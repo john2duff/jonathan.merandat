@@ -107,7 +107,7 @@ vue.prototype.afficherSujet = function(sujet, boutonRetour){
         document.getElementById("contact").style["opacity"] = "1";
         document.getElementById("contact").style["z-index"] = "2";
         document.getElementById("contact").style["margin-top"] = "initial";
-        document.getElementById("contact").style["width"] = "200px";        
+        document.getElementById("contact").style["width"] = "initial";        
         document.getElementById("contact").style["padding"] = "20px";
         //afficher bouton retour
         document.getElementById("boutonRetour").style["opacity"] = "0";  
@@ -228,13 +228,11 @@ function buildContent(selector, className, id){
                 if (key.substring(0,5) == "liste"){
                     classe += " listeItem";
                 }
-                var div2 = buildElement("div", "marge");
                 var type = "p";
                 if (key.substring(0,4) == "span"){
                     type = "span";
                 }
-                div2.appendChild(buildElement(type, classe, selector + "_" + key, node[key]))
-                div.appendChild(div2);
+                div.appendChild(buildElement(type, classe, selector + "_" + key, node[key]));
             }
         }
     }

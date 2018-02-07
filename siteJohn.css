@@ -42,17 +42,17 @@ h5{
     background-color: rgb(242, 246, 255);
 }
 
-#contact{
+#contact {
     /*box-shadow: 0px 0px 20px 5px #656565;*/
     display: flex;
     flex-direction: row;
     align-items: center;
-    z-index:4;
+    z-index: 4;
     padding: 20px;
     width: 200px;
     margin-left: -80px;
     background-color: rgb(124, 124, 124);
-    color:white;
+    color: white;
     transition-property: all;
     transition-duration: 1s;
     -webkit-transition-property: all;
@@ -64,43 +64,52 @@ h5{
     -o-transition-property: all;
     -o-transition-duration: 1s;
     cursor: pointer;
-}
-.contact{
-    font-size:20px;
     font-weight: bold;
 }
-#contact:nth-child(1){
-    flex:1;
+
+
+.contact {
+    font-size: 20px;
 }
-#contact_mail{
+
+#contact:nth-child(1) {
+    flex: 1;
+}
+
+#contact_mail {
     font-style: italic;
 }
-#photoCv{
+
+#photoCv {
     border-radius: 50%;
-    width:70px;
-    border:2px solid rgb(0, 0, 0);
+    width: 70px;
+    border: 2px solid rgb(0, 0, 0);
 }
-#coordonnee{
+
+#coordonnee {
     display: flex;
     flex-direction: column;
     padding-left: 20px;
 }
-#sujets{
+
+#sujets {
     display: flex;
     justify-content: flex-start;
     align-items: center;
     flex-wrap: wrap;
-    padding-left: 20px;
 }
-#sujets:nth-child(2){
-    flex:4;
+
+#sujets:nth-child(2) {
+    flex: 4;
 }
-#sujets > label:last-child{
-    opacity:0;
-    width:0px;
-    z-index:-999;   
+
+#sujets > label:last-child {
+    opacity: 0;
+    width: 0px;
+    z-index: -999;
 }
-.sujets{
+
+.sujets {
     padding-right: 20px;
     cursor: pointer;
     z-index: 2;
@@ -117,94 +126,116 @@ h5{
     -o-transition-property: all;
     -o-transition-duration: 2s;
 }
-#bandeauHaut{
+
+#bandeauHaut {
     display: flex;
     justify-content: flex-start;
     transition: color 1s;
     transition: background-color 2s;
     border-bottom: 3px black solid;
 }
-.sujetsBandeau{
+
+.sujetsBandeau {
     margin-right: 10px;
     font-size: 20px;
     line-height: 40px;
     cursor: pointer;
+    border: 2px solid black;
+    border-radius: 20px;
+    padding: 10px;
+    margin: 10px;
 }
-#corps{
+
+#corps {
     display: flex;
     flex-direction: row;
     height: 100%;
     overflow: auto;
     width: 100%;
 }
-#page{
+
+#page {
     /*margin: 0px 50px;*/
     width: inherit;
 }
-#page:nth-child(2){
-    flex:5;
-}
-#pageAccueil{
+
+    #page:nth-child(2) {
+        flex: 5;
+    }
+
+#pageAccueil {
     padding: 0px 30px;
 }
-h1{
+
+h1 {
     opacity: inherit;
     height: inherit;
 }
-h2{
+
+h2 {
     line-height: 40px;
 }
-h3{
+
+h3 {
     line-height: 40px;
 }
-h4{
-    line-height: 40px; 
+
+h4 {
+    line-height: 40px;
 }
-.elementVisible{
+
+.elementVisible {
     display: block;
 }
-.elementNonVisible{
+
+.elementNonVisible {
     display: none;
 }
-.titres{
-    margin:0px;
+
+.titres {
+    margin: 0px;
     padding: 0px 0px 0px 0px;
-    cursor:pointer;
+    cursor: pointer;
 }
-.divTitreH2{
+
+.divTitreH2 {
     position: sticky;
     top: 0px;
     z-index: 30;
     padding-left: 50px;
     background-color: darkgrey;
 }
-.divTitreH3{
+
+.divTitreH3 {
     position: sticky;
     top: 40px;
     z-index: 20;
     padding-left: 70px;
     background-color: lightgray;
 }
-.divTitreH4{
+
+.divTitreH4 {
     position: sticky;
     top: 80px;
     z-index: 10;
     padding-left: 90px;
-    background-color:#ffffff;
+    background-color: #ffffff;
 }
-.divTitre{
+
+.divTitre {
     /*box-shadow: 0px 5px 50px 1px #3a3a3a;*/
     /*margin:3px;*/
 }
-.contenu{
-    height:100%;
+
+.contenu {
+    height: 100%;
 }
 
-.introduction, .explication{
+.introduction, .explication {
     padding: 0px 30px;
 }
 
-#boutonRetour{
+#boutonRetour {
     cursor: pointer;
     line-height: 0px;
     /* vertical-align: middle; */
@@ -226,7 +257,7 @@ h4{
 }
 
 /*app conversion hexa dec bin*/
-.appHexaBinDec{
+.appHexaBinDec {
     display: flex;
     justify-content: unset;
     flex-direction: column;
@@ -235,50 +266,58 @@ h4{
     font-size: 20px;
     padding: 20px;
 }
-.blockAppHexaBinDec{
+
+.blockAppHexaBinDec {
     vertical-align: middle;
     line-height: 40px;
 }
-.inputHexaBinDec{
+
+.inputHexaBinDec {
     margin-left: 20px;
 }
 
 /*app jeu casse tete chinois*/
-#divCasseTeteChinois{
+#divCasseTeteChinois {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     padding: 20px;
 }
-.divJeuCasseTeteChinois{
-    padding:5px;
-    margin:20px;
-    border : 3px solid black;
+
+.divJeuCasseTeteChinois {
+    padding: 5px;
+    margin: 20px;
+    border: 3px solid black;
 }
-.niveauJeuCasseTete{
+
+.niveauJeuCasseTete {
     text-align: center;
     font-weight: bold;
     font-size: 25px;
 }
-.divJeuCasseTeteChinoisEnglobe{
-    display:flex;
+
+.divJeuCasseTeteChinoisEnglobe {
+    display: flex;
     flex-direction: column;
 }
-.elementJeuCasseTeteChinois{
-    position:relative;
+
+.elementJeuCasseTeteChinois {
+    position: relative;
     /*border : 1px solid black;*/
     /*margin: 2px;*/
 }
-.elementJeuCasseTeteEnglobant{
+
+.elementJeuCasseTeteEnglobant {
     /*padding: 5px;*/
-    position:relative;
+    position: relative;
 }
-.elementJeuCasseTeteEnglobant3{
+
+.elementJeuCasseTeteEnglobant3 {
     border: 1px solid black;
     height: -webkit-fill-available;
 }
 
-.rondInterieurCasseTete{
+.rondInterieurCasseTete {
     position: absolute;
     border-radius: 50%;
     height: 30px;
@@ -290,18 +329,44 @@ h4{
     border: 2px solid black;
     background-color: maroon;
 }
-.elementJeuCasseTeteChinois{
-    height:100%;
+
+.elementJeuCasseTeteChinois {
+    height: 100%;
 }
-#elementJeuCasseTeteChinois0{
+
+#elementJeuCasseTeteChinois0 {
     background-color: gray;
 }
-.elementJeuCasseTeteChinois1, .elementJeuCasseTeteChinois3, .elementJeuCasseTeteChinois5, .elementJeuCasseTeteChinois7, .elementJeuCasseTeteChinois9{
+
+.elementJeuCasseTeteChinois1, .elementJeuCasseTeteChinois3, .elementJeuCasseTeteChinois5, .elementJeuCasseTeteChinois7, .elementJeuCasseTeteChinois9 {
     background-color: green;
 }
-.elementJeuCasseTeteChinois2, .elementJeuCasseTeteChinois4, .elementJeuCasseTeteChinois6, .elementJeuCasseTeteChinois8{
+
+.elementJeuCasseTeteChinois2, .elementJeuCasseTeteChinois4, .elementJeuCasseTeteChinois6, .elementJeuCasseTeteChinois8 {
     background-color: red;
 }
-.elementJeuCasseTeteChinois10{
+
+.elementJeuCasseTeteChinois10 {
     background-color: rgb(255, 244, 85);
+}
+
+/****Pour la lecture sur iphone****/
+@media only screen and (max-device-width : 400px) {
+    .sujetsBandeau {
+        margin-right: 10px;
+        font-size: 40px;
+        line-height: 60px;
+        cursor: pointer;
+    }
+    .contact {
+        font-size: 40px;
+    }
+    #contact {
+        width: 400px;
+    }
+    #photoCv {
+        border-radius: 50%;
+        width: 140px;
+        border: 2px solid rgb(0, 0, 0);
+    }
 }
