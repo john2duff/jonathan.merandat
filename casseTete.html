@@ -1,5 +1,5 @@
-<!doctype html>
-<html lang="en">
+﻿<!doctype html>
+<html lang="fr">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!-- Style CSS -->
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/casseTete.css" />
+    <script src="js/casseTete.js"></script>
+    <script src="js/commonFonction.js"></script></script>
 
     <title>Jonathan Merandat</title>
 
@@ -16,35 +19,37 @@
 
 <body>
     <!--header -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">
-            <img src="img/photoCv.jpg" height="50" style="border-radius:50%;vertical-align: top;" />
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">
+                <img src="img/photoCv.jpg" height="50" style="border-radius:50%;vertical-align: top;" />
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.html">Accueil<span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="casseTete.html">Casse-têtes</a>
-                </li>
-            </ul>
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Tapez un mot" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Rechercher</button>
-            </form>
-        </div>
-    </nav>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Accueil<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="casseTete.html">Casse-têtes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="cuisine.html">Cuisine</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    
 
     <!-- corps-->
-    <nav class="navbar sticky-top navbar-light bg-light">
-        <a class="navbar-brand" href="#">Rubik's cube</a>
-    </nav>
-    <div class="container-fluid">
+    <div class="container">
+        <nav class="navbar sticky-top navbar-light bg-light">
+            <h3>Rubik's cube</h3>
+        </nav>
         <h4>Notations</h4>
         <div class="container-fluid">
             <p>L'apostrophe après la lettre signifie que l'<b>on inverse le sens de rotation.</b></p>
@@ -57,62 +62,113 @@
                 <li>F : Front</li>
                 <li>B : Back</li>
             </ul>
-<h5>Les mouvements en majuscule</h5>
+            <h5>Les mouvements en minuscule</h5>
+            <p>Les lettres en minuscule correspondent au mouvement de base + la tranche juste à côté de celle-ci.</p>
+            <h5>Les mouvements en tranche central</h5>
             <ul>
-                <li>U : Up</li>
-                <li>D : Down</li>
-                <li>R : Right</li>
-                <li>L : Left</li>
-                <li>F : Front</li>
-                <li>B : Back</li>
+                <li>M : Middle <i>(tranche du milieu vertical et face à nous)</i></li>
+                <li>E : Equator<i>(tranche du milieu horizontale et face à nous)</i></li>
+                <li>S : Standing <i>(tranche du milieu parallèle à nous)</i></li>
+
             </ul>
-        </div> 
+        </div>
         <h4> 3 x 3 x 3</h4>
         <div class="container-fluid">
             <h5>Méthode de Fridrich</b></h5>
+            <div class="container-fluid">
+                <h6>Etape 1 : Faire la croix</h6>
+                <h6>Etape 2 : Finir les deux premiers étages</h6>
+                <h6>Etape 3 : Orienter la dernière face</h6>
                 <div class="container-fluid">
-                    <h6>Etape 1 : Faire la croix</h6>
-                    <h6>Etape 2 : Finir les deux premiers étages</h6>
-                    <h6>Etape 3 : Orienter la dernière face</h6>
+                    <h7>Pour les arêtes</h7>
                     <div class="container-fluid">
-                        <h7>Pour les arêtes</h7>
-                        <div class="container-fluid">
-                            <div class="d-flex flex-row justify-content-around flex-wrap">
-                                <figure class="figure" style="text-align:center;">
-                                    <img src="img/arete1.png" class="figure-img img-fluid rounded" alt="">
-                                    <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">FRUR'U'F'</figcaption>
-                                </figure>
-                                <figure class="figure" style="text-align:center;">
-                                    <img src="img/arete2.png" class="figure-img img-fluid rounded" alt="">
-                                    <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">FURU'R'F'</figcaption>
-                                </figure>
-                                <figure class="figure" style="text-align:center;">
-                                    <img src="img/arete3.png" class="figure-img img-fluid rounded" alt="">
-                                    <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">b'R'U'RUb</figcaption>
-                                </figure>
-                                <figure class="figure" style="text-align:center;">
-                                    <img src="img/arete4.png" class="figure-img img-fluid rounded" alt="">
-                                    <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">fRUR'U'f'</figcaption>
-                                </figure>
-                                <figure class="figure" style="text-align:center;">
-                                    <img src="img/arete5.png" class="figure-img img-fluid rounded" alt="">
-                                    <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">RU2'R2'FRF'U2R'FRF'</figcaption>
-                                </figure> 
-</div>
-<h7>Pour les coins</h7>
-                        <div class="container-fluid">
-<figure class="figure" style="text-align:center;">
-                                    <img src="img/coin1.png" class="figure-img img-fluid rounded" alt="">
-                                    <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;"></figcaption>
-                                </figure>
+                        <div class="d-flex flex-row justify-content-around flex-wrap">
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete1.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">FRUR'U'F'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete2.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">FURU'R'F'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete3.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">b'R'U'RUb</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete4.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">fRUR'U'f'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete5.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">RU2'R2'FRF'U2R'FRF'</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                    <h7>Pour les coins</h7>
+                    <div class="container-fluid">
+                        <div class="d-flex flex-row justify-content-around flex-wrap">
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin1.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">RUR'URU2'R'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin2.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">RU2'R'U'RU'R'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin3.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">RUR'URU'R'URU2'R'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin4.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">RU2'R2'U'R2U'R2'U2R</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin5.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">l'URD'R'U'RDx'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin6.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">l'U'LURU'r'F</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin7.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">R2D'RU2'R'DRU2'R</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+                <h6>Etape 4 : Placer les éléments de la dernière face</h6>
+                <div class="container-fluid">
+                    <div class="d-flex flex-row justify-content-around flex-wrap">
+                        <figure class="figure" style="text-align:center;">
+                            <img src="img/h.png" class="figure-img img-fluid rounded" alt="">
+                            <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">M2'UM2'U2M2'UM2'</figcaption>
+                        </figure>
+                        <figure class="figure" style="text-align:center;">
+                            <img src="img/z.png" class="figure-img img-fluid rounded" alt="">
+                            <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">U'M'UM2'UM2'UM'U2M2'</figcaption>
+                        </figure>
+                        <figure class="figure" style="text-align:center;">
+                            <img src="img/u.png" class="figure-img img-fluid rounded" alt="">
+                            <figcaption class="figure-caption" style="color:black;text-align:center;font-size:2em;">M2'UM'U2'MUM2'</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="blockquote-footer">Someone famous in <cite title="Source Title">Source Title</cite></footer>
 
-                            </div>
-                         </div>
-                     </div>
+        <nav class="navbar sticky-top navbar-light bg-light">
+            <h3>Casse-tête chinois</h3>
+        </nav>
+        <div class="container-fluid">
+            <script>appCasseTeteChinois();</script>
         </div>
     </div>
-     
 
+     
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
