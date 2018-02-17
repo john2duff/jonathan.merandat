@@ -15,35 +15,74 @@
   	
   <body>
       <!--header -->
-      <script src="https://www.w3schools.com/lib/w3.js"></script>
-      <div w3-include-html="header.html"></div>
-      <script>w3.includeHTML(); document.getElementById("buttonRecetteVorwerk").className = "nav-link active";</script>
+      <div class="container">
+          <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+              <a class="navbar-brand" href="#">
+                  <img src="img/photoCv.jpg" height="50" style="border-radius:50%;vertical-align: top;" />
+              </a>
+              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+              </button>
+
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                  <ul class="navbar-nav mr-auto">
+                      <li class="nav-item">
+                          <a id="buttonIndex" class="nav-link" href="index.html">Accueil<span class="sr-only">(current)</span></a>
+                      </li>
+                      <li class="nav-item dropdown">
+                          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Informatique
+                          </a>
+                          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                              <a class="dropdown-item" href="InfoEvaluationDesProgrammes.html">Evaluation des programmes</a>
+                              <a class="dropdown-item" href="InfoCyberSecurite.html">Cyber Sécurité</a>
+                              <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
+                          </div>
+                      </li>
+                      <li class="nav-item dropdown">
+                          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Casse-têtes
+                          </a>
+                          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                              <a class="dropdown-item" href="rubiksCube.html">Rubik's Cube</a>
+                              <a class="dropdown-item" href="casseTeteChinois.html">Casse tête chinois</a>
+                          </div>
+                      </li>
+                      <li class="nav-item active">
+                          <a id="buttonRecetteVorwerk" class="nav-link" href="recetteVorwerk.html">Recettes</a>
+                      </li>
+
+                  </ul>
+              </div>
+          </nav>
+      </div>
 
       <div class="container">
           <nav class="navbar sticky-top navbar-light bg-light">
-              <select class="custom-select custom-select-lg mb-3" onchange="selectRecette(this.value);">
+              <select class="custom-select custom-select-lg" onchange="selectRecette(this.value);">
                   <option selected>Sélectionner une recette</option>
                   <option value="1">Pâte à tartiner</option>
                   <option value="2">Crème de petits pois</option>
-                  <option value="3">Three</option>
+                  <option value="3">Chocolat chaud</option>
+                  <option value="4">Velouté de carottes</option>
               </select>
           </nav>
           <div id="recettes">
               <div id="recette1">
                   <div class="container-fluid">
-                      <h3>Ingrédients</h3>
+                      <h4>Ingrédients</h4>
                       <ul class="list-group list-group-flush">
-                          <li class="list-group-item">200 grammes de pralinoise</li>
-                          <li class="list-group-item">100 grammes de chocolat</li>
-                          <li class="list-group-item">397 gramme de lait concentré</li>
-                          <li class="list-group-item">30 grammes d'huile de noisette</li>
+                          <li class="list-group-item">200 gr. de pralinoise</li>
+                          <li class="list-group-item">100 gr. de chocolat</li>
+                          <li class="list-group-item">397 gr. de lait concentré</li>
+                          <li class="list-group-item">30 gr. d'huile de noisette</li>
                       </ul>
                       <h3>Etapes</h3>
                       <ul class="list-group list-group-flush">
-                          <li class="list-group-item">Ajouter 200g de pralinoise. </li>
-                          <li class="list-group-item">Ajouter une plaque de chocolat de 100g.</liclass="list-group-item">
-                          <li class="list-group-item">Ajouter 397g de lait concentré.</li>
-                          <li class="list-group-item">Ajouter 30g d'huile de noisette.</li>
+                          <li class="list-group-item">Ajouter 200 gr. de pralinoise. </li>
+                          <li class="list-group-item">Ajouter une plaque de chocolat de 100 gr.</li>
+                          <li class="list-group-item">Ajouter 397 gr. de lait concentré.</li>
+                          <li class="list-group-item">Ajouter 30 gr. d'huile de noisette.</li>
                           <li class="list-group-item">Fermer le couvercle et lancer : <br><center><b>2 min - 60° - vitesse 2</b></center></li>
                           <li class="list-group-item">Racler.</li>
                           <li class="list-group-item">Fermer le couvercle et lancer : <br><center><b>2 min - 60° - vitesse 2</b></center></li>
@@ -52,12 +91,75 @@
                   </div>
               </div>
               <div id="recette2">
-                  <div></div>
-                  <h3>Ingrédients</h3>
-                  Test2
+                  <div class="container-fluid">
+                      <h4>Ingrédients</h4>
+                      <ul class="list-group list-group-flush">
+                          <li class="list-group-item">150 gr. d'oignons.</li>
+                          <li class="list-group-item">20 gr. de beurre.</li>
+                          <li class="list-group-item">1000 gr. de petites pois frais ou surgelé.</li>
+                          <li class="list-group-item">500 gr. d'eau.</li>
+                          <li class="list-group-item">1 cube de bouillon de volaille.</li>
+                          <li class="list-group-item">200 gr. de crème fraîche.</li>
+                          <li class="list-group-item">2 pincées de poivre.</li>
+                          <li class="list-group-item">1/2 pincée de sel.</li>
+                      </ul>
+                      <h3>Etapes</h3>
+                      <ul class="list-group list-group-flush">
+                          <li class="list-group-item">Mettre les oignons dans le bol et hacher. <br><center><b>5 sec - 120° - vitesse 0.5</b></center></li>
+                          <li class="list-group-item">Racler les parois du bol à l'aide de la spatule.</li>
+                          <li class="list-group-item">Ajouter 20g de beurre et rissoler, sans le gobelet doseur. <br><center><b>3 min - 120° - vitesse 0.5</b></center></li>
+                          <li class="list-group-item">Ajouter 500g de petits pois et rissoler, sans le gobelet doseur. <br><center><b>4 min - 120° - vitesse 0.5</b></center></li>
+                          <li class="list-group-item">Ajouter 500g d'eau et 1 cube de bouillon de volaille et cuire. <br><center><b>15 min - 100° - vitesse 1</b></center></li>
+                          <li class="list-group-item">Ajouter 200g de crème fraîche, 2 pincées de poivre et 1/2 c. à café de sel et mixer. <br><center><b>1 min - 37° - vitesse 10</b></center></li>
+                          <li class="list-group-item">Ajouter le reste des petits pois et cuire. <br><center><b>5 min - 90° - vitesse 1</b></center></li>
+                          <li class="list-group-item">Servir aussitôt</li>
+                      </ul>
+                  </div>
+              </div>
+              <div id="recette3">
+                  <div class="container-fluid">
+                      <h4>Ingrédients</h4>
+                      <ul class="list-group list-group-flush">
+                          <li class="list-group-item">500 gr. de lait.</li>
+                          <li class="list-group-item">150 gr. de chocolat.</li>
+                      </ul>
+                      <h3>Etapes</h3>
+                      <ul class="list-group list-group-flush">
+                          <li class="list-group-item">Mettre 500g de lait et 150g de chocolat dans le bol et chauffer. <br><center><b>6 min - 80° - vitesse 1</b></center></li>
+                          <li class="list-group-item">Déguster</li>
+                      </ul>
+                  </div>
+              </div>
+              <div id="recette4">
+                  <div class="container-fluid">
+                      <h4>Ingrédients</h4>
+                      <ul class="list-group list-group-flush">
+                          <li class="list-group-item">2 c. à soupe de curry.</li>
+                          <li class="list-group-item">20 gr. d'huile d'olive.</li>
+                          <li class="list-group-item">70 gr. d'échalotes.</li>
+                          <li class="list-group-item">150 gr. de pommes.</li>
+                          <li class="list-group-item">900 gr. de carottes.</li>
+                          <li class="list-group-item">2 cubes de bouillon de légumes.</li>
+                          <li class="list-group-item">100 gr. de lait.</li>
+                          <li class="list-group-item">100 gr. de yaourt nature.</li>
+                          <li class="list-group-item">1 pincée de sel.</li>
+                          <li class="list-group-item">2 pincées de poivre.</li>
+                      </ul>
+                      <h3>Etapes</h3>
+                      <ul class="list-group list-group-flush">
+                          <li class="list-group-item">Mettre 2 c. à soupe de curry et 20g d'huile d'olive dans le bol et chauffer. <br><center><b>2 min - 100° - vitesse 0.5</b></center></li>
+                          <li class="list-group-item">Ajouter 70g d'échalotes, 150g de pommes et 900g de carottes et mixer. <br><center><b>5 sec - 37° - vitesse 5</b></center></li>
+                          <li class="list-group-item">Racler les parois du bol.</li>
+                          <li class="list-group-item">Mixer à nouveau. <br><center><b>5 sec - 37° - vitesse 5</b></center></li>
+                          <li class="list-group-item">Ajouter 700g d'eau et 2 cubes de bouillon de légumes et cuire. <br><center><b>35 min - 100° - vitesse 1</b></center></li>
+                          <li class="list-group-item">Ajouter 100 de lait, 100g de yaourt nature, 1 pincée de sel et deux pincées de poivre et mélanger. <br><center><b>20 sec - 37° - vitesse 4</b></center></li>
+                          <li class="list-group-item">Déguster</li>
+                      </ul>
+                  </div>
               </div>
           </div>
       </div>
+
       <script>
           var selectRecette = function (evt) {
               var divRecettes = document.getElementById("recettes");

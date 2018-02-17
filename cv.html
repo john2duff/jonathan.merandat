@@ -16,9 +16,47 @@
 
 <body>
     <!--header -->
-    <script src="https://www.w3schools.com/lib/w3.js"></script>
-    <div w3-include-html="header.html"></div>
-    <script>w3.includeHTML();</script>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">
+                <img src="img/photoCv.jpg" height="50" style="border-radius:50%;vertical-align: top;" />
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a id="buttonIndex" class="nav-link" href="index.html">Accueil<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Informatique
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="InfoEvaluationDesProgrammes.html">Evaluation des programmes</a>
+                            <a class="dropdown-item" href="InfoCyberSecurite.html">Cyber Sécurité</a>
+                            <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Casse-têtes
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="rubiksCube.html">Rubik's Cube</a>
+                            <a class="dropdown-item" href="casseTeteChinois.html">Casse tête chinois</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a id="buttonRecetteVorwerk" class="nav-link" href="recetteVorwerk.html">Recettes</a>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+    </div>
 
     <div class="container">
         <nav class="navbar sticky-top navbar-light bg-light">

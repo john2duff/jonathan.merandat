@@ -23,3 +23,11 @@ html {
 .dropdown-menu{
     z-index:9999;
 }
+
+.titre{
+    margin-bottom:0;
+}
+
+.barTitre{
+    cursor:pointer;
+}
