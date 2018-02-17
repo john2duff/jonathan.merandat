@@ -2,13 +2,13 @@
 <html lang="fr">
 <head>
     <!-- Required meta tags -->
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859" />
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!-- Style CSS -->
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css"/>
     <title>Jonathan Merandat</title>
 
 </head>
@@ -60,7 +60,14 @@
    
 
     <div class="container">
- 
+        <nav class="navbar sticky-top navbar-light bg-light">
+            <select class="custom-select custom-select-lg mb-3" onchange="selectRecette(this.value);">
+                <option selected>Sélectionner une recette</option>
+                <option value="1">Pâte à tartiner</option>
+                <option value="2">Crème de petits pois</option>
+                <option value="3">Three</option>
+            </select>
+        </nav>
         <div id="recettes">
             <div id="recette1">
                 <div class="container-fluid">

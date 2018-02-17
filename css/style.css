@@ -19,3 +19,7 @@ html {
         font-size: 1.6rem;
     }
 }
+
+.dropdown-menu{
+    z-index:9999;
+}
