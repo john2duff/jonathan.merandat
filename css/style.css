@@ -28,6 +28,26 @@ html {
     margin-bottom:0;
 }
 
-.barTitre{
-    cursor:pointer;
+.barTitre {
+    cursor: pointer;
+}
+.listeCadre-item{
+    border:3px solid rgb(224, 224, 224);
+}
+
+.cours {
+    border: 3px solid rgb(224, 224, 224);
+    padding:1em;
+    margin-bottom:0;
+}
+.exemple {
+    background-color: rgb(224, 224, 224);
+    padding: 1em;
+}
+
+.conversionBin{
+    padding:1em;
+}
+.text-conversionBin{
+    width:150px;
 }

@@ -11,3 +11,16 @@ function buildElement(element, className, id, innerHTML, textContent, style) {
     }
     return elementHTML;
 }
+
+var showTitle = function (evt) {
+    var el = evt.nextElementSibling;
+    while (el) {
+        var display = el.style.display;
+        if (display != "none" || display == "") {
+            evt.nextElementSibling.style.display = "none";
+        } else {
+            evt.nextElementSibling.style.display = "initial";
+        }
+    }
+
+}
