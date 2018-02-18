@@ -13,7 +13,7 @@ function buildElement(element, className, id, innerHTML, textContent, style) {
 }
 
 var showTitle = function (evt) {
-    var el = evt.nextElementSibling;
+    var el = evt.parentElement.nextElementSibling;
     while (el) {
         var display = el.style.display;
         if (display != "none" || display == "") {
@@ -23,5 +23,4 @@ var showTitle = function (evt) {
         }
         el = el.nextElementSibling;
     }
-
 }

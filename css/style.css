@@ -20,6 +20,16 @@ html {
     }
 }
 
+.tiret{
+    list-style-type:none;
+}
+.tiret li::before{
+    content:"- ";
+}
+.tiret li.no-tiret::before{
+    content:"";
+}
+
 #photoCv {
     border-radius: 5px;
     height: 50px;
@@ -35,6 +45,21 @@ html {
 
 .barTitre {
     cursor: pointer;
+    background-color:#b5cde0;
+}
+a > .barTitre > .titre {
+    text-decoration: none;
+    color:black;
+    text-underline-position:left;
+}
+a:hover {
+    text-decoration: none;
+}
+evidence {
+    font-size: 18px;
+    font-weight: 500;
+    padding: 0.3em;
+    background-color: #fcf8e3;
 }
 .listeCadre-item{
     border:3px solid rgb(224, 224, 224);
@@ -44,6 +69,10 @@ html {
     border: 3px solid rgb(224, 224, 224);
     padding:1em;
     margin-bottom:0;
+    background-color:#f6f6f6;
+}
+.exemple > .cours {
+    background-color: #b5d0ad;
 }
 .cours-img {
     border: 3px solid rgb(224, 224, 224);
