@@ -17,7 +17,7 @@
 
 <body>
     <!--header -->
-    <div class="container">
+    <div id="header" class="container">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="#">
                 <img id="photoCv" src="img/photoCv.jpg" />
@@ -61,10 +61,44 @@
         </nav>
     </div>
 
+    <!--<div id="navigationSpy" class="btn-group dropleft sticky-top">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            ...
+        </button>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#intro">Introduction</a>
+            <a class="dropdown-item" href="#machineTuring">Machine de Turing</a>
+            <a class="dropdown-item" href="#variationTuring">Variations Turing</a>
+        </div>
+    </div>
+        -->
+    <!--
+        <div id="navigationSpy" class="btn-group-vertical dropleft navigationOver">
+        <button type="button" class="btn btn-secondary" style="margin: 1px;">&#129153;</button>
+        <button style="margin: 1px;" class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            ...
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" >Introduction
+                <div id="list-example" class="list-group">
+                    <a class="list-group-item list-group-item-action" href="#intro">Item 1</a>
+                    <a class="list-group-item list-group-item-action" href="#list-item-2">Item2</a>
+                    <a class="list-group-item list-group-item-action" href="#list-item-3">Item 3</a>
+                    <a class="list-group-item list-group-item-action" href="#list-item-4">Item 4</a>
+                </div>
+            </a>
+            <a class="dropdown-item" href="#intro">Introduction</a>
+            <a class="dropdown-item" href="#machineTuring">Machine de Turing</a>
+            <a class="dropdown-item" href="#variationTuring">Variations Turing</a>
+        </div>
+        <button style="margin: 1px;" type="button" class="btn btn-secondary">&#129155;</button>
+    </div>
+    -->
     <!-- corps-->
     <div class="container">
+
         <!--Introduction-->
-        <div>
+        <div id="intro">
             <a href="#introInfoEvalProg">
                 <nav id="introInfoEvalProg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
                     <h4 class="titre">Introduction</h4>
@@ -127,7 +161,7 @@
         </div>
 
         <!--Machine de Turing-->
-        <div>
+        <div id="machineTuring">
             <a href="#machineInfoEvalProg">
                 <nav id="machineInfoEvalProg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
                     <h4 class="titre">Machine de Turing</h4>
@@ -281,35 +315,35 @@
                 </p>
                 <center>
                     <figure class="figure">
-                        <table class="table table-active table-sm" style="width:250px;">
-                            <thead class="text-center">
-                                <tr>
-                                    <th scope="col">&#0948;</th>
-                                    <th scope="col">1</th>
-                                    <th scope="col">B</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-center">
-                                <tr>
-                                    <th scope="row">q&#8320;</th>
-                                    <td>(q<sub>i</sub>, 1, D)</td>
-                                    <td>(q&fnof;, B, G)</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">q<sub>i</sub></th>
-                                    <td>(q<sub>p</sub>, 1, D)</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">q<sub>p</sub></th>
-                                    <td>(q<sub>i</sub>, 1, D)</td>
-                                    <td>(q&fnof;, B, G)</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <figcaption class="figure-caption text-center">
-
-                        </figcaption>
+                        <div class="table-responsive">
+                            <table class="table table-active table-sm">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th scope="col">&#0948;</th>
+                                        <th scope="col">1</th>
+                                        <th scope="col">B</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                    <tr>
+                                        <th scope="row">q&#8320;</th>
+                                        <td>(q<sub>i</sub>, 1, D)</td>
+                                        <td>(q&fnof;, B, G)</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">q<sub>i</sub></th>
+                                        <td>(q<sub>p</sub>, 1, D)</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">q<sub>p</sub></th>
+                                        <td>(q<sub>i</sub>, 1, D)</td>
+                                        <td>(q&fnof;, B, G)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <figcaption class="figure-caption text-center"></figcaption>
                     </figure>
                 </center>
                 <div class="cours">
@@ -350,21 +384,22 @@
                     </div>
                 </div>
                 <div class="exemple">
-                    <p><evidence>q<sub>i</sub> </evidence>  &#8658;  le nombre de 1 à gauche de la tête de lecture est <evidence>impair</evidence></p> 
+                    <p><evidence>q<sub>i</sub> </evidence>  &#8658;  le nombre de 1 à gauche de la tête de lecture est <evidence>impair</evidence></p>
                     <p><evidence>q<sub>p</sub> </evidence>  &#8658;  le nombre de 1 à gauche de la tête de lecture est <evidence>pair</evidence></p>
-                    <p><evidence>q<sub>f</sub> </evidence>  &#8658;  si elle pointe sur :
-                    <ul class="tiret">
-                        <li>un 1, qu'il y a un nombre impair de 1 à sa gauche et un B à sa droite</li>
-                        <li class="no-tiret"><b>ou</b></li>
-                        <li>sur B et qu'il n'y a que des B sur le ruban</li>
-                    </ul>
+                    <p>
+                        <evidence>q<sub>f</sub> </evidence>  &#8658;  si elle pointe sur :
+                        <ul class="tiret">
+                            <li>un 1, qu'il y a un nombre impair de 1 à sa gauche et un B à sa droite</li>
+                            <li class="no-tiret"><b>ou</b></li>
+                            <li>sur B et qu'il n'y a que des B sur le ruban</li>
+                        </ul>
                     </p>
                 </div>
             </div>
             <div class="cours">
                 <h5>Mots et langages reconnus</h5>
                 <p>
-                    Pour un mot &omega; &#8712; &sum;*, trois situations peuvent se produire lors du calcul de M sur &omega; 
+                    Pour un mot &omega; &#8712; &sum;*, trois situations peuvent se produire lors du calcul de M sur &omega;
                     <ul>
                         <li>le calcul s'arrête dans un état final &#8658; &omega; est <evidence>reconnu (accepté)</evidence> par M.</li>
                         <li>le calcul s'arrêt dans un état non final &#8658; &omega; est <evidence>refusé</evidence> par M.</li>
@@ -380,36 +415,38 @@
                 </p>
             </div>
             <div class="exemple">
-                <p><i>Exemple : </i>: </p>
-                soit M = (Q, q<sub>0</sub>, {q<sub>f</sub>}, {0,1,B}, B, {0,1}, &delta;) 
-                où Q = {q<sub>0</sub>, q<sub>r</sub>, q<sub>f</sub>} 
+                c
+                soit M = (Q, q<sub>0</sub>, {q<sub>f</sub>}, {0,1,B}, B, {0,1}, &delta;)
+                où Q = {q<sub>0</sub>, q<sub>r</sub>, q<sub>f</sub>}
                 et &delta; est défini par le tableau suivant :
                 <center>
                     <figure class="figure">
-                        <table class="table table-active table-sm" style="width:250px;">
-                            <thead class="text-center">
-                                <tr>
-                                    <th scope="col">&#0948;</th>
-                                    <th scope="col">0</th>
-                                    <th scope="col">1</th>
-                                    <th scope="col">B</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-center">
-                                <tr>
-                                    <th scope="row">q<sub>0</sub></th>
-                                    <td>(q<sub>0</sub>, 0, D)</td>
-                                    <td>(q<sub>0</sub>, 1, D)</td>
-                                    <td>(q<sub>r</sub>, B, G)</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">q<sub>r</sub></th>
-                                    <td>(q<sub>f</sub>, 1, G)</td>
-                                    <td>(q<sub>r</sub>, 0, G)</td>
-                                    <td>(q<sub>f</sub>, 1, D)</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-active table-sm">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th scope="col">&#0948;</th>
+                                        <th scope="col">0</th>
+                                        <th scope="col">1</th>
+                                        <th scope="col">B</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                    <tr>
+                                        <th scope="row">q<sub>0</sub></th>
+                                        <td>(q<sub>0</sub>, 0, D)</td>
+                                        <td>(q<sub>0</sub>, 1, D)</td>
+                                        <td>(q<sub>r</sub>, B, G)</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">q<sub>r</sub></th>
+                                        <td>(q<sub>f</sub>, 1, G)</td>
+                                        <td>(q<sub>r</sub>, 0, G)</td>
+                                        <td>(q<sub>f</sub>, 1, D)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <figcaption class="figure-caption text-center">
                             M décide la fonction qui ajoute 1 à un nombre écrit en binaire.
                         </figcaption>
@@ -423,6 +460,107 @@
                     <h5>Calcul sur 11 </h5>
                     <evidence>q<sub>0</sub>11 &#8866; 1q<sub>0</sub>1 &#8866; 11q<sub>0</sub> &#8866; 1q<sub>r</sub>1 &#8866; q<sub>r</sub>10 &#8866; q<sub>r</sub>B00 &#8866; 1q<sub>f</sub>00</evidence>
                 </div>
+            </div>
+        </div>
+
+        <!--Variations machine  de Turing-->
+        <div id="variationTuring">
+            <a href="#variationInfoEvalProg">
+                <nav id="variationInfoEvalProg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Variations sur la machine de Turing</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Surplace</h5>
+                <p>Il est possible de rester à la même position à chaque pas de calcul en rajoutant R à la fonction de transition &delta;.</p>
+                &delta; : <i>Q x &#0915; &#8594; Q x &#0915; x {G,D,R}  </i>
+            </div>
+            <div class="exemple">
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing8.png" width="100%" class="figure-img img-fluid rounded" alt="Pas de calcul">
+                    <figcaption class="figure-caption text-center">Pas de calcul sir (q, a) &#8594;<sup>&delta;</sup> (q', b, R).</figcaption>
+                </figure>
+                <div class="font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    La possibilité de faire du sur-place sera utile dans le cas d'une machine de Turing à plusieurs têtes de lecture et plusieurs rubans.
+                </div>
+            </div>
+            <div class="cours">
+                <p>Voici un modèle avec plusieurs bandes disjointes et une tête de lecture par ruban.</p>
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing9.png" width="100%" class="figure-img img-fluid rounded" alt="Pas de calcul">
+                    <figcaption class="figure-caption text-center">Configuration d'une machine à plusieurs rubans.</figcaption>
+                </figure>
+                <p>La fonction de transition est la seule partie qui est modifiée. Tous les changements d'état se font en simultané.</p>
+            </div>
+            <div class="exemple">
+                <p><i>Exemple du palindrome</i></p>
+                <div class="font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    Un palindrome est un mot qui se lit de la même façon de gauche à droite et de droite à gauche.
+                </div>
+                <p>
+                    La machine de Turing M = (Q, q<sub>0</sub>, q<sub>f</sub>, {a,b,B}, B, {a,b}, &delta;) <br />
+                    où Q = {q<sub>0</sub>, q<sub>c</sub>, q<sub>g</sub>, q<sub>v</sub>, q<sub>f</sub>} <br />
+                    et &delta; est définie par le tableau suivant :
+                    <center>
+                        <figure class="figure">
+                            <div class="table-responsive">
+                                <table class="table table-active table-sm">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th scope="col">&#0948;</th>
+                                            <th scope="col">a,a</th>
+                                            <th scope="col">b,b</th>
+                                            <th scope="col">B,B</th>
+                                            <th scope="col">a,B</th>
+                                            <th scope="col">b,B</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        <tr>
+                                            <th scope="row">q<sub>0</sub></th>
+                                            <td></td>
+                                            <td></td>
+                                            <td>(q<sub>f</sub>, B, B, D, D)</td>
+                                            <td>(q<sub>c</sub>, a, a, D, D)</td>
+                                            <td>(q<sub>c</sub>, b, b, D, D)</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">q<sub>c</sub></th>
+                                            <td></td>
+                                            <td></td>
+                                            <td>(q<sub>g</sub>, B, B, G, R)</td>
+                                            <td>(q<sub>c</sub>, a, a, D, D)</td>
+                                            <td>(q<sub>c</sub>, b, b, D, D)</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">q<sub>g</sub></th>
+                                            <td></td>
+                                            <td></td>
+                                            <td>(q<sub>v</sub>, B, B, D, G)</td>
+                                            <td>(q<sub>g</sub>, a, B, G, R)</td>
+                                            <td>(q<sub>g</sub>, b, B, G, R)</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">q<sub>v</sub></th>
+                                            <td>(q<sub>v</sub>, a, a, D, G)</td>
+                                            <td>(q<sub>v</sub>, b, b, D, G)</td>
+                                            <td>(q<sub>f</sub>, B, B, R, R)</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <figcaption class="figure-caption text-center">
+                               
+                            </figcaption>
+                        </figure>
+                    </center>
+                    décide l'ensemble des palindromes sur l'alphabet {a,b}.
+                </p>
+                <p><i>Exemple pour le mot aba :</i></p>
             </div>
         </div>
     </div>

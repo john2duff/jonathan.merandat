@@ -94,4 +94,19 @@ evidence {
     margin-right:0.5em;
 }
 
+#navigationSpy:hover {
+    opacity: 1;
+}
+
+.navigationSpy:active {
+    opacity: 1;
+}
+#navigationSpy {
+    position:fixed;
+    opacity:0.5;
+}
+
+#header > .navbar{
+    z-index:99999;
+}
 
