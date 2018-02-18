@@ -24,3 +24,17 @@ var showTitle = function (evt) {
         el = el.nextElementSibling;
     }
 }
+
+var setSticky = function (evt) {
+    var el = evt.parentElement;
+    var position = el.style.position;
+    if (position != "sticky" || position == "") {
+        el.style.position = "sticky";
+        el.style.top = "0px";
+        evt.textContent = "Sticky on";
+    } else {
+        el.style.position = "initial";
+        el.style.position = "initial";
+        evt.textContent = "Sticky off";
+    }
+}

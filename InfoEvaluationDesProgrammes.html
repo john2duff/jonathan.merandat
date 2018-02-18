@@ -503,64 +503,101 @@
                     La machine de Turing M = (Q, q<sub>0</sub>, q<sub>f</sub>, {a,b,B}, B, {a,b}, &delta;) <br />
                     où Q = {q<sub>0</sub>, q<sub>c</sub>, q<sub>g</sub>, q<sub>v</sub>, q<sub>f</sub>} <br />
                     et &delta; est définie par le tableau suivant :
-                    <center>
-                        <figure class="figure">
-                            <div class="table-responsive">
-                                <table class="table table-active table-sm">
-                                    <thead class="text-center">
-                                        <tr>
-                                            <th scope="col">&#0948;</th>
-                                            <th scope="col">a,a</th>
-                                            <th scope="col">b,b</th>
-                                            <th scope="col">B,B</th>
-                                            <th scope="col">a,B</th>
-                                            <th scope="col">b,B</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-center">
-                                        <tr>
-                                            <th scope="row">q<sub>0</sub></th>
-                                            <td></td>
-                                            <td></td>
-                                            <td>(q<sub>f</sub>, B, B, D, D)</td>
-                                            <td>(q<sub>c</sub>, a, a, D, D)</td>
-                                            <td>(q<sub>c</sub>, b, b, D, D)</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">q<sub>c</sub></th>
-                                            <td></td>
-                                            <td></td>
-                                            <td>(q<sub>g</sub>, B, B, G, R)</td>
-                                            <td>(q<sub>c</sub>, a, a, D, D)</td>
-                                            <td>(q<sub>c</sub>, b, b, D, D)</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">q<sub>g</sub></th>
-                                            <td></td>
-                                            <td></td>
-                                            <td>(q<sub>v</sub>, B, B, D, G)</td>
-                                            <td>(q<sub>g</sub>, a, B, G, R)</td>
-                                            <td>(q<sub>g</sub>, b, B, G, R)</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">q<sub>v</sub></th>
-                                            <td>(q<sub>v</sub>, a, a, D, G)</td>
-                                            <td>(q<sub>v</sub>, b, b, D, G)</td>
-                                            <td>(q<sub>f</sub>, B, B, R, R)</td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <figcaption class="figure-caption text-center">
-                               
-                            </figcaption>
-                        </figure>
-                    </center>
+                    <div class="text-center">
+                        <button onclick="setSticky(this);" type="button" class="btn btn-secondary stickyButton" data-toggle="button" aria-pressed="false" autocomplete="off">
+                            Sticky off
+                        </button>
+                        <div>
+                            <center>
+                                <figure class="figure">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm" style="background-color:#c8c8c8;">
+                                            <thead class="text-center">
+                                                <tr>
+                                                    <th scope="col">&#0948;</th>
+                                                    <th scope="col">a,a</th>
+                                                    <th scope="col">b,b</th>
+                                                    <th scope="col">B,B</th>
+                                                    <th scope="col">a,B</th>
+                                                    <th scope="col">b,B</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-center">
+                                                <tr>
+                                                    <th scope="row">q<sub>0</sub></th>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>(q<sub>f</sub>, B, B, D, D)</td>
+                                                    <td>(q<sub>c</sub>, a, a, D, D)</td>
+                                                    <td>(q<sub>c</sub>, b, b, D, D)</td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">q<sub>c</sub></th>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>(q<sub>g</sub>, B, B, G, R)</td>
+                                                    <td>(q<sub>c</sub>, a, a, D, D)</td>
+                                                    <td>(q<sub>c</sub>, b, b, D, D)</td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">q<sub>g</sub></th>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>(q<sub>v</sub>, B, B, D, G)</td>
+                                                    <td>(q<sub>g</sub>, a, B, G, R)</td>
+                                                    <td>(q<sub>g</sub>, b, B, G, R)</td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">q<sub>v</sub></th>
+                                                    <td>(q<sub>v</sub>, a, a, D, G)</td>
+                                                    <td>(q<sub>v</sub>, b, b, D, G)</td>
+                                                    <td>(q<sub>f</sub>, B, B, R, R)</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <figcaption class="figure-caption text-center">
+
+                                    </figcaption>
+                                </figure>
+                            </center>
+                        </div>
+                    </div>
+                    
                     décide l'ensemble des palindromes sur l'alphabet {a,b}.
                 </p>
                 <p><i>Exemple pour le mot aba :</i></p>
+                <center>
+                    <img src="img/fonc-turing10.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing11.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing12.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing13.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing14.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing15.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing16.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing17.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing18.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing19.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing20.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing21.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing22.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing23.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                </center>
             </div>
         </div>
     </div>
