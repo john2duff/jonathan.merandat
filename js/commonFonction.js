@@ -17,10 +17,11 @@ var showTitle = function (evt) {
     while (el) {
         var display = el.style.display;
         if (display != "none" || display == "") {
-            evt.nextElementSibling.style.display = "none";
+            el.style.display = "none";
         } else {
-            evt.nextElementSibling.style.display = "initial";
+            el.style.display = "block";
         }
+        el = el.nextElementSibling;
     }
 
 }

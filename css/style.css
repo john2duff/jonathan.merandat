@@ -40,9 +40,13 @@ html {
     padding:1em;
     margin-bottom:0;
 }
+.cours-img {
+    border: 3px solid rgb(224, 224, 224);
+} 
 .exemple {
     background-color: rgb(224, 224, 224);
     padding: 1em;
+    /*background: repeating-linear-gradient( 45deg, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.01) 10px, rgba(0, 0, 0, 0.1) 10px, rgba(0, 0, 0, 0.1) 20px )*/
 }
 
 .conversionBin{
@@ -51,3 +55,9 @@ html {
 .text-conversionBin{
     width:150px;
 }
+
+.logoInfo{
+    margin-right:0.5em;
+}
+
+

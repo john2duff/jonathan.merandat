@@ -39,7 +39,8 @@
                             <a class="dropdown-item" href="InfoEvaluationDesProgrammes.html">Evaluation des programmes</a>
                             <a class="dropdown-item" href="InfoCyberSecurite.html">Cyber Sécurité</a>
                             <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
-                            <a class="dropdown-item" href="InfoOutils.html">Outils</a>
+                            <a class="dropdown-item" href="InfoConversion.html">Convertisseurs</a>
+                            <a class="dropdown-item" href="InfoReferences.html">Références</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -62,34 +63,98 @@
     
     <!-- corps-->
     <div class="container">
-        <nav class="navbar sticky-top navbar-light bg-light barTitre" onclick="showTitle(this);">
-            <h4 class="titre">Introduction</h4>
-        </nav>
-        <div class="cours">Un <b>problème </b>en informatique est constitué de données sous une certaine forme et d'une question portant sur ces données.</div>
-        <div class="exemple">
-            <p><i>Exemple d'un problème </i>: </p>
-            <b>Données </b>: 250 gr. de farine, 0.5 litre de lait, 2 oeufs, 2 gr. de sel. <br />
-            <b>Question </b>: Comment faire une pâte à crêpes ? <br />
+        
+        <div>
+            <nav class="navbar sticky-top navbar-light bg-light barTitre" onclick="showTitle(this);">
+                <h4 class="titre">Introduction</h4>
+            </nav>
+            <div class="cours">Un <b>problème </b>en informatique est constitué de données sous une certaine forme et d'une question portant sur ces données.</div>
+            <div class="exemple">
+                <p><i>Exemple d'un problème </i>: </p>
+                Données : 250 gr. de farine, 0.5 litre de lait, 2 oeufs, 2 gr. de sel. <br />
+                Question : Comment faire une pâte à crêpes ? <br />
+            </div>
+            <div class="cours">Un <b>algorithme </b>est une méthode indiquant sans ambiguïté des actions mécaniques à effectuer pour trouver la réponse à un problème.</div>
+            <div class="exemple">
+                <p><i>Algorithme pour le problème 1 : </i></p>
+                <ol>
+                    <li>Mettre la farine dans un saladier.</li>
+                    <li>Faire un puits.</li>
+                    <li>Y casser les oeufs entiers.</li>
+                    <li>Ajouter l'huile, le sel et 10cl. de lait.</li>
+                    <li>Ajouter l'huile, le sel et 10cl. de lait.</li>
+                    <li>Battre énergiquement la pâte avec une cuillière.</li>
+                    <li>Mouiller progressivement avec le reste de lait.</li>
+                    <li>Laisser reposer une heure.</li>
+                </ol>
+            </div>
+            <div class="cours">
+                <h5>Existe-t-il un algorithme pour chaque problème ?</h5>
+                <div>Non, certains problèmes ne peuvent être résolus par aucun algorithme.</div>
+            </div>
+            <div class="exemple font-italic">
+                <img class="logoInfo" src="img/logo-info.png" height="25" />
+                Heureusement pour la Française des jeux qu'il n'existe pas un algorithme qui permette de trouver les numéros gagnants du prochain tirage!
+            </div>
+            <div class="cours">
+                <p>Un problème pour lequel aucun algorithme n'existe est dit <b>indécidable.</b></p>
+                <div>Un algorithme peut exister mais <b>n'est pas forcément utilisable.</b></div>
+            </div>
+            <div class="exemple">
+                <p><i>Exemple d'un problème </i>: </p>
+                Un puzzle de 25 cartes (carré de 5x5). Si l'on doit tester toutes les combinaisons, cela fait 25! combinaisons différentes.
+                <br /> 25! = 15 511 210 043 330 985 984 000 000 ---> ce qui fait beaucoup de possibilités. <br />
+                Un ordinateur qui vérifierait 1 milliard de combinaisons par seconde mettrait 490 millions d'années pour tout tester ! <br />
+                <b>L'algorithme est donc inutilisable.</b>
+            </div>
+            <div class="cours">
+                Deux raisons pour lesquelles un algorithme peut être inutilisable :
+                <ul>
+                    <li>le temps de calcul est trop long.</li>
+                    <li>il utilise trop de place mémoire.</li>
+                </ul>
+                <p>S'il existe un algorithme utilisable alors le problème est <b>traitable.</b></p>
+                <h5>Complexité</h5>
+                La complexité correspond à deux valeurs :
+                <ul>
+                    <li>son temps d'exécution</li>
+                    <li>la place mémoire utilisée</li>
+                </ul>
+                <b>L'algorithmique</b> est l'étude des méthodes pour améliorer la complexité d'un algorithme.
+            </div>
         </div>
-        <div class="cours">Un <b>algorithme </b>est une méthode indiquant sans ambiguïté des actions mécaniques à effectuer pour trouver la réponse à un problème.</div>
-        <div class="exemple">
-            <p><i>Algorithme pour le problème 1 : </i></p>
-            <ol>
-                <li>Mettre la farine dans un saladier.</li>
-                <li>Faire un puits.</li>
-                <li>Y casser les oeufs entiers.</li>
-                <li>Ajouter l'huile, le sel et 10cl. de lait.</li>
-                <li>Ajouter l'huile, le sel et 10cl. de lait.</li>
-                <li>Battre énergiquement la pâte avec une cuillière.</li>
-                <li>Mouiller progressivement avec le reste de lait.</li>
-                <li>Laisser reposer une heure.</li>
-            </ol>
+
+        <div>
+            <nav class="navbar sticky-top navbar-light bg-light barTitre" onclick="showTitle(this);">
+                <h4 class="titre">Machine de Turing</h4>
+            </nav>
+            <div class="cours">
+                <h5>Alphabet, mot, langage</h5>
+                Un <b>alphabet </b>désigne un ensemble fini de symboles. <br />
+                Un <b>mot </b>d'un alphabet est une suite finie de symbole <i>(pris dans cet alphabet)</i>. <br />
+                Un <b>langage</b> est un ensemble de mots.
+            </div>
+            <div class="exemple">
+                <div><i>Exemple :</i> {a, bab} est un langage.</div>
+            </div>
+            <div class="cours">
+                <h5>Présentation</h5>
+                La machine de Turing est une modélisation mathématique très simple, mais très puissante, du fonctionnement d'un ordinateur. <br />
+                La partie de contrôle représente le microprocesseur (composé d'un nombre fini d'états). <br />
+                Le ruban représente la mémoire de l'ordinateur (infini). <br />
+                La tête de lecture est le bus qui relie le microprocesseur et la mémoire. <br />
+            </div>
+            <div class="exemple">
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing1.png" width="100%" class="figure-img img-fluid rounded" alt="Machine de Turing au cours d'un calcul.'">
+                    <figcaption class="figure-caption text-center">Machine de Turing au cours d'un calcul.</figcaption>
+                </figure>
+            </div>
+            <div class="cours">
+                <h5>Définition formelle</h5>
+                Une machine de Turing % est un setpuplet (<i>Q, q0, F, 	&#0181;  </i>)
+            </div>
         </div>
-        <div class="cours">
-            <h5>Existe-t-il un algorithme pour chaque problème ?</h5>
-            <div>Non, certains problèmes ne peuvent être résoluts par aucun algorithme.</div>
-        </div>
-        <div class="exemple font-italic">Heureusement pour la Française des jeux qu'il n'existe pas un algorithme qui permette de trouver les numéros gagnants du prochain tirage! </div>
     </div>
 
      
