@@ -20,8 +20,13 @@ html {
     }
 }
 
-.dropdown-menu{
-    z-index:9999;
+#photoCv {
+    border-radius: 5px;
+    height: 50px;
+}
+
+.dropdown-menu {
+    z-index: 9999;
 }
 
 .titre{
