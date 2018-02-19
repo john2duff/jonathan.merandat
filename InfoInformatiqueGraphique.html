@@ -10,6 +10,9 @@
     <!-- Style CSS -->
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/commonFonction.js"></script>
+    
+    <!-- CodeMirror -->
+
 
     <title>Informatique graphique</title>
 
@@ -41,6 +44,7 @@
                             <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
                             <a class="dropdown-item" href="InfoConversion.html">Convertisseurs</a>
                             <a class="dropdown-item" href="InfoUnicode.html">Unicode</a>
+                            <a class="dropdown-item" href="InfoTools.html">Outils</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -60,14 +64,80 @@
             </div>
         </nav>
     </div>
-    
+
 
     <!-- corps-->
     <div class="container">
+        <!--Introduction-->
+        <div id="intro">
+            <a href="#introInfoIg">
+                <nav id="introInfoIg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Introduction</h4>
+                </nav>
+            </a>
+            <div class="exemple">
+                <h5>Références</h5>
+                <p>
+                    <evidence>OpenGl </evidence>est une bibliothéque graphique contenant environ 200 fonctions. <br />
+                    Site de référence : <a href="https://www.opengl.org/">https://www.opengl.org/</a> <br />
+                    Manuel des fonctions : <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl4/">https://www.khronos.org/registry/OpenGL-Refpages/gl4/</a>
+                </p>
+                <p>
+                    <evidence>GLUT </evidence> (GL Utility Toolkit) est une bibliothéque graphique. On l'utilisera pour faire l'intereface, les évènements clavier et souris.
+                    <br />
+                    Site de référence : <a href="https://www.opengl.org/documentation/specs/glut/spec3/spec3.html">https://www.opengl.org/documentation/specs/glut/spec3/spec3.html</a>
+                </p>
+                <p>
+                    <evidence>GLU </evidence>est une autre bibliothéque pour orienter la caméra.
+                </p>
+            </div>
+            <div class="cours">
+                <h5>Installation sous Windows</h5>
+                <ul>
+                    <li>
+                        Téléchargez gcc avec MinGW et l'installer : <a href="https://sourceforge.net/projects/mingw/">https://sourceforge.net/projects/mingw/</a>
+                    </li>
+                    <li>
+                        Placez-vous dans le répertoire <b>\MinGW\bin</b> et lancer la commande mingw-get install gcc
+                    </li>
+                    <li>Ajouter l'adresse MinGW/bin au chemin PATH</li>
+                    <li>
+                        Téléchargez le fichier <b>GLUT-MinGW-3.7.6-6.mp.zip </b>à l’url <a href="http://files.transmissionzero.co.uk/software/development/GLUT/">http://files.transmissionzero.co.uk/software/development/GLUT/</a>
+                         et décompactez GLUT pour MinGw.
+                    </li>
+                    <li>
+                        Copiez le fichier <evidence>glut.h</evidence> dans le répertoire \MinGw\include\GL\ et le fichier <evidence>libglut32.a</evidence> dans le répertoire
+                        \MinGw\lib\
+                    </li>
+                    <li>
+                        Copiez le fichier glut32.dll dans le répertoire contenant vos fichier source (ou un répertoire se trouvant
+                        dans le chemin, par exemple le répertoire contenant l’exécutable gcc)
+                    </li>
+                    <li>
+                        Pour compilez le programme utilisez la commande <evidence>gcc test.c -lglut32 -lopengl32</evidence> (pour la partie 2 qui
+                        utilise GLU ajoutez -lGLU).
+                    </li>
+                    <li>
+                        Lancer le programme a.exe. Testez aussi le fichier test2.c qui ouvre deux fenêtres graphique.
+                    </li>
+                </ul>
+            </div>
+        </div>
 
+        <div id="structure">
+            <a href="#structureInfoIg">
+                <nav id="structureInfoIg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Structure</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Programme simple</h5>
+
+            </div>
+        </div>
     </div>
 
-     
+
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
