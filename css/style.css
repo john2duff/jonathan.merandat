@@ -114,3 +114,7 @@ evidence {
     z-index:99999;
 }
 
+.CodeMirror, .CodeMirror-scroll {
+    border-radius: 15px;
+}
+

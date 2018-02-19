@@ -10,8 +10,18 @@
     <!-- Style CSS -->
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/commonFonction.js"></script>
-    
+
     <!-- CodeMirror -->
+    <link rel=stylesheet href="codemirror-5.34.0/doc/docs.css">
+    <script src="codemirror-5.34.0/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="codemirror-5.34.0/lib/codemirror.css">
+    <script src="codemirror-5.34.0/mode/javascript/javascript.js"></script>
+    <script src="codemirror-5.34.0/addon/edit/matchbrackets.js"></script>
+    <link rel="stylesheet" href="codemirror-5.34.0/addon/hint/show-hint.css">
+    <script src="codemirror-5.34.0/addon/hint/show-hint.js"></script>
+    <link rel="stylesheet" href="codemirror-5.34.0/theme/ambiance.css">
+    <link rel="stylesheet" href="codemirror-5.34.0/theme/ambiance.css">
+    <script src="codemirror-5.34.0/clike.js"></script>
 
 
     <title>Informatique graphique</title>
@@ -59,7 +69,6 @@
                     <li class="nav-item">
                         <a id="buttonRecetteVorwerk" class="nav-link" href="recetteVorwerk.html">Recettes</a>
                     </li>
-
                 </ul>
             </div>
         </nav>
@@ -85,7 +94,9 @@
                 <p>
                     <evidence>GLUT </evidence> (GL Utility Toolkit) est une bibliothéque graphique. On l'utilisera pour faire l'intereface, les évènements clavier et souris.
                     <br />
-                    Site de référence : <a href="https://www.opengl.org/documentation/specs/glut/spec3/spec3.html">https://www.opengl.org/documentation/specs/glut/spec3/spec3.html</a>
+                    Site de référence : <span>
+                        <a href="https://www.opengl.org/documentation/specs/glut/spec3/spec3.html">https://www.opengl.org/documentation/specs/glut/spec3/spec3.html</a>
+                    </span>
                 </p>
                 <p>
                     <evidence>GLU </evidence>est une autre bibliothéque pour orienter la caméra.
@@ -103,7 +114,7 @@
                     <li>Ajouter l'adresse MinGW/bin au chemin PATH</li>
                     <li>
                         Téléchargez le fichier <b>GLUT-MinGW-3.7.6-6.mp.zip </b>à l’url <a href="http://files.transmissionzero.co.uk/software/development/GLUT/">http://files.transmissionzero.co.uk/software/development/GLUT/</a>
-                         et décompactez GLUT pour MinGw.
+                        et décompactez GLUT pour MinGw.
                     </li>
                     <li>
                         Copiez le fichier <evidence>glut.h</evidence> dans le répertoire \MinGw\include\GL\ et le fichier <evidence>libglut32.a</evidence> dans le répertoire
@@ -132,14 +143,44 @@
             </a>
             <div class="cours">
                 <h5>Programme simple</h5>
+                <textarea id="progSimple">
+#include "base.c"
+char name[] = "Jooohn"; //Nom de la fenetre 
+char message[200]; //Message fenetre
 
+//Dessin de la fenetre principale
+void description() {
+	glColor3dv(BLEU);
+	glutWireCube(1);
+}
+//Animation de la fenetre principale
+void anime() {
+	if (axe)
+		sprintf(message, "Msg statique : Hello world - Msg dynamique : Axes affiches");
+	else
+		sprintf(message, "Msg statique : Hello world - Msg dynamique : Axes non affiches");
+	glutPostRedisplay();
+}
+void initialisation() {}
+void clavier(unsigned char key) {}
+void redimension(int width, int height) {}
+                </textarea>
+                <script>
+                    var cEditor = CodeMirror.fromTextArea(document.getElementById("progSimple"), {
+                        lineNumbers: true,
+                        matchBrackets: true,
+                        mode: "text/x-c++src"
+                    });
+                    cEditor.setOption("theme", "ambiance");
+                </script>
             </div>
         </div>
     </div>
 
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!--Optional JavaScript -->
+    <!--jQuery first, then Popper.js, then Bootstrap JS -->
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
