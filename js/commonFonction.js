@@ -45,7 +45,8 @@ var modeAffichage = CONTAINER_FLUID;
 
 var actualiserModeAffichage = function () {
     var t = document.getElementsByClassName("modeAffichage");
-    for (var i = 0; i < t.length; i++) {
-        t[i].className = modeAffichage;
+    var nb = t.length;
+    for (var i = 0; i < nb; i++) {
+        t[0].className = modeAffichage;
     }
 }
