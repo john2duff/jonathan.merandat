@@ -70,7 +70,7 @@ evidence {
     padding:1em;
     margin-bottom:0;
     background-color:#f6f6f6;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 .exemple > .cours {
     background-color: #b5d0ad;
