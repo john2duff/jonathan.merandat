@@ -70,7 +70,8 @@ evidence {
     padding:1em;
     margin-bottom:0;
     background-color:#f6f6f6;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width:100%;
 }
 .exemple > .cours {
     background-color: #b5d0ad;
@@ -82,7 +83,8 @@ evidence {
     background-color: rgb(224, 224, 224);
     padding: 1em;
     /*background: repeating-linear-gradient( 45deg, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.01) 10px, rgba(0, 0, 0, 0.1) 10px, rgba(0, 0, 0, 0.1) 20px )*/
-    word-wrap:break-word;
+    overflow-wrap:break-word;
+    width:100%;
 }
 
 .conversionBin{
