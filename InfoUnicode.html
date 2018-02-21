@@ -11,6 +11,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <!-- Style CSS -->
     <link rel="stylesheet" href="css/style.css" />
+    <script src="commonFonction.js"></script>
     <title>Jonathan Merandat</title>
     <style>
         .table-header {
@@ -86,7 +87,7 @@
 
 <body>
     <!--header -->
-    <div class="container">
+    <div class="modeAffichage">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="#">
                 <img id="photoCv" src="img/photoCv.jpg" />
@@ -132,7 +133,7 @@
     </div>
 
 
-    <div class="container">
+    <div class="modeAffichage">
         <nav class="navbar sticky-top navbar-light bg-light">
             <select class="custom-select custom-select-lg" onchange="selectReference(this.value);">
                 <option selected>Sélectionner une langue</option>
@@ -1857,7 +1858,7 @@
         selectReference("0");
     </script>
 
-
+    <script>actualiserModeAffichage();</script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

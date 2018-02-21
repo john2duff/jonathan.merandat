@@ -19,7 +19,7 @@
 
 <body>
     <!--header -->
-    <div class="container">
+    <div class="modeAffichage">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="#">
                 <img id="photoCv" src="img/photoCv.jpg" />
@@ -63,9 +63,9 @@
             </div>
         </nav>
     </div>
-    
+
     <!-- body-->
-    <div class="container">
+    <div class="modeAffichage">
         <nav class="navbar sticky-top navbar-light bg-light barTitre" onclick="showTitle(this);">
             <h4 class="titre">Notations</h4>
         </nav>
@@ -91,7 +91,7 @@
             </ul>
         </div>
     </div>
-    <div class="container">
+    <div class="modeAffichage">
         <nav class="navbar sticky-top navbar-light bg-light barTitre" onclick="showTitle(this);">
             <h4 class="titre">3 x 3 x 3</h4>
         </nav>
@@ -100,7 +100,8 @@
             <ul class="list-group">
                 <li class="list-group-item">Faire la croix</li>
                 <li class="list-group-item">Finir les deux premiers étages</li>
-                <li class="list-group-item">Orienter la dernière face
+                <li class="list-group-item">
+                    Orienter la dernière face
                     <p class="font-italic text-center">
                         Pour les arêtes
                         <div class="container">
@@ -164,7 +165,8 @@
                         </div>
                     </p>
                 </li>
-                <li class="list-group-item">Placer les éléments de la dernière face
+                <li class="list-group-item">
+                    Placer les éléments de la dernière face
                     <div class="container-fluid">
                         <div class="d-flex flex-row justify-content-around flex-wrap">
                             <figure class="figure" style="text-align:center;">
@@ -183,17 +185,18 @@
                     </div>
                 </li>
             </ul>
-                
-            
+
+
         </div>
     </div>
-   
+
     <!--footer-->
-    <div class="container">
+    <div class="modeAffichage">
         <center><footer class="blockquote-footer">Sources : <a href="https://www.francocube.com/">Francocube </a></footer></center>
     </div>
 
 
+    <script>actualiserModeAffichage();</script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

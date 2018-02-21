@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!-- Style CSS -->
     <link rel="stylesheet" href="css/style.css" />
+    <script src="commonFonction.js"></script>
     <title>Jonathan Merandat</title>
 
 </head>
 
 <body>
     <!--header -->
-    <div class="container">
+    <div class="modeAffichage">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="#">
                 <img src="img/photoCv.jpg" height="50" style="border-radius:50%;vertical-align: top;" />
@@ -57,9 +58,9 @@
         </nav>
     </div>
 
-   
 
-    <div class="container">
+
+    <div class="modeAffichage">
         <nav class="navbar sticky-top navbar-light bg-light">
             <select class="custom-select custom-select-lg mb-3" onchange="selectRecette(this.value);">
                 <option selected>Sélectionner une recette</option>
@@ -72,23 +73,23 @@
             <div id="recette1">
                 <div class="container-fluid">
                     <h3>Ingrédients</h3>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">200 grammes de pralinoise</li>
-                            <li class="list-group-item">100 grammes de chocolat</li>
-                            <li class="list-group-item">397 gramme de lait concentré</li>
-                            <li class="list-group-item">30 grammes d'huile de noisette</li>
-                        </ul>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">200 grammes de pralinoise</li>
+                        <li class="list-group-item">100 grammes de chocolat</li>
+                        <li class="list-group-item">397 gramme de lait concentré</li>
+                        <li class="list-group-item">30 grammes d'huile de noisette</li>
+                    </ul>
                     <h3>Etapes</h3>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Ajouter 200g de pralinoise. </li>
-                            <li class="list-group-item">Ajouter une plaque de chocolat de 100g.</liclass="list-group-item">
-                            <li class="list-group-item">Ajouter 397g de lait concentré.</li>
-                            <li class="list-group-item">Ajouter 30g d'huile de noisette.</li>
-                            <li class="list-group-item">Fermer le couvercle et lancer : <br><center><b>2 min - 60° - vitesse 2</b></center></li> 
-                            <li class="list-group-item">Racler.</li>
-                            <li class="list-group-item">Fermer le couvercle et lancer : <br><center><b>2 min - 60° - vitesse 2</b></center></li>
-                            <li class="list-group-item">Déguster !</li>
-                        </ul>    
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Ajouter 200g de pralinoise. </li>
+                        <li class="list-group-item">Ajouter une plaque de chocolat de 100g.</liclass="list-group-item">
+                        <li class="list-group-item">Ajouter 397g de lait concentré.</li>
+                        <li class="list-group-item">Ajouter 30g d'huile de noisette.</li>
+                        <li class="list-group-item">Fermer le couvercle et lancer : <br><center><b>2 min - 60° - vitesse 2</b></center></li>
+                        <li class="list-group-item">Racler.</li>
+                        <li class="list-group-item">Fermer le couvercle et lancer : <br><center><b>2 min - 60° - vitesse 2</b></center></li>
+                        <li class="list-group-item">Déguster !</li>
+                    </ul>
                 </div>
             </div>
             <div id="recette2">
@@ -97,22 +98,23 @@
                 Test2
             </div>
         </div>
-</div>
+    </div>
     <script>
-         var selectRecette = function (evt) {
-             var divRecettes = document.getElementById("recettes");
-             for (var i = 0; i < divRecettes.children.length; i++) {
-                 if (divRecettes.children[i].id == "recette" + evt) {
-                     divRecettes.children[i].style.display = "initial";
-                 } else {
-                     divRecettes.children[i].style.display = "none";
-                 }
-             }
-         }
-         selectRecette("recette0");
+        var selectRecette = function (evt) {
+            var divRecettes = document.getElementById("recettes");
+            for (var i = 0; i < divRecettes.children.length; i++) {
+                if (divRecettes.children[i].id == "recette" + evt) {
+                    divRecettes.children[i].style.display = "initial";
+                } else {
+                    divRecettes.children[i].style.display = "none";
+                }
+            }
+        }
+        selectRecette("recette0");
     </script>
 
 
+    <script>actualiserModeAffichage();</script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

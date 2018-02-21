@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!-- Style CSS -->
     <link rel="stylesheet" href="css/style.css" />
+    <script src="commonFonction.js"></script>
     <title>Jonathan Merandat</title>
 
 </head>
 
 <body>
     <!--header -->
-    <div class="container">
+    <div class="modeAFfichage">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="#">
                 <img id="photoCv" src="img/photoCv.jpg" />
@@ -60,7 +61,7 @@
         </nav>
     </div>
 
-    <div class="container">
+    <div class="modeAffichage">
         <nav class="navbar sticky-top navbar-light bg-light">
             <select class="custom-select custom-select-lg" onchange="selectRecette(this.value);">
                 <option value="0">Sélectionner une recette</option>
@@ -197,6 +198,7 @@
     </script>
 
 
+    <script>actualiserModeAffichage();</script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

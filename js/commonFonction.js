@@ -38,3 +38,14 @@ var setSticky = function (evt) {
         evt.textContent = "Sticky off";
     }
 }
+
+const CONTAINER = "container";
+const CONTAINER_FLUID = "container-fluid";
+var modeAffichage = CONTAINER_FLUID;
+
+var actualiserModeAffichage = function () {
+    var t = document.getElementsByClassName("modeAffichage");
+    for (var i = 0; i < t.length; i++) {
+        t[i].className = modeAffichage;
+    }
+}
