@@ -173,6 +173,37 @@ void redimension(int width, int height) {}
                     });
                     cEditor.setOption("theme", "ambiance");
                 </script>
+                <div class="exemple font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    Le fichier de base.c (~500 lignes de code) donne un cadre permettant de simplifier la programmation OpenGL.
+                    Grâce à cela, on définit les initialisations, les objets à placer dans la fenêtre et les réponses aux event clavier et souris.
+                    <br />
+                </div>
+                <div class="exemple">
+                    Les fonctions <i>description</i> permettent de modéliser les scènes à afficher.
+                    La fonction <i>anime</i> (unique) permet de créer un animation des scènes modélisées.
+                    Par défaut, on effectue les rotations des objets de la scène autour de trois axes
+                    à l'aide des variables prédéfinies nommé <i>xr, yr et zr.</i>
+                    <br />
+                    La fonction <i>initialisation</i> (unique) permet d'initialiser les variables éventuelles.
+                </div>
+                <div class="cours">
+                    <h5>Primitives graphiques OpenGL</h5>
+                    Fonction <i>glBegin </i>dan l'API OpenGL : <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/">https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/</a>
+                    Description des primitives :
+                    <ul>
+                        <li><b>GL_POINTS </b> : Traite un point seul. Vertex n définit le point n</li>
+                        <li><b>GL_LINES </b> : Traite une ligne. Sommets 2 ⁢ n - 1 et 2 ⁢ n définissent la ligne n.</li>
+                        <li><b>GL_LINE_STRIP </b> : Dessine un groupe de lignes connectées. Sommets n et n + 1 définissent la ligne n.</li>
+                        <li><b>GL_LINE_LOOP </b> : Dessine un groupe de lignes connectées en boucle. Sommets n et n + 1 définissent la ligne n.</li>
+                        <li><b>GL_TRIANGLES </b> : Traite chaque triplet de sommets comme un triangle indépendant. Sommets 3 ⁢ n - 2 , 3 ⁢ n - 1 , et 3 ⁢ n définissent le triangle n.</li>
+                        <li><b>GL_TRIANGLE_STRIP </b> : Dessine un groupe de triangles connectés. Pour chaque triangle, sommets n, n + 1 , and n + 2 définissent le triangle n.</li>
+                        <li><b>GL_TRIANGLES </b> : Traite chaque triplet de sommets comme un triangle indépendant. Sommets 1 , n + 1 , and n + 2 définissent le triangle n. </li>
+                        <li><b>GL_QUADS </b> : Traite chaque groupe de 4 sommets comme un quadrilatère indépendant.  Sommets 4 ⁢ n - 3 , 4 ⁢ n - 2 , 4 ⁢ n - 1 , et 4 ⁢ n définissent la quadrilatère n. </li>
+                        <li><b>GL_QUAD_STRIP </b> : Dessine chaque groupe de quadrilatères connectés.  Sommets 2 ⁢ n - 1 , 2 ⁢ n , 2 ⁢ n + 2 , et 2 ⁢ n + 1 définissent les quadrilatères n. </li>
+                        <li><b>GL_POLYGON </b> : Dessine une forme, un polygone convexe.  Sommets 1 à N pour définir le polygone. </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

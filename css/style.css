@@ -45,7 +45,11 @@ html {
 
 .barTitre {
     cursor: pointer;
-    background-color:#b5cde0;
+    background-color: #b5cde0;
+    box-shadow: 8px 8px 12px #aaa;
+    margin-left: -10px;
+    margin-right: -10px;
+    border-radius: 3px;
 }
 a > .barTitre > .titre {
     text-decoration: none;
