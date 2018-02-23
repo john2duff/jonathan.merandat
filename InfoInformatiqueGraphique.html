@@ -1,0 +1,219 @@
+﻿<!doctype html>
+<html lang="fr">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Style CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/commonFonction.js"></script>
+
+    <!-- CodeMirror -->
+    <link rel=stylesheet href="codemirror-5.34.0/doc/docs.css">
+    <script src="codemirror-5.34.0/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="codemirror-5.34.0/lib/codemirror.css">
+    <script src="codemirror-5.34.0/mode/javascript/javascript.js"></script>
+    <script src="codemirror-5.34.0/addon/edit/matchbrackets.js"></script>
+    <link rel="stylesheet" href="codemirror-5.34.0/addon/hint/show-hint.css">
+    <script src="codemirror-5.34.0/addon/hint/show-hint.js"></script>
+    <link rel="stylesheet" href="codemirror-5.34.0/theme/ambiance.css">
+    <link rel="stylesheet" href="codemirror-5.34.0/theme/ambiance.css">
+    <script src="codemirror-5.34.0/clike.js"></script>
+
+
+    <title>Informatique graphique</title>
+
+</head>
+
+<body>
+    <!--header -->
+    <div class="modeAffichage">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">
+                <img id="photoCv" src="img/photoCv.jpg" />
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a id="buttonIndex" class="nav-link" href="index.html">Accueil<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item dropdown active">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Informatique
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="InfoEvaluationDesProgrammes.html">Evaluation des programmes</a>
+                            <a class="dropdown-item" href="InfoCyberSecurite.html">Cyber Sécurité</a>
+                            <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
+                            <a class="dropdown-item" href="InfoConversion.html">Convertisseurs</a>
+                            <a class="dropdown-item" href="InfoUnicode.html">Unicode</a>
+                            <a class="dropdown-item" href="InfoTools.html">Outils</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Casse-têtes
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="rubiksCube.html">Rubik's Cube</a>
+                            <a class="dropdown-item" href="casseTeteChinois.html">Casse tête chinois</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a id="buttonRecetteVorwerk" class="nav-link" href="recetteVorwerk.html">Recettes</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+
+    <!-- corps-->
+    <div class="modeAffichage">
+        <!--Introduction-->
+        <div id="intro">
+            <a href="#introInfoIg">
+                <nav id="introInfoIg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Introduction</h4>
+                </nav>
+            </a>
+            <div class="exemple">
+                <h5>Références</h5>
+                <p>
+                    <evidence>OpenGl </evidence>est une bibliothéque graphique contenant environ 200 fonctions. <br />
+                    Site de référence : <a href="https://www.opengl.org/">https://www.opengl.org/</a> <br />
+                    Manuel des fonctions : <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl4/">https://www.khronos.org/registry/OpenGL-Refpages/gl4/</a>
+                </p>
+                <p>
+                    <evidence>GLUT </evidence> (GL Utility Toolkit) est une bibliothéque graphique. On l'utilisera pour faire l'intereface, les évènements clavier et souris.
+                    <br />
+                    Site de référence : <span>
+                        <a href="https://www.opengl.org/documentation/specs/glut/spec3/spec3.html">https://www.opengl.org/documentation/specs/glut/spec3/spec3.html</a>
+                    </span>
+                </p>
+                <p>
+                    <evidence>GLU </evidence>est une autre bibliothéque pour orienter la caméra.
+                </p>
+            </div>
+            <div class="cours">
+                <h5>Installation sous Windows</h5>
+                <ul>
+                    <li>
+                        Téléchargez gcc avec MinGW et l'installer : <a href="https://sourceforge.net/projects/mingw/">https://sourceforge.net/projects/mingw/</a>
+                    </li>
+                    <li>
+                        Placez-vous dans le répertoire <b>\MinGW\bin</b> et lancer la commande mingw-get install gcc
+                    </li>
+                    <li>Ajouter l'adresse MinGW/bin au chemin PATH</li>
+                    <li>
+                        Téléchargez le fichier <b>GLUT-MinGW-3.7.6-6.mp.zip </b>à l’url <a href="http://files.transmissionzero.co.uk/software/development/GLUT/">http://files.transmissionzero.co.uk/software/development/GLUT/</a>
+                        et décompactez GLUT pour MinGw.
+                    </li>
+                    <li>
+                        Copiez le fichier <evidence>glut.h</evidence> dans le répertoire \MinGw\include\GL\ et le fichier <evidence>libglut32.a</evidence> dans le répertoire
+                        \MinGw\lib\
+                    </li>
+                    <li>
+                        Copiez le fichier glut32.dll dans le répertoire contenant vos fichier source (ou un répertoire se trouvant
+                        dans le chemin, par exemple le répertoire contenant l’exécutable gcc)
+                    </li>
+                    <li>
+                        Pour compilez le programme utilisez la commande <evidence>gcc test.c -lglut32 -lopengl32</evidence> (pour la partie 2 qui
+                        utilise GLU ajoutez -lGLU).
+                    </li>
+                    <li>
+                        Lancer le programme a.exe. Testez aussi le fichier test2.c qui ouvre deux fenêtres graphique.
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="structure">
+            <a href="#structureInfoIg">
+                <nav id="structureInfoIg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Structure</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Programme simple</h5>
+                <textarea id="progSimple">
+#include "base.c"
+char name[] = "Jooohn"; //Nom de la fenetre 
+char message[200]; //Message fenetre
+
+//Dessin de la fenetre principale
+void description() {
+	glColor3dv(BLEU);
+	glutWireCube(1);
+}
+//Animation de la fenetre principale
+void anime() {
+	if (axe)
+		sprintf(message, "Msg statique : Hello world - Msg dynamique : Axes affiches");
+	else
+		sprintf(message, "Msg statique : Hello world - Msg dynamique : Axes non affiches");
+	glutPostRedisplay();
+}
+void initialisation() {}
+void clavier(unsigned char key) {}
+void redimension(int width, int height) {}
+                </textarea>
+                <script>
+                    var cEditor = CodeMirror.fromTextArea(document.getElementById("progSimple"), {
+                        lineNumbers: true,
+                        matchBrackets: true,
+                        mode: "text/x-c++src"
+                    });
+                    cEditor.setOption("theme", "ambiance");
+                </script>
+                <div class="exemple font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    Le fichier de base.c (~500 lignes de code) donne un cadre permettant de simplifier la programmation OpenGL.
+                    Grâce à cela, on définit les initialisations, les objets à placer dans la fenêtre et les réponses aux event clavier et souris.
+                    <br />
+                </div>
+                <div class="exemple">
+                    Les fonctions <i>description</i> permettent de modéliser les scènes à afficher.
+                    La fonction <i>anime</i> (unique) permet de créer un animation des scènes modélisées.
+                    Par défaut, on effectue les rotations des objets de la scène autour de trois axes
+                    à l'aide des variables prédéfinies nommé <i>xr, yr et zr.</i>
+                    <br />
+                    La fonction <i>initialisation</i> (unique) permet d'initialiser les variables éventuelles.
+                </div>
+                <div class="cours">
+                    <h5>Primitives graphiques OpenGL</h5>
+                    Fonction <i>glBegin </i>dan l'API OpenGL : <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/">https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/</a>
+                    Description des primitives :
+                    <ul>
+                        <li><b>GL_POINTS </b> : Traite un point seul. Vertex n définit le point n</li>
+                        <li><b>GL_LINES </b> : Traite une ligne. Sommets 2 ⁢ n - 1 et 2 ⁢ n définissent la ligne n.</li>
+                        <li><b>GL_LINE_STRIP </b> : Dessine un groupe de lignes connectées. Sommets n et n + 1 définissent la ligne n.</li>
+                        <li><b>GL_LINE_LOOP </b> : Dessine un groupe de lignes connectées en boucle. Sommets n et n + 1 définissent la ligne n.</li>
+                        <li><b>GL_TRIANGLES </b> : Traite chaque triplet de sommets comme un triangle indépendant. Sommets 3 ⁢ n - 2 , 3 ⁢ n - 1 , et 3 ⁢ n définissent le triangle n.</li>
+                        <li><b>GL_TRIANGLE_STRIP </b> : Dessine un groupe de triangles connectés. Pour chaque triangle, sommets n, n + 1 , and n + 2 définissent le triangle n.</li>
+                        <li><b>GL_TRIANGLES </b> : Traite chaque triplet de sommets comme un triangle indépendant. Sommets 1 , n + 1 , and n + 2 définissent le triangle n. </li>
+                        <li><b>GL_QUADS </b> : Traite chaque groupe de 4 sommets comme un quadrilatère indépendant.  Sommets 4 ⁢ n - 3 , 4 ⁢ n - 2 , 4 ⁢ n - 1 , et 4 ⁢ n définissent la quadrilatère n. </li>
+                        <li><b>GL_QUAD_STRIP </b> : Dessine chaque groupe de quadrilatères connectés.  Sommets 2 ⁢ n - 1 , 2 ⁢ n , 2 ⁢ n + 2 , et 2 ⁢ n + 1 définissent les quadrilatères n. </li>
+                        <li><b>GL_POLYGON </b> : Dessine une forme, un polygone convexe.  Sommets 1 à N pour définir le polygone. </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>actualiserModeAffichage();</script>
+    <!--Optional JavaScript -->
+    <!--jQuery first, then Popper.js, then Bootstrap JS -->
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

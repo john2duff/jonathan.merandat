@@ -1,0 +1,73 @@
+/*app jeu casse tete chinois*/
+#divCasseTeteChinois {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+.divJeuCasseTeteChinois {
+    padding: 5px;
+    margin: 20px;
+    border: 3px solid black;
+}
+
+.niveauJeuCasseTete {
+    text-align: center;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.divJeuCasseTeteChinoisEnglobe {
+    display: flex;
+    flex-direction: column;
+}
+
+.elementJeuCasseTeteChinois {
+    position: relative;
+    /*border : 1px solid black;*/
+    /*margin: 2px;*/
+}
+
+.elementJeuCasseTeteEnglobant {
+    /*padding: 5px;*/
+    position: relative;
+}
+
+.elementJeuCasseTeteEnglobant3 {
+    border: 1px solid black;
+    height: -webkit-fill-available;
+}
+
+.rondInterieurCasseTete {
+    position: absolute;
+    border-radius: 50%;
+    height: 30px;
+    width: 30px;
+    margin-left: -15px;
+    left: 50%;
+    top: 50%;
+    margin-top: -15px;
+    border: 2px solid black;
+    background-color: maroon;
+}
+
+.elementJeuCasseTeteChinois {
+    height: 100%;
+}
+
+#elementJeuCasseTeteChinois0 {
+    background-color: gray;
+}
+
+.elementJeuCasseTeteChinois1, .elementJeuCasseTeteChinois3, .elementJeuCasseTeteChinois5, .elementJeuCasseTeteChinois7, .elementJeuCasseTeteChinois9 {
+    background-color: green;
+}
+
+.elementJeuCasseTeteChinois2, .elementJeuCasseTeteChinois4, .elementJeuCasseTeteChinois6, .elementJeuCasseTeteChinois8 {
+    background-color: red;
+}
+
+.elementJeuCasseTeteChinois10 {
+    background-color: rgb(255, 244, 85);
+}

@@ -1,0 +1,613 @@
+﻿<!doctype html>
+<html lang="fr">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Style CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/commonFonction.js"></script>
+
+    <title>Evaluation des programmes</title>
+
+</head>
+
+<body>
+    <!--header -->
+    <div id="header" class="modeAffichage">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">
+                <img id="photoCv" src="img/photoCv.jpg" />
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a id="buttonIndex" class="nav-link" href="index.html">Accueil<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item dropdown active">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Informatique
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="InfoEvaluationDesProgrammes.html">Evaluation des programmes</a>
+                            <a class="dropdown-item" href="InfoCyberSecurite.html">Cyber Sécurité</a>
+                            <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
+                            <a class="dropdown-item" href="InfoConversion.html">Convertisseurs</a>
+                            <a class="dropdown-item" href="InfoUnicode.html">Unicode</a>
+                            <a class="dropdown-item" href="InfoTools.html">Outils</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Casse-têtes
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="rubiksCube.html">Rubik's Cube</a>
+                            <a class="dropdown-item" href="casseTeteChinois.html">Casse tête chinois</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a id="buttonRecetteVorwerk" class="nav-link" href="recetteVorwerk.html">Recettes</a>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!--<div id="navigationSpy" class="btn-group dropleft sticky-top">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            ...
+        </button>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#intro">Introduction</a>
+            <a class="dropdown-item" href="#machineTuring">Machine de Turing</a>
+            <a class="dropdown-item" href="#variationTuring">Variations Turing</a>
+        </div>
+    </div>
+        -->
+    <!--
+        <div id="navigationSpy" class="btn-group-vertical dropleft navigationOver">
+        <button type="button" class="btn btn-secondary" style="margin: 1px;">&#129153;</button>
+        <button style="margin: 1px;" class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            ...
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" >Introduction
+                <div id="list-example" class="list-group">
+                    <a class="list-group-item list-group-item-action" href="#intro">Item 1</a>
+                    <a class="list-group-item list-group-item-action" href="#list-item-2">Item2</a>
+                    <a class="list-group-item list-group-item-action" href="#list-item-3">Item 3</a>
+                    <a class="list-group-item list-group-item-action" href="#list-item-4">Item 4</a>
+                </div>
+            </a>
+            <a class="dropdown-item" href="#intro">Introduction</a>
+            <a class="dropdown-item" href="#machineTuring">Machine de Turing</a>
+            <a class="dropdown-item" href="#variationTuring">Variations Turing</a>
+        </div>
+        <button style="margin: 1px;" type="button" class="btn btn-secondary">&#129155;</button>
+    </div>
+    -->
+    <!-- corps-->
+    <div class="modeAffichage">
+
+        <!--Introduction-->
+        <div id="intro">
+            <a href="#introInfoEvalProg">
+                <nav id="introInfoEvalProg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Introduction</h4>
+                </nav>
+            </a>
+            <div class="cours">Un <b>problème </b>en informatique est constitué de données sous une certaine forme et d'une question portant sur ces données.</div>
+            <div class="exemple">
+                <p><i>Exemple d'un problème </i>: </p>
+                Données : 250 gr. de farine, 0.5 litre de lait, 2 oeufs, 2 gr. de sel. <br />
+                Question : Comment faire une pâte à crêpes ? <br />
+            </div>
+            <div class="cours">Un <b>algorithme </b>est une méthode indiquant sans ambiguïté des actions mécaniques à effectuer pour trouver la réponse à un problème.</div>
+            <div class="exemple">
+                <p><i>Algorithme pour le problème 1 : </i></p>
+                <ol>
+                    <li>Mettre la farine dans un saladier.</li>
+                    <li>Faire un puits.</li>
+                    <li>Y casser les oeufs entiers.</li>
+                    <li>Ajouter l'huile, le sel et 10cl. de lait.</li>
+                    <li>Ajouter l'huile, le sel et 10cl. de lait.</li>
+                    <li>Battre énergiquement la pâte avec une cuillière.</li>
+                    <li>Mouiller progressivement avec le reste de lait.</li>
+                    <li>Laisser reposer une heure.</li>
+                </ol>
+            </div>
+            <div class="cours">
+                <h5>Existe-t-il un algorithme pour chaque problème ?</h5>
+                <div>Non, certains problèmes ne peuvent être résolus par aucun algorithme.</div>
+            </div>
+            <div class="exemple font-italic">
+                <img class="logoInfo" src="img/logo-info.png" height="25" />
+                Heureusement pour la Française des jeux qu'il n'existe pas un algorithme qui permette de trouver les numéros gagnants du prochain tirage!
+            </div>
+            <div class="cours">
+                <p>Un problème pour lequel aucun algorithme n'existe est dit <b>indécidable.</b></p>
+                <div>Un algorithme peut exister mais <b>n'est pas forcément utilisable.</b></div>
+            </div>
+            <div class="exemple">
+                <p><i>Exemple d'un problème </i>: </p>
+                Un puzzle de 25 cartes (carré de 5x5). Si l'on doit tester toutes les combinaisons, cela fait 25! combinaisons différentes.
+                <br /> 25! = 15 511 210 043 330 985 984 000 000 ---> ce qui fait beaucoup de possibilités. <br />
+                Un ordinateur qui vérifierait 1 milliard de combinaisons par seconde mettrait 490 millions d'années pour tout tester ! <br />
+                <b>L'algorithme est donc inutilisable.</b>
+            </div>
+            <div class="cours">
+                Deux raisons pour lesquelles un algorithme peut être inutilisable :
+                <ul>
+                    <li>le temps de calcul est trop long.</li>
+                    <li>il utilise trop de place mémoire.</li>
+                </ul>
+                <p>S'il existe un algorithme utilisable alors le problème est <b>traitable.</b></p>
+                <h5>Complexité</h5>
+                La complexité correspond à deux valeurs :
+                <ul>
+                    <li>son temps d'exécution</li>
+                    <li>la place mémoire utilisée</li>
+                </ul>
+                <b>L'algorithmique</b> est l'étude des méthodes pour améliorer la complexité d'un algorithme.
+            </div>
+        </div>
+
+        <!--Machine de Turing-->
+        <div id="machineTuring">
+            <a href="#machineInfoEvalProg">
+                <nav id="machineInfoEvalProg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Machine de Turing</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Alphabet, mot, langage</h5>
+                Un <b>alphabet </b>désigne un ensemble fini de symboles. <br />
+                Un <b>mot </b>d'un alphabet est une suite finie de symbole <i>(pris dans cet alphabet)</i>. <br />
+                Un <b>langage</b> est un ensemble de mots.
+            </div>
+            <div class="exemple">
+                <div><i>Exemple :</i> {a, bab} est un langage.</div>
+            </div>
+            <div class="cours">
+                <h5>Présentation</h5>
+                La machine de Turing est une modélisation mathématique très simple, mais très puissante, du fonctionnement d'un ordinateur. <br />
+                <ul>
+                    <li>La <b>partie de contrôle </b>représente le microprocesseur (composé d'un nombre fini d'états). </li>
+                    <li>Le <b>ruban </b>représente la mémoire de l'ordinateur (infini). </li>
+                    <li>La <b>tête de lecture </b>est le bus qui relie le microprocesseur et la mémoire.</li>
+                </ul>
+            </div>
+            <div class="exemple">
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing1.png" width="100%" class="figure-img img-fluid rounded" alt="Machine de Turing au cours d'un calcul.'">
+                    <figcaption class="figure-caption text-center">Machine de Turing au cours d'un calcul.</figcaption>
+                </figure>
+            </div>
+            <div class="cours">
+                <h5>Définition formelle</h5>
+                Une machine de Turing M est un septuplet <evidence>(<i>Q, q0, F, 	&#0915;, B, &#0931;, &#0948;   </i>)</evidence>
+                <ul>
+                    <li><i>Q</i> est l'ensemble fini d'états du contrôle</li>
+                    <li><i>q0</i> est l'état initial</li>
+                    <li><i>F &#8838; Q</i> est l'ensemble des états finaux</li>
+                    <li><i>&#0915;</i> est l'alphabet du ruban</li>
+                    <li><i>B &#1013; &#0915;</i> est un symbole spécial associé à la case vide</li>
+                    <li><i>&#0931; &#8838; (&#0915;\{B})</i> est l'ensemble des symboles avec lesquels les mots fournis en entrée à la machine sont exprimés</li>
+                    <li><i>&#0948;</i> est la fonction de transition de <i>Q x &#0915; &#8594; Q x &#0915; x {G,D}  </i> </li>
+                </ul>
+            </div>
+            <div class="exemple">
+                <p><i>Exemple : </i>: </p>
+                <p> M = (Q, q0, {qf}, {1,B}, B, {1}, &#0948;) où Q={q0, qi, qp, qf}</p>
+                <p>&#0948; est défini par le tableau suivant :</p>
+                <center>
+                    <figure class="figure">
+                        <table class="table table-active table-sm" style="width:250px;">
+                            <thead class="text-center">
+                                <tr>
+                                    <th scope="col">&#0948;</th>
+                                    <th scope="col">1</th>
+                                    <th scope="col">B</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <tr>
+                                    <th scope="row">q&#8320;</th>
+                                    <td>(q<sub>i</sub>, 1, D)</td>
+                                    <td>(q&fnof;, B, G)</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">q<sub>i</sub></th>
+                                    <td>(q<sub>p</sub>, 1, D)</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">q<sub>p</sub></th>
+                                    <td>(q<sub>i</sub>, 1, D)</td>
+                                    <td>(q&fnof;, B, G)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <figcaption class="figure-caption text-center">
+                            La fonction de transition est représentée par un tableau.<br />
+                            Il y a une ligne par état de contrôle (q0, qi, qp, qf) et une colonne par symbole de l'alphabet du ruban (1, B). <br />
+                            La fonction n'est pas totale car elle n'est pas définie partout (pour qi et B).
+                        </figcaption>
+                    </figure>
+                </center>
+            </div>
+            <div class="cours">
+                <h5>Configurations d'une machine de Turing</h5>
+                La configuration d'une machine de Turing est l'état global de la machine à un instant donné.<br />
+                Elle comprend :
+                <ul class="tiret">
+                    <li>l'état de contrôle qui est un élement de <i>Q</i>.</li>
+                    <li>le contenu de la bande.</li>
+                    <li>la position de la tête de lecture sur la bande.</li>
+                </ul>
+            </div>
+            <div class="exemple">
+                <p>
+                    Si la machine se trouve dans un état q &#8712; Q, la<evidence> <b>configuration</b> est écrite &alpha;<i>q</i>&beta;. </evidence><br />
+                    Avec &alpha; et &beta; &#8712; &lceil;* où &alpha; est le contenu de la bande strictement à gauche de la tête de lecture et &beta; est le contenu à droite de la tête de lecture.
+                </p>
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing2.png" width="100%" class="figure-img img-fluid rounded" alt="Configuration">
+                    <figcaption class="figure-caption text-center">Configuration de la machine de Turing.</figcaption>
+                </figure>
+                <p>
+                    Si la machine se trouve dans l'état initial, la <evidence><b>configuration intiale</b> s'écrit donc q0 &beta;.</evidence>
+                    Où q0 est l'état initial et &beta; &#8712; &sum;* est la donnée initiale.
+                </p>
+            </div>
+            <div class="cours">
+                <h5>Calculs d'une machine de Turing</h5>
+                <p>
+                    Une étape de calcul consiste à passer d'une configuration à une autre en appliquant une des transitions de la fonction de transition &delta;.
+                    Une étape de calcul comprend trois étapes :
+                    <ol>
+                        <li>changer l'état de contrôle</li>
+                        <li>écrire un symbole à la place du symbole sous la tête de lecture</li>
+                        <li>déplacer sa tête de lecture d'une position vers la gauche ou la droite</li>
+                    </ol>
+                </p>
+            </div>
+            <div class="exemple">
+                <p><i>Exemple d'une transition: </i>: </p>
+                <evidence>(q, a) &#8594; (q', b, x)</evidence>
+                Peut être appliquée si la machine se trouve dans l'état q et si le symbole sous la tête de lecture est a.<br />
+                Après l'application de cette transition, la machine se trouve dans l'état q',
+                le symbole a est remplacé sur la bande par b et la tête de lecture se déplace vers la gauche ou la droite en fonction de la valeur de x.
+            </div>
+            <div class="cours">
+                On note c &#8866;M c' une étape de calcul qui fait passer la machine d'une configuration c à une configuration c' en appliquant une transition de &delta;.
+                Formellement, pour une machine de Turing M, la <b>relation de transition</b> &#8866;M sur les configurations de M est définie par :
+                <ul style="list-style-type:disc;">
+                    <li>&alpha;qa&beta;' &#8866;M &alpha;bq'&beta;' si (q, a) &#8594; (q', b, D) </li>
+                    <li>&alpha;'a&#8342;&#8331;&#8321;qa&beta; &#8866;M &alpha;'q'a&#8342;&#8331;&#8321;b&beta; si (q, a) &#8594 (q', b, G) </li>
+                </ul>
+            </div>
+            <div class="exemple">
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing3.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <figcaption class="figure-caption text-center">Configuration de la machine de Turing avant la transition.</figcaption>
+                </figure>
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing4.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <figcaption class="figure-caption text-center">Configuration de la machine de Turing après la transition si (q, a) &#8594; (q', b, D).</figcaption>
+                </figure>
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing5.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <figcaption class="figure-caption text-center">Configuration de la machine de Turing après la transition si (q, a) &#8594 (q', b, G).</figcaption>
+                </figure>
+                <p><i>Exemples de calcul : </i>: </p>
+                <p>
+                    Pour M = (Q, q0, {q&fnof;}, {1,B}, B, {1}, &delta;)
+                    où Q = {q0, qi, qp, q&fnof;} et &delta; définie par le tableau suivant :
+                </p>
+                <center>
+                    <figure class="figure">
+                        <div class="table-responsive">
+                            <table class="table table-active table-sm">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th scope="col">&#0948;</th>
+                                        <th scope="col">1</th>
+                                        <th scope="col">B</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                    <tr>
+                                        <th scope="row">q&#8320;</th>
+                                        <td>(q<sub>i</sub>, 1, D)</td>
+                                        <td>(q&fnof;, B, G)</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">q<sub>i</sub></th>
+                                        <td>(q<sub>p</sub>, 1, D)</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">q<sub>p</sub></th>
+                                        <td>(q<sub>i</sub>, 1, D)</td>
+                                        <td>(q&fnof;, B, G)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <figcaption class="figure-caption text-center"></figcaption>
+                    </figure>
+                </center>
+                <div class="cours">
+                    <h5>Le calcul de M sur 111 </h5>
+                    <evidence>
+                        q&#8320;111 &#8866<sub>M</sub> 1q<sub>i</sub>11 &#8866<sub>M</sub> 11q<sub>p</sub>1 &#8866<sub>M</sub> 111q<sub>i</sub>
+                    </evidence>
+                    <div class="exemple font-italic">
+                        <figure class="figure" style="width:100%;">
+                            <img src="img/fonc-turing6.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                            <figcaption class="figure-caption text-center">
+                                Calcul de M sur 111
+                            </figcaption>
+                        </figure>
+                        <img class="logoInfo" src="img/logo-info.png" height="25" />
+                        Il s'arrête à l'état q<sub>i</sub> qui est non-final.
+                    </div>
+                </div>
+                <div class="cours">
+                    <h5>Le calcul de M sur 1111 </h5>
+                    <evidence>
+                        q<sub>0</sub>1111 &#8866<sub>M</sub>
+                        1q<sub>i</sub>111 &#8866<sub>M</sub>
+                        11q<sub>p</sub>11 &#8866<sub>M</sub>
+                        111q<sub>i</sub>1 &#8866<sub>M</sub>
+                        1111q<sub>p</sub> &#8866<sub>M</sub>
+                        111q<sub>f</sub>1
+                    </evidence>
+                    <div class="exemple font-italic">
+                        <figure class="figure" style="width:100%;">
+                            <img src="img/fonc-turing7.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                            <figcaption class="figure-caption text-center">
+                                Calcul de M sur 1111
+                            </figcaption>
+                        </figure>
+                        <img class="logoInfo" src="img/logo-info.png" height="25" />
+                        Il s'arrête à l'état q<sub>f</sub> qui est un état final.
+                    </div>
+                </div>
+                <div class="exemple">
+                    <p><evidence>q<sub>i</sub> </evidence>  &#8658;  le nombre de 1 à gauche de la tête de lecture est <evidence>impair</evidence></p>
+                    <p><evidence>q<sub>p</sub> </evidence>  &#8658;  le nombre de 1 à gauche de la tête de lecture est <evidence>pair</evidence></p>
+                    <p>
+                        <evidence>q<sub>f</sub> </evidence>  &#8658;  si elle pointe sur :
+                        <ul class="tiret">
+                            <li>un 1, qu'il y a un nombre impair de 1 à sa gauche et un B à sa droite</li>
+                            <li class="no-tiret"><b>ou</b></li>
+                            <li>sur B et qu'il n'y a que des B sur le ruban</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+            <div class="cours">
+                <h5>Mots et langages reconnus</h5>
+                <p>
+                    Pour un mot &omega; &#8712; &sum;*, trois situations peuvent se produire lors du calcul de M sur &omega;
+                    <ul>
+                        <li>le calcul s'arrête dans un état final &#8658; &omega; est <evidence>reconnu (accepté)</evidence> par M.</li>
+                        <li>le calcul s'arrêt dans un état non final &#8658; &omega; est <evidence>refusé</evidence> par M.</li>
+                        <li>le calcul ne s'arrête pas.</li>
+                    </ul>
+                </p>
+            </div>
+            <div class="cours">
+                <h5>Langages et fonctions décidables</h5>
+                <p>
+                    Le <evidence>langage est décidable</evidence> s'il existe une machine de Turing M telle que L=L(M) et si M s'arrête sur tous les mot &omega; &#8712; &sum;*.
+                    Une <evidence>fonction est décidable</evidence> s'il existe une machine de Turing qui la décide.
+                </p>
+            </div>
+            <div class="exemple">
+                c
+                soit M = (Q, q<sub>0</sub>, {q<sub>f</sub>}, {0,1,B}, B, {0,1}, &delta;)
+                où Q = {q<sub>0</sub>, q<sub>r</sub>, q<sub>f</sub>}
+                et &delta; est défini par le tableau suivant :
+                <center>
+                    <figure class="figure">
+                        <div class="table-responsive">
+                            <table class="table table-active table-sm">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th scope="col">&#0948;</th>
+                                        <th scope="col">0</th>
+                                        <th scope="col">1</th>
+                                        <th scope="col">B</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                    <tr>
+                                        <th scope="row">q<sub>0</sub></th>
+                                        <td>(q<sub>0</sub>, 0, D)</td>
+                                        <td>(q<sub>0</sub>, 1, D)</td>
+                                        <td>(q<sub>r</sub>, B, G)</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">q<sub>r</sub></th>
+                                        <td>(q<sub>f</sub>, 1, G)</td>
+                                        <td>(q<sub>r</sub>, 0, G)</td>
+                                        <td>(q<sub>f</sub>, 1, D)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <figcaption class="figure-caption text-center">
+                            M décide la fonction qui ajoute 1 à un nombre écrit en binaire.
+                        </figcaption>
+                    </figure>
+                </center>
+                <div class="cours">
+                    <h5>Calcul sur 101 </h5>
+                    <evidence>q<sub>0</sub>101 &#8866; 1q<sub>0</sub>01 &#8866; 10q<sub>0</sub>1 &#8866; 101q<sub>0</sub>1 &#8866; 10q<sub>r</sub>1 &#8866; 1q<sub>r</sub>00 &#8866; q<sub>f</sub>110</evidence>
+                </div>
+                <div class="cours">
+                    <h5>Calcul sur 11 </h5>
+                    <evidence>q<sub>0</sub>11 &#8866; 1q<sub>0</sub>1 &#8866; 11q<sub>0</sub> &#8866; 1q<sub>r</sub>1 &#8866; q<sub>r</sub>10 &#8866; q<sub>r</sub>B00 &#8866; 1q<sub>f</sub>00</evidence>
+                </div>
+            </div>
+        </div>
+
+        <!--Variations machine  de Turing-->
+        <div id="variationTuring">
+            <a href="#variationInfoEvalProg">
+                <nav id="variationInfoEvalProg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Variations sur la machine de Turing</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Surplace</h5>
+                <p>Il est possible de rester à la même position à chaque pas de calcul en rajoutant R à la fonction de transition &delta;.</p>
+                &delta; : <i>Q x &#0915; &#8594; Q x &#0915; x {G,D,R}  </i>
+            </div>
+            <div class="exemple">
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing8.png" width="100%" class="figure-img img-fluid rounded" alt="Pas de calcul">
+                    <figcaption class="figure-caption text-center">Pas de calcul sir (q, a) &#8594;<sup>&delta;</sup> (q', b, R).</figcaption>
+                </figure>
+                <div class="font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    La possibilité de faire du sur-place sera utile dans le cas d'une machine de Turing à plusieurs têtes de lecture et plusieurs rubans.
+                </div>
+            </div>
+            <div class="cours">
+                <p>Voici un modèle avec plusieurs bandes disjointes et une tête de lecture par ruban.</p>
+                <figure class="figure" style="width:100%;">
+                    <img src="img/fonc-turing9.png" width="100%" class="figure-img img-fluid rounded" alt="Pas de calcul">
+                    <figcaption class="figure-caption text-center">Configuration d'une machine à plusieurs rubans.</figcaption>
+                </figure>
+                <p>La fonction de transition est la seule partie qui est modifiée. Tous les changements d'état se font en simultané.</p>
+            </div>
+            <div class="exemple">
+                <p><i>Exemple du palindrome</i></p>
+                <div class="font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    Un palindrome est un mot qui se lit de la même façon de gauche à droite et de droite à gauche.
+                </div>
+                <p>
+                    La machine de Turing M = (Q, q<sub>0</sub>, q<sub>f</sub>, {a,b,B}, B, {a,b}, &delta;) <br />
+                    où Q = {q<sub>0</sub>, q<sub>c</sub>, q<sub>g</sub>, q<sub>v</sub>, q<sub>f</sub>} <br />
+                    et &delta; est définie par le tableau suivant :
+                    <div class="text-center">
+                        <button onclick="setSticky(this);" type="button" class="btn btn-secondary stickyButton" data-toggle="button" aria-pressed="false" autocomplete="off">
+                            Sticky off
+                        </button>
+                        <div>
+                            <center>
+                                <figure class="figure">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm" style="background-color:#c8c8c8;">
+                                            <thead class="text-center">
+                                                <tr>
+                                                    <th scope="col">&#0948;</th>
+                                                    <th scope="col">a,a</th>
+                                                    <th scope="col">b,b</th>
+                                                    <th scope="col">B,B</th>
+                                                    <th scope="col">a,B</th>
+                                                    <th scope="col">b,B</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-center">
+                                                <tr>
+                                                    <th scope="row">q<sub>0</sub></th>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>(q<sub>f</sub>, B, B, D, D)</td>
+                                                    <td>(q<sub>c</sub>, a, a, D, D)</td>
+                                                    <td>(q<sub>c</sub>, b, b, D, D)</td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">q<sub>c</sub></th>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>(q<sub>g</sub>, B, B, G, R)</td>
+                                                    <td>(q<sub>c</sub>, a, a, D, D)</td>
+                                                    <td>(q<sub>c</sub>, b, b, D, D)</td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">q<sub>g</sub></th>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>(q<sub>v</sub>, B, B, D, G)</td>
+                                                    <td>(q<sub>g</sub>, a, B, G, R)</td>
+                                                    <td>(q<sub>g</sub>, b, B, G, R)</td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">q<sub>v</sub></th>
+                                                    <td>(q<sub>v</sub>, a, a, D, G)</td>
+                                                    <td>(q<sub>v</sub>, b, b, D, G)</td>
+                                                    <td>(q<sub>f</sub>, B, B, R, R)</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <figcaption class="figure-caption text-center">
+
+                                    </figcaption>
+                                </figure>
+                            </center>
+                        </div>
+                    </div>
+
+                    décide l'ensemble des palindromes sur l'alphabet {a,b}.
+                </p>
+                <p><i>Exemple pour le mot aba :</i></p>
+                <center>
+                    <img src="img/fonc-turing10.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing11.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing12.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing13.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing14.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing15.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing16.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing17.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing18.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing19.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing20.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing21.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing22.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <div style="font-size:30px;">&#129155;</div>
+                    <img src="img/fonc-turing23.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                </center>
+            </div>
+        </div>
+    </div>
+
+    <script>actualiserModeAffichage();</script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

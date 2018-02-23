@@ -1,0 +1,207 @@
+﻿<!doctype html>
+<html lang="fr">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Style CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/casseTete.css" />
+    <script src="js/casseTete.js"></script>
+    <script src="js/commonFonction.js"></script>
+
+    <title>Rubik's Cube</title>
+
+</head>
+
+<body>
+    <!--header -->
+    <div class="modeAffichage">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">
+                <img id="photoCv" src="img/photoCv.jpg" />
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a id="buttonIndex" class="nav-link" href="index.html">Accueil<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Informatique
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="InfoEvaluationDesProgrammes.html">Evaluation des programmes</a>
+                            <a class="dropdown-item" href="InfoCyberSecurite.html">Cyber Sécurité</a>
+                            <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
+                            <a class="dropdown-item" href="InfoConversion.html">Convertisseurs</a>
+                            <a class="dropdown-item" href="InfoUnicode.html">Unicode</a>
+                            <a class="dropdown-item" href="InfoTools.html">Outils</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown active">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Casse-têtes
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="rubiksCube.html">Rubik's Cube</a>
+                            <a class="dropdown-item" href="casseTeteChinois.html">Casse tête chinois</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a id="buttonRecetteVorwerk" class="nav-link" href="recetteVorwerk.html">Recettes</a>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- body-->
+    <div class="modeAffichage">
+        <div id="notations">
+            <a href="#notations">
+                <nav class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Notations</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <p>L'apostrophe après la lettre signifie que l'<b>on inverse le sens de rotation.</b></p>
+                <h5>Les mouvements en majuscule</h5>
+                <ul>
+                    <li>U : Up</li>
+                    <li>D : Down</li>
+                    <li>R : Right</li>
+                    <li>L : Left</li>
+                    <li>F : Front</li>
+                    <li>B : Back</li>
+                </ul>
+                <h5>Les mouvements en minuscule</h5>
+                <p>Les lettres en minuscule correspondent au mouvement de base + la tranche juste à côté de celle-ci.</p>
+                <h5>Les mouvements en tranche central</h5>
+                <ul>
+                    <li>M : Middle <i>(tranche du milieu vertical et face à nous)</i></li>
+                    <li>E : Equator<i>(tranche du milieu horizontale et face à nous)</i></li>
+                    <li>S : Standing <i>(tranche du milieu parallèle à nous)</i></li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="modeAffichage">
+        <div id="3x3x3">
+            <a href="#3x3x3">
+                <nav class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">3 x 3 x 3</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Méthode de Fridrich</h5>
+                <h6>1. Faire la croix</h6>
+                <h6>2. Finir les deux premiers étages</h6>
+                <h6>3. Orienter la dernière face</h6>
+                <div class="exemple">
+                    <h7>Pour les arêtes</h7>
+                    <div class="cours">
+                        <div class="d-flex flex-row justify-content-around flex-wrap">
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete1.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">FRUR'U'F'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete2.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">FURU'R'F'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete3.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">b'R'U'RUb</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete4.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">fRUR'U'f'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/arete5.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">RU2'R2'FRF'U2R'FRF'</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                    <h7>Pour les coins</h7>
+                    <div class="cours">
+                        <div class="d-flex flex-row justify-content-around flex-wrap">
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin1.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">RUR'URU2'R'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin2.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">RU2'R'U'RU'R'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin3.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">RUR'URU'R'URU2'R'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin4.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">RU2'R2'U'R2U'R2'U2R</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin5.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">l'URD'R'U'RDx'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin6.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">l'U'LURU'r'F</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/coin7.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">R2D'RU2'R'DRU2'R</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+
+                <h6>4. Placer les éléments de la dernière face</h6>
+                <div class="exemple">
+                    <div class="cours">
+                        <div class="d-flex flex-row justify-content-around flex-wrap">
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/h.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">M2'UM2'U2M2'UM2'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/z.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">U'M'UM2'UM2'UM'U2M2'</figcaption>
+                            </figure>
+                            <figure class="figure" style="text-align:center;">
+                                <img src="img/u.png" class="figure-img img-fluid rounded" alt="">
+                                <figcaption class="figure-caption" style="color:black;text-align:center;font-size:1.4em;">M2'UM'U2'MUM2'</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--footer-->
+    <div class="modeAffichage">
+        <center><footer class="blockquote-footer">Sources : <a href="https://www.francocube.com/">Francocube </a></footer></center>
+    </div>
+
+
+    <script>actualiserModeAffichage();</script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
