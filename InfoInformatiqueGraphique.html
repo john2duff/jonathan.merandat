@@ -277,74 +277,189 @@ void redimension(int width, int height) {}
             </div>
         </div>
 
-        <div id="vecteurs">
-            <a href="#vecteursInfoIg">
-                <nav id="vecteursInfoIg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
-                    <h4 class="titre">Vecteurs</h4>
+        <div id="matrices">
+            <a href="#matricesInfoIg">
+                <nav id="matricesInfoIg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Matrices</h4>
                 </nav>
             </a>
             <div class="cours">
-                <h5>Addition de vecteurs</h5>
+                <h5>Transposée</h5>
                 <p>
-                    <img src="img/vecteur1.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice1.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
                 </p>
                 <p>
-                    <img src="img/vecteur2.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                </p>
-                <evidence>Le résultat est une <b>matrice</b>.</evidence>
-            </div>
-            <div class="cours">
-                <h5>Multiplication scalaire</h5>
-                <p>
-                    <img src="img/vecteur3.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                </p>
-                <p>
-                    <img src="img/vecteur4.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice2.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
                 </p>
                 <evidence>Le résultat est une <b>matrice</b>.</evidence>
+                <div class="exemple">
+                    Exemple :
+                    <img src="img/matrice3.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
             </div>
             <div class="cours">
-                <h5>Produit scalaire</h5>
+                <h5>Addition matricielle</h5>
                 <p>
-                    <img src="img/vecteur5.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice4.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
                 </p>
                 <p>
-                    <img src="img/vecteur6.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                </p>
-                <evidence>Le résultat est un <b>nombre</b>.</evidence>
-            </div>
-            <div class="cours">
-                <h5>Distance</h5>
-                La distance, dans le plan, entre le point P=(x,y) et l'origine (0,0) est donnée par :
-                <p>
-                    <img src="img/vecteur7.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                </p>
-                <evidence>Le résultat est un <b>nombre</b>.</evidence>
-            </div>
-            <div class="cours">
-                <h5>Longueur</h5>
-                La longueur d'un vecteur :
-                <p>
-                    <img src="img/vecteur8.png" style="max-width:100px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                </p>
-                est donné par sa norme :
-                <p>
-                    <img src="img/vecteur9.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                </p>
-                <evidence>Le résultat est un <b>nombre</b>.</evidence>
-            </div>
-            <div class="cours">
-                <h5>Produit vectoriel</h5>
-                <p>
-                    <img src="img/vecteur10.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                </p>
-                <p>
-                    <img src="img/vecteur11.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice5.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
                 </p>
                 <evidence>Le résultat est une <b>matrice</b>.</evidence>
-                Le produit vectoriel de deux vecteurs donne un troisième <evidence>vecteur perpendiculaire aux deux autres.</evidence>
+                <div class="exemple">
+                    Exemple :
+                    <img src="img/matrice6.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+            </div>
+            <div class="cours">
+                <h5>Produit matriciel</h5>
+                <p>
+                    <img src="img/matrice7.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </p>
+                <p>
+                    <img src="img/matrice8.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </p>
+                <evidence>Le résultat est une <b>matrice</b>.</evidence>
+                <p>
+                    Soit C = A x B : <br />
+                    <ul>
+                        <li>
+                            Si A est un vecteur ligne, alors la résultat sera un vecteur ligne.
+                        </li>
+                        <li>
+                            Si B est un vecteur colonne, alors la résultat sera un vecteur colonne.
+                        </li>
+                    </ul>
+                </p>
+                <div class="exemple">
+                    Exemple :
+                    <img src="img/matrice9.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+            </div>
+
+            <div class="exemple">
+                <div class="cours">
+                    <button onclick="setSticky(this);" type="button" class="btn btn-secondary stickyButton" data-toggle="button" aria-pressed="false" autocomplete="off"></button>
+                    <img src="img/matrice10.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+                <div class="cours">
+                    <button onclick="setSticky(this);" type="button" class="btn btn-secondary stickyButton" data-toggle="button" aria-pressed="false" autocomplete="off"></button>
+                    <img src="img/matrice11.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+                <div class="cours">
+                    <button onclick="setSticky(this);" type="button" class="btn btn-secondary stickyButton" data-toggle="button" aria-pressed="false" autocomplete="off"></button>
+                    <img src="img/matrice12.png" style="max-width:100px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+                <div class="cours">
+                    <button onclick="setSticky(this);" type="button" class="btn btn-secondary stickyButton" data-toggle="button" aria-pressed="false" autocomplete="off"></button>
+                    <img src="img/matrice13.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+                <div class="exemple">
+                    Exemples de calculs :
+                    <img src="img/matrice14.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice15.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice16.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice17.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice18.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/matrice19.png" style="max-width:150px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+            </div>
+
+        </div>
+
+        <div id="courbes">
+            <a href="#courbesInfoIg">
+                <nav id="courbesInfoIg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Courbes et surface</h4>
+                </nav>
+            </a>
+
+            <div class="cours">
+                <h5>Définitions</h5>
+                <p>
+                    Une courbe paramétrique cubique est définie par :
+                </p>
+                <img src="img/courbe1.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <p>
+                    Nous pouvons décomposer Q(t) avec la matrice C et le vecteur ligne T :
+                </p>
+                <img src="img/courbe2.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <p>
+                    On peut décomposer à nouveau la matrice C en deux matrices : M et G
+                </p>
+                <img src="img/courbe3.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <img src="img/courbe4.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+            </div>
+
+            <div class="cours">
+                <h5>Courbe de Bézier</h5>
+                La tangente au point P0 est donnée par le segment P0P1.
+                <p>
+                    <img src="img/courbe5.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </p>
+                Pour raccorder deux courbes de bézier, nous devons vérifier que le segment P2P3 et P3P4 sont parallèles.
+                <p>
+                    <img src="img/courbe6.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </p>
+                <div class="exemple">
+                    <p>
+                        Exemple :
+                        P0 = [0 0 0], P1 = [0 1 0], P2 = [1 1 0], P3 = [1 0 0].
+                    </p>
+                    <img src="img/courbe7.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/courbe8.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/courbe9.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/courbe10.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/courbe11.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/courbe12.png" style="max-width:100px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/courbe13.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+
+                </div>
+            </div>
+
+            <div class="cours">
+                <h5>Surfaces bi-cubiques</h5>
+                <img src="img/surface2.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                Chaque courbe G<sub>i</sub>(t) est controlée par quatre points. Les quatres courbes G<sub>i</sub>(t) sont donc controlées par 16 points P<sub>ij</sub>.
+                <img src="img/surface1.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div class="exemple">
+                    <p>
+                        Exemple d'une surface bi-cubique:
+                    </p>
+                    <img src="img/surface3.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    <p>
+                        La coordonnée y de la courbe est donnée par :
+                    </p>
+                    <img src="img/surface4.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+            </div>
+
+            <div class="cours">
+                <h5>Quadriques</h5>
+                <div class="exemple">
+                <h6><b>Cylindre</b></h6>
+                <img src="img/surface7.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br/>
+                    <img src="img/surface5.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
+                    En coordonnées sphériques :
+                    <img src="img/surface6.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+                <div class="exemple">
+                    <h6><b>Sphère</b></h6>
+                    <img src="img/surface8.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
+                    <img src="img/surface9.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
+                    En coordonnées sphériques :
+                    <img src="img/surface10.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+                <div class="exemple">
+                    <h6><b>Cône de révolution</b></h6>
+                    <img src="img/surface11.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
+                    <img src="img/surface12.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
+                    En coordonnées sphériques :
+                    <img src="img/surface13.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
             </div>
         </div>
+
     </div>
 
 

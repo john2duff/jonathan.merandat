@@ -120,8 +120,13 @@ evidence {
     z-index:99999;
 }
 
-.stickyButton{
-    z-index:99999;
+.stickyButton {
+    position: absolute;
+    z-index: 99999;
+    opacity: 0.2;
+}
+.stickyButton:hover{
+    opacity:1;
 }
 
 .CodeMirror, .CodeMirror-scroll {

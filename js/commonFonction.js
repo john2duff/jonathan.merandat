@@ -30,12 +30,14 @@ var setSticky = function (evt) {
     var position = el.style.position;
     if (position != "sticky" || position == "") {
         el.style.position = "sticky";
-        el.style.top = "0px";
-        evt.textContent = "Sticky on";
+        el.style.backgroundColor = "orange";
+        el.style.top = "40px";
+        evt.textContent = "";
     } else {
         el.style.position = "initial";
+        el.style.backgroundColor = "initial";
         el.style.position = "initial";
-        evt.textContent = "Sticky off";
+        evt.textContent = "";
     }
 }
 
