@@ -437,8 +437,8 @@ void redimension(int width, int height) {}
             <div class="cours">
                 <h5>Quadriques</h5>
                 <div class="exemple">
-                <h6><b>Cylindre</b></h6>
-                <img src="img/surface7.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br/>
+                    <h6><b>Cylindre</b></h6>
+                    <img src="img/surface7.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
                     <img src="img/surface5.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
                     En coordonnées sphériques :
                     <img src="img/surface6.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
@@ -456,6 +456,107 @@ void redimension(int width, int height) {}
                     <img src="img/surface12.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
                     En coordonnées sphériques :
                     <img src="img/surface13.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                </div>
+            </div>
+
+        </div>
+
+        <div id="transfo">
+            <a href="#transfoInfoIg">
+                <nav id="transfoInfoIg" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Transformations géométriques</h4>
+                </nav>
+            </a>
+
+            <div class="cours">
+                <h5>Translation dans le plan</h5>
+                <img src="img/transfo1.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <p>
+                    Pour translater la maison suivant le vecteur de translation T(d<sub>x</sub>, d<sub>y</sub>):
+                </p>
+                <img src="img/transfo2.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+            </div>
+            <div class="cours">
+                <h5>Facteur d'échelle dans le plan</h5>
+                <img src="img/transfo3.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <p>
+                    Pour ajouter un facteur d'échelle suivant la matrice de facteur d'échelle S(S<sub>x</sub>, S<sub>y</sub>): <br />
+                    <img src="img/transfo5.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                </p>
+                <img src="img/transfo4.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+            </div>
+            <div class="cours">
+                <h5>Rotation dans le plan</h5>
+                <img src="img/transfo6.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <img src="img/transfo7.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <img src="img/transfo8.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <p>
+                    Pour appliquer une rotation : <br />
+                    <img src="img/transfo10.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                </p>
+                <img src="img/transfo9.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+            </div>
+            <div class="cours">
+                <h5>Cisaillement dans le plan</h5>
+                <img src="img/transfo11.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <p>
+                    Pour appliquer un cisaillement avec la matrice C(C<sub>x</sub>, C<sub>y</sub>) : <br />
+                    <img src="img/transfo13.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                </p>
+                <img src="img/transfo12.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+            </div>
+            <div class="cours">
+                <h5>Coordonnées homogènes</h5>
+                <p>
+                    Pour faire des transformations, on utilise soit l'addition matricielle soit la multiplication matricielle.
+                    Nous allons voir comment passer par une multiplication matricielle dans tous les cas.
+                </p>
+                <p>
+                    Nous ajoutons une troisième coordonnée nommée W. Un point P = (x, y) est représenté en coordonnée homogène par un vecteur z = (x, y, W).
+                </p>
+                <p>
+                    Deux vecteurs sont identiques s'ils sont multiples l'un de l'autre. <br />
+                    Ex : (2,3,6) et (4,6,12) représentent le même point.
+                </p>
+                <div class="exemple">
+                    <h6>Translation en coordonnées homogènes</h6>
+                    <img src="img/transfo14.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <img src="img/transfo15.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <img src="img/transfo16.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <p>
+                        Idem pour les autres transformations
+                    </p>
+                </div>
+            </div>
+            <div class="cours">
+                <h5>Transformations multiples</h5>
+                <div class="exemple">
+                    <div class="cours">
+                        <h6>Translation suivie d'une rotation</h6>
+                        <img src="img/transfo17.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                        <img src="img/transfo18.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                        <img src="img/transfo19.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                        <p>P2 sera donc égal à : </p>
+                        <img src="img/transfo20.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                        <div class="exemple">
+                            <p>Exemple : </p>
+                            <img src="img/transfo26.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                            <img src="img/transfo21.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                            <img src="img/transfo27.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                            <img src="img/transfo22.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                            <img src="img/transfo23.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                            <img src="img/transfo24.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                            <img src="img/transfo25.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                        </div>
+                    </div>
+                    <div class="cours">
+                        <h6>Rotation suivie d'une translation</h6>
+>
+                        <div class="exemple">
+                            <p>Exemple : </p>
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
