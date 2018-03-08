@@ -101,6 +101,12 @@ evidence {
     width:100%;
 }
 
+.flex-row-vcenter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .conversionBin{
     padding:1em;
 }
