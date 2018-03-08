@@ -376,17 +376,17 @@
             <div class="cours">
                 <h5><evidence>Cross site scripting</evidence><i>(XSS)</i></h5>
                 <img src="img/crossSiteScripting1.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt=""> <br />
-                    Il existe deux types d'attaque XSS :
-                    <ul>
-                        <li>
-                            <b>Stored XSS </b>: le code malicieux est stocké sur le serveur. <br />
-                            <img src="img/crossSiteScripting2.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                        </li>
-                        <li>
-                            <b>Reflected XSS </b>: le code malicieux est réfléchi sur un poste client sans stockage sur le serveur. <br />
-                            <img src="img/crossSiteScripting3.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
-                        </li>
-                    </ul>
+                Il existe deux types d'attaque XSS :
+                <ul>
+                    <li>
+                        <b>Stored XSS </b>: le code malicieux est stocké sur le serveur. <br />
+                        <img src="img/crossSiteScripting2.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    </li>
+                    <li>
+                        <b>Reflected XSS </b>: le code malicieux est réfléchi sur un poste client sans stockage sur le serveur. <br />
+                        <img src="img/crossSiteScripting3.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                    </li>
+                </ul>
                 <div class="exemple">
                     <h5>Mise en oeuvre</h5>
                     Modification d'un lien <br />
@@ -399,7 +399,7 @@
                     <b>Ne pas remonter les données non fiables au navigateur</b>
                     <ol>
                         <li>
-                            Sur le serveur applicatif, <evidence>filtrer les données non fiables</evidence>basées sur le contenu HTML 
+                            Sur le serveur applicatif, <evidence>filtrer les données non fiables</evidence>basées sur le contenu HTML
                             (corps, attribut, Javascript, CSS ou URL)
                         </li>
                         <li>
@@ -430,6 +430,72 @@
                 &#10551; Guide des bonnes pratiques <br />
                 &#10551; Fournit des outils <br />
             </p>
+        </div>
+    </div>
+
+    <div class="modeAffichage">
+        <a href="#analyseInfoCyberSecurite">
+            <nav id="analyseInfoCyberSecurite" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                <h4 class="titre">Analyse de risque de sécurité</h4>
+            </nav>
+        </a>
+        <div class="cours">
+            <h5>Processus de gestion des risques <b>ISO 27005:2011</b></h5>
+            <img src="img/risqueSecu1.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+        </div>
+        <div class="exemple">
+            <h5>Etablissement du contexte</h5>
+            <p>
+                On cherche à établir le contexte externe (environnement culturel, social, politique, les relations avec les parties prenantes, etc...) et
+                interne (l'organisation, les rôles, les capacités en termes de ressources, les normes, etc...)
+            </p>
+            <h5>Appréciation des risques</h5>
+            <p>
+                Souvent réalisé en deux itérations. Une appréciation de haut niveau afin d'identifier les risques majeurs potentiels puis l'analyse plus détaillés de ces risque.
+            </p>
+            <h5>Traitement des risques</h5>
+            <p>
+                Sert à identifier les mesures pour réduire, maintenir, éviter ou transférer les risques.
+            </p>
+            <img src="img/risqueSecu2.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+            <h5>Communication relative aux risques</h5>
+            <p>
+                Il est important de bien communiquer les risques et les enjeux aux parties prenantes afin qu'elle puisse prendre des décisions
+                en connaissance de causes. Il est important que leurs perceptions des risques ainsi que leurs bénéfices soient bien documentée.
+            </p>
+            <h5>Surveillance et revue des risques</h5>
+            Les risques ne sont pas statiques, une surveillance constante est donc nécessaire concernant les points suivants :
+            <ul>
+                <li>
+                    les nouveaux actifs ayant été inclus dans la gestion des risques
+                </li>
+                <li>
+                    les modifications des valeurs des actifs
+                </li>
+                <li>
+                    les nouvelles menaces susceptibles d'être actives.
+                </li>
+                <li>
+                    l'augmentation du risque (probabilité ou gravité)
+                </li>
+            </ul>
+        </div>
+        <div class="cours">
+            <h5>RSSI</h5>
+            <p>
+                <b>Responsable de la sécurité des Systèmes d'Information </b> est chargé de la définition et de la mise en oeuvre de la politique
+                de sécurité de l'entreprise. Suivant la taille de l'organisation, le RSSI peut encadrer une équipe d'ingénieurs et techniciens.
+            </p>
+        </div>
+        <div class="cours">
+            <h5>Notation diagrammatique CORAS</h5>
+            <p>
+                Permet la modélisation par des diagrammes d'une analyse de risque de sécurit (<i>
+                    développé par l'institut SINTEF à Oslo en Norvège -
+                    <a href="http://coras.sourceforge.net/">lien vers le site CORAS</a>
+                </i> ).
+            </p>
+            <img src="img/risqueSecu3.png" style="max-width:800px;width:100%;" class="figure-img img-fluid rounded" alt="">
         </div>
     </div>
 
