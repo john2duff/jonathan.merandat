@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/commonFonction.js"></script>
 
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+
     <title>Evaluation des programmes</title>
 
 </head>
@@ -41,7 +43,7 @@
                             <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
                             <a class="dropdown-item" href="InfoConversion.html">Convertisseurs</a>
                             <a class="dropdown-item" href="InfoUnicode.html">Unicode</a>
-                            <a class="dropdown-item" href="InfoTools.html">Outils</a> 
+                            <a class="dropdown-item" href="InfoTools.html">Outils</a>
                             <a class="dropdown-item" href="InfoWeb.html">Dév. Web</a>
                         </div>
                     </li>
@@ -98,7 +100,6 @@
     -->
     <!-- corps-->
     <div class="modeAffichage">
-
         <!--Introduction-->
         <div id="intro">
             <a href="#introInfoEvalProg">
@@ -189,7 +190,7 @@
             </div>
             <div class="exemple">
                 <figure class="figure" style="width:100%;">
-                    <img src="img/fonc-turing1.png" width="100%" class="figure-img img-fluid rounded" alt="Machine de Turing au cours d'un calcul.'">
+                    <img src="img/fonc-turing1.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="Machine de Turing au cours d'un calcul.'">
                     <figcaption class="figure-caption text-center">Machine de Turing au cours d'un calcul.</figcaption>
                 </figure>
             </div>
@@ -210,41 +211,39 @@
                 <p><i>Exemple : </i>: </p>
                 <p> M = (Q, q0, {qf}, {1,B}, B, {1}, &#0948;) où Q={q0, qi, qp, qf}</p>
                 <p>&#0948; est défini par le tableau suivant :</p>
-                <center>
-                    <figure class="figure">
-                        <table class="table table-active table-sm" style="width:250px;">
-                            <thead class="text-center">
-                                <tr>
-                                    <th scope="col">&#0948;</th>
-                                    <th scope="col">1</th>
-                                    <th scope="col">B</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-center">
-                                <tr>
-                                    <th scope="row">q&#8320;</th>
-                                    <td>(q<sub>i</sub>, 1, D)</td>
-                                    <td>(q&fnof;, B, G)</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">q<sub>i</sub></th>
-                                    <td>(q<sub>p</sub>, 1, D)</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">q<sub>p</sub></th>
-                                    <td>(q<sub>i</sub>, 1, D)</td>
-                                    <td>(q&fnof;, B, G)</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <figcaption class="figure-caption text-center">
-                            La fonction de transition est représentée par un tableau.<br />
-                            Il y a une ligne par état de contrôle (q0, qi, qp, qf) et une colonne par symbole de l'alphabet du ruban (1, B). <br />
-                            La fonction n'est pas totale car elle n'est pas définie partout (pour qi et B).
-                        </figcaption>
-                    </figure>
-                </center>
+                <figure class="figure">
+                    <table class="table table-active table-sm" style="width:250px;">
+                        <thead class="text-center">
+                            <tr>
+                                <th scope="col">&#0948;</th>
+                                <th scope="col">1</th>
+                                <th scope="col">B</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <tr>
+                                <th scope="row">q&#8320;</th>
+                                <td>(q<sub>i</sub>, 1, D)</td>
+                                <td>(q&fnof;, B, G)</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">q<sub>i</sub></th>
+                                <td>(q<sub>p</sub>, 1, D)</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">q<sub>p</sub></th>
+                                <td>(q<sub>i</sub>, 1, D)</td>
+                                <td>(q&fnof;, B, G)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <figcaption class="figure-caption text-center">
+                        La fonction de transition est représentée par un tableau.<br />
+                        Il y a une ligne par état de contrôle (q0, qi, qp, qf) et une colonne par symbole de l'alphabet du ruban (1, B). <br />
+                        La fonction n'est pas totale car elle n'est pas définie partout (pour qi et B).
+                    </figcaption>
+                </figure>
             </div>
             <div class="cours">
                 <h5>Configurations d'une machine de Turing</h5>
@@ -262,7 +261,7 @@
                     Avec &alpha; et &beta; &#8712; &lceil;* où &alpha; est le contenu de la bande strictement à gauche de la tête de lecture et &beta; est le contenu à droite de la tête de lecture.
                 </p>
                 <figure class="figure" style="width:100%;">
-                    <img src="img/fonc-turing2.png" width="100%" class="figure-img img-fluid rounded" alt="Configuration">
+                    <img src="img/fonc-turing2.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="Configuration">
                     <figcaption class="figure-caption text-center">Configuration de la machine de Turing.</figcaption>
                 </figure>
                 <p>
@@ -299,15 +298,15 @@
             </div>
             <div class="exemple">
                 <figure class="figure" style="width:100%;">
-                    <img src="img/fonc-turing3.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/fonc-turing3.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
                     <figcaption class="figure-caption text-center">Configuration de la machine de Turing avant la transition.</figcaption>
                 </figure>
                 <figure class="figure" style="width:100%;">
-                    <img src="img/fonc-turing4.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/fonc-turing4.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
                     <figcaption class="figure-caption text-center">Configuration de la machine de Turing après la transition si (q, a) &#8594; (q', b, D).</figcaption>
                 </figure>
                 <figure class="figure" style="width:100%;">
-                    <img src="img/fonc-turing5.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                    <img src="img/fonc-turing5.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
                     <figcaption class="figure-caption text-center">Configuration de la machine de Turing après la transition si (q, a) &#8594 (q', b, G).</figcaption>
                 </figure>
                 <p><i>Exemples de calcul : </i>: </p>
@@ -315,39 +314,38 @@
                     Pour M = (Q, q0, {q&fnof;}, {1,B}, B, {1}, &delta;)
                     où Q = {q0, qi, qp, q&fnof;} et &delta; définie par le tableau suivant :
                 </p>
-                <center>
-                    <figure class="figure">
-                        <div class="table-responsive">
-                            <table class="table table-active table-sm">
-                                <thead class="text-center">
-                                    <tr>
-                                        <th scope="col">&#0948;</th>
-                                        <th scope="col">1</th>
-                                        <th scope="col">B</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-center">
-                                    <tr>
-                                        <th scope="row">q&#8320;</th>
-                                        <td>(q<sub>i</sub>, 1, D)</td>
-                                        <td>(q&fnof;, B, G)</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">q<sub>i</sub></th>
-                                        <td>(q<sub>p</sub>, 1, D)</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">q<sub>p</sub></th>
-                                        <td>(q<sub>i</sub>, 1, D)</td>
-                                        <td>(q&fnof;, B, G)</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <figcaption class="figure-caption text-center"></figcaption>
-                    </figure>
-                </center>
+
+                <figure class="figure">
+                    <div class="table-responsive">
+                        <table class="table table-active table-sm">
+                            <thead class="text-center">
+                                <tr>
+                                    <th scope="col">&#0948;</th>
+                                    <th scope="col">1</th>
+                                    <th scope="col">B</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <tr>
+                                    <th scope="row">q&#8320;</th>
+                                    <td>(q<sub>i</sub>, 1, D)</td>
+                                    <td>(q&fnof;, B, G)</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">q<sub>i</sub></th>
+                                    <td>(q<sub>p</sub>, 1, D)</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">q<sub>p</sub></th>
+                                    <td>(q<sub>i</sub>, 1, D)</td>
+                                    <td>(q&fnof;, B, G)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <figcaption class="figure-caption text-center"></figcaption>
+                </figure>
                 <div class="cours">
                     <h5>Le calcul de M sur 111 </h5>
                     <evidence>
@@ -355,7 +353,7 @@
                     </evidence>
                     <div class="exemple font-italic">
                         <figure class="figure" style="width:100%;">
-                            <img src="img/fonc-turing6.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                            <img src="img/fonc-turing6.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
                             <figcaption class="figure-caption text-center">
                                 Calcul de M sur 111
                             </figcaption>
@@ -376,7 +374,7 @@
                     </evidence>
                     <div class="exemple font-italic">
                         <figure class="figure" style="width:100%;">
-                            <img src="img/fonc-turing7.png" width="100%" class="figure-img img-fluid rounded" alt="">
+                            <img src="img/fonc-turing7.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
                             <figcaption class="figure-caption text-center">
                                 Calcul de M sur 1111
                             </figcaption>
@@ -421,39 +419,37 @@
                 soit M = (Q, q<sub>0</sub>, {q<sub>f</sub>}, {0,1,B}, B, {0,1}, &delta;)
                 où Q = {q<sub>0</sub>, q<sub>r</sub>, q<sub>f</sub>}
                 et &delta; est défini par le tableau suivant :
-                <center>
-                    <figure class="figure">
-                        <div class="table-responsive">
-                            <table class="table table-active table-sm">
-                                <thead class="text-center">
-                                    <tr>
-                                        <th scope="col">&#0948;</th>
-                                        <th scope="col">0</th>
-                                        <th scope="col">1</th>
-                                        <th scope="col">B</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-center">
-                                    <tr>
-                                        <th scope="row">q<sub>0</sub></th>
-                                        <td>(q<sub>0</sub>, 0, D)</td>
-                                        <td>(q<sub>0</sub>, 1, D)</td>
-                                        <td>(q<sub>r</sub>, B, G)</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">q<sub>r</sub></th>
-                                        <td>(q<sub>f</sub>, 1, G)</td>
-                                        <td>(q<sub>r</sub>, 0, G)</td>
-                                        <td>(q<sub>f</sub>, 1, D)</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <figcaption class="figure-caption text-center">
-                            M décide la fonction qui ajoute 1 à un nombre écrit en binaire.
-                        </figcaption>
-                    </figure>
-                </center>
+                <figure class="figure">
+                    <div class="table-responsive">
+                        <table class="table table-active table-sm">
+                            <thead class="text-center">
+                                <tr>
+                                    <th scope="col">&#0948;</th>
+                                    <th scope="col">0</th>
+                                    <th scope="col">1</th>
+                                    <th scope="col">B</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <tr>
+                                    <th scope="row">q<sub>0</sub></th>
+                                    <td>(q<sub>0</sub>, 0, D)</td>
+                                    <td>(q<sub>0</sub>, 1, D)</td>
+                                    <td>(q<sub>r</sub>, B, G)</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">q<sub>r</sub></th>
+                                    <td>(q<sub>f</sub>, 1, G)</td>
+                                    <td>(q<sub>r</sub>, 0, G)</td>
+                                    <td>(q<sub>f</sub>, 1, D)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <figcaption class="figure-caption text-center">
+                        M décide la fonction qui ajoute 1 à un nombre écrit en binaire.
+                    </figcaption>
+                </figure>
                 <div class="cours">
                     <h5>Calcul sur 101 </h5>
                     <evidence>q<sub>0</sub>101 &#8866; 1q<sub>0</sub>01 &#8866; 10q<sub>0</sub>1 &#8866; 101q<sub>0</sub>1 &#8866; 10q<sub>r</sub>1 &#8866; 1q<sub>r</sub>00 &#8866; q<sub>f</sub>110</evidence>
@@ -479,7 +475,7 @@
             </div>
             <div class="exemple">
                 <figure class="figure" style="width:100%;">
-                    <img src="img/fonc-turing8.png" width="100%" class="figure-img img-fluid rounded" alt="Pas de calcul">
+                    <img src="img/fonc-turing8.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="Pas de calcul">
                     <figcaption class="figure-caption text-center">Pas de calcul sir (q, a) &#8594;<sup>&delta;</sup> (q', b, R).</figcaption>
                 </figure>
                 <div class="font-italic">
@@ -490,7 +486,7 @@
             <div class="cours">
                 <p>Voici un modèle avec plusieurs bandes disjointes et une tête de lecture par ruban.</p>
                 <figure class="figure" style="width:100%;">
-                    <img src="img/fonc-turing9.png" width="100%" class="figure-img img-fluid rounded" alt="Pas de calcul">
+                    <img src="img/fonc-turing9.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="Pas de calcul">
                     <figcaption class="figure-caption text-center">Configuration d'une machine à plusieurs rubans.</figcaption>
                 </figure>
                 <p>La fonction de transition est la seule partie qui est modifiée. Tous les changements d'état se font en simultané.</p>
@@ -505,101 +501,283 @@
                     La machine de Turing M = (Q, q<sub>0</sub>, q<sub>f</sub>, {a,b,B}, B, {a,b}, &delta;) <br />
                     où Q = {q<sub>0</sub>, q<sub>c</sub>, q<sub>g</sub>, q<sub>v</sub>, q<sub>f</sub>} <br />
                     et &delta; est définie par le tableau suivant :
-                    <div class="text-center">
+                    <div class="stickyElement">
                         <button onclick="setSticky(this);" type="button" class="btn btn-secondary stickyButton" data-toggle="button" aria-pressed="false" autocomplete="off">
-                            Sticky off
+                            Epingler l'élément
                         </button>
-                        <div>
-                            <center>
-                                <figure class="figure">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm" style="background-color:#c8c8c8;">
-                                            <thead class="text-center">
-                                                <tr>
-                                                    <th scope="col">&#0948;</th>
-                                                    <th scope="col">a,a</th>
-                                                    <th scope="col">b,b</th>
-                                                    <th scope="col">B,B</th>
-                                                    <th scope="col">a,B</th>
-                                                    <th scope="col">b,B</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="text-center">
-                                                <tr>
-                                                    <th scope="row">q<sub>0</sub></th>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td>(q<sub>f</sub>, B, B, D, D)</td>
-                                                    <td>(q<sub>c</sub>, a, a, D, D)</td>
-                                                    <td>(q<sub>c</sub>, b, b, D, D)</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">q<sub>c</sub></th>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td>(q<sub>g</sub>, B, B, G, R)</td>
-                                                    <td>(q<sub>c</sub>, a, a, D, D)</td>
-                                                    <td>(q<sub>c</sub>, b, b, D, D)</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">q<sub>g</sub></th>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td>(q<sub>v</sub>, B, B, D, G)</td>
-                                                    <td>(q<sub>g</sub>, a, B, G, R)</td>
-                                                    <td>(q<sub>g</sub>, b, B, G, R)</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">q<sub>v</sub></th>
-                                                    <td>(q<sub>v</sub>, a, a, D, G)</td>
-                                                    <td>(q<sub>v</sub>, b, b, D, G)</td>
-                                                    <td>(q<sub>f</sub>, B, B, R, R)</td>
-                                                    <td></td>
-                                                    <td></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <figcaption class="figure-caption text-center">
+                        <figure class="figure">
+                            <div class="table-responsive">
+                                <table class="table table-sm" style="background-color:#c8c8c8;">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th scope="col">&#0948;</th>
+                                            <th scope="col">a,a</th>
+                                            <th scope="col">b,b</th>
+                                            <th scope="col">B,B</th>
+                                            <th scope="col">a,B</th>
+                                            <th scope="col">b,B</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        <tr>
+                                            <th scope="row">q<sub>0</sub></th>
+                                            <td></td>
+                                            <td></td>
+                                            <td>(q<sub>f</sub>, B, B, D, D)</td>
+                                            <td>(q<sub>c</sub>, a, a, D, D)</td>
+                                            <td>(q<sub>c</sub>, b, b, D, D)</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">q<sub>c</sub></th>
+                                            <td></td>
+                                            <td></td>
+                                            <td>(q<sub>g</sub>, B, B, G, R)</td>
+                                            <td>(q<sub>c</sub>, a, a, D, D)</td>
+                                            <td>(q<sub>c</sub>, b, b, D, D)</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">q<sub>g</sub></th>
+                                            <td></td>
+                                            <td></td>
+                                            <td>(q<sub>v</sub>, B, B, D, G)</td>
+                                            <td>(q<sub>g</sub>, a, B, G, R)</td>
+                                            <td>(q<sub>g</sub>, b, B, G, R)</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">q<sub>v</sub></th>
+                                            <td>(q<sub>v</sub>, a, a, D, G)</td>
+                                            <td>(q<sub>v</sub>, b, b, D, G)</td>
+                                            <td>(q<sub>f</sub>, B, B, R, R)</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <figcaption class="figure-caption text-center">
 
-                                    </figcaption>
-                                </figure>
-                            </center>
-                        </div>
+                            </figcaption>
+                        </figure>
                     </div>
 
                     décide l'ensemble des palindromes sur l'alphabet {a,b}.
                 </p>
                 <p><i>Exemple pour le mot aba :</i></p>
-                <center>
-                    <img src="img/fonc-turing10.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing11.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing12.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing13.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing14.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing15.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing16.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing17.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing18.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing19.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing20.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing21.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing22.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                    <div style="font-size:30px;">&#129155;</div>
-                    <img src="img/fonc-turing23.png" width="100%" class="figure-img img-fluid rounded" alt="">
-                </center>
+                <img src="img/fonc-turing10.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing11.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing12.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing13.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing14.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing15.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing16.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing17.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing18.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing19.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing20.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing21.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing22.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+                <div style="font-size:30px;">&#129155;</div>
+                <img src="img/fonc-turing23.png" style="max-width:500px;width:100%;" class="figure-img img-fluid rounded" alt="">
+            </div>
+            <div class="cours">
+                <h5>Machine non-déterministe</h5>
+                <p>
+                    Il existe une machine non-déterministe M acceptant un langage \(L\) si et seulement s'il existe une machine déterministe \(M'\) acceptant \(L\).
+                    <!--
+                    \( &delta; \subseteq Q \times &Gamma; \times Q\)
+                    $$ &delta; \subseteq Q \times &Gamma; \times Q$$
+                    -->
+                </p>
+                <div class="exemple font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    Une machine de Turing standard est appelée machine de Turing <b>déterministe</b>.
+                </div>
+            </div>
+        </div>
+
+        <!--Décidabilité-->
+        <div id="decidabilite">
+            <a href="#decidabiliteInfo">
+                <nav id="decidabiliteInfo" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Décidabilité et indécidabilité</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Thèse de Church</h5>
+                <b>Tout langage de programmation non trivial équivaut à une machine de Turing.</b> <br />
+                Pour tout algorithme il existe une machine de Turing qui le décide.
+            </div>
+            <div class="cours">
+                <h5>Langages et problèmes décidables</h5>
+                <p>
+
+                    Le langage \(L \subseteq &sum;^*\) est <b>décidable</b> s'il existe une machine de Turing \(M\) telle que \(L=L(M)\) et si \(M\) s'arrête sur tous les mots \(&omega; \in &sum;^* \)
+                </p>
+                <p>
+                    L'intersection de deux langaes décidables est décidable. <br />
+                    L'union de deux langages décidables est décidable.
+                </p>
+            </div>
+            <div class="cours">
+                <h5>Problèmes indécidables</h5>
+                <p>
+                    Un problème est dit <b>indécidable</b> quand il n'existe pas de machine de Turing qui le décide, c'est à dire
+                    qu'il n'existe pas de machine de Turing qui s'arrête sur toutes les instances du problème en donnant la bonne réponse.
+                </p>
+            </div>
+            <div class="exemple">
+                <h6>Codage d'une machine de Turing</h6>
+                <p>
+                    Machine de Turing \(M = (Q, q_0, q_1, \{1, B\}, B, \{1\}, &delta;)\) où \(Q = \{q_0, q_i, q_p, q_1 \}\) et
+                    &delta; =
+
+                </p>
+                <div class="stickyElement" style="max-width:800px;">
+                    <button onclick="setSticky(this);" type="button" class="btn btn-secondary stickyButton" data-toggle="button" aria-pressed="false" autocomplete="off">
+                        Epingler l'élément
+                    </button>
+                    <figure class="figure">
+                        <div class="table-responsive">
+                            <table class="table table-sm" style="background-color:#c8c8c8;">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th scope="col">&delta;</th>
+                                        <th scope="col">1</th>
+                                        <th scope="col">B</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                    <tr>
+                                        <th scope="row">\(q_0\)</th>
+                                        <td>\((q_i, 1, D)\)</td>
+                                        <td>\((q_1, B, G)\)</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">\(q_i\)</th>
+                                        <td>\((q_p, 1, D)\)</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">\(q_p\)</th>
+                                        <td>\((q_i, 1, D)\)</td>
+                                        <td>\((q_1, B, G)\)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <figcaption class="figure-caption text-center">
+
+                        </figcaption>
+                    </figure>
+                </div>
+
+                <div class="exemple font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    <a href="http://zanotti.univ-tln.fr/turing/turing.php">Simulateur de machine de Turing </a>
+                    Exemple de programme :
+
+                </div>
+            </div>
+            <div class="cours">
+                <h5>Réductions et problèmes indécidables</h5>
+                <p>
+                    Données : une machine de Turing M et un mot &omega;<br />
+                    Question : Est-ce que M accepte &omega;? <br />
+                </p>
+                <evidence><b>Le problème de l'acceptation est indécidable.</b></evidence>
+                <p>
+                    Données : une machine de Turing M et un mot &omega;<br />
+                    Question : Est-ce que M s'arrête sur &omega;? <br />
+                </p>
+                <evidence><b>Le problème de l'arrêt est indécidable.</b></evidence>
+            </div>
+        </div>
+
+        <!--classe de complexité-->
+        <div class="complexite">
+            <a href="#complexiteInfo">
+                <nav id="complexiteInfo" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Classes de complexité</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Définitions de la complexité d'une machine de Turing</h5>
+                On associe tout d'abord deux fonctions \(C_t\) et \(C_e\) :
+                <ul>
+                    <li>
+                        \(C_t\) est la <b>complexité en temps</b>
+                    </li>
+                    <li>
+                        \(C_e\) est la <b>complexité en temps</b>
+                    </li>
+                </ul>
+            </div>
+            <div class="exemple">
+                On définit \(C_t(n)\) comme le <evidence>nombre maximum de pas de calcul</evidence> pour obtenir le résultat sur une donnée de taille \(n\) :
+                $$ C_t(n) = sup\{c_t(&omega;) : |&omega;| = n\}$$
+                et \(C_e(n)\) comme le <evidence>nombre maximum de cases de ruban</evidence> pour obtenir le résultat sur une donnée de taille \(n\) :
+                $$ C_e(n) = sup\{c_e(&omega;) : |&omega;| = n\}$$
+            </div>
+            <div class="cours">
+                Les fonctions obtenues ont des allures complexes, c'est pourquoi on va associer des fonctions à des fonction :
+                <ul>
+                    <li>
+                        <evidence>linéraires</evidence> : \(n \to an\)
+                    </li>
+                    <li>
+                        <evidence>polynomiales </evidence>: \(n \to n^c\)
+                    </li>
+                    <li>
+                        <evidence>exponentielles </evidence>: \(n \to c^n\)
+                    </li>
+                </ul>
+            </div>
+            <div class="cours">
+                <h5>Classes de complexité d'un problème</h5>
+                Un problème \(P\) appartient à la classe :
+                <ul>
+                    <li>
+                        <evidence>DTime(f)</evidence> s'il existe une machine de Turing <b>déterministe</b> M telle que \(C_t(n) = O(f(n))\)
+                    </li>
+                    <li>
+                        <evidence>DSpace(f)</evidence> s'il existe une machine de Turing <b>déterministe</b> M telle que \(C_e(n) = O(f(n))\)
+                    </li>
+                    <li>
+                        <evidence>NTime(f)</evidence> s'il existe une machine de Turing <b>non-déterministe</b> M telle que \(C_t(n) = O(f(n))\)
+                    </li>
+                    <li>
+                        <evidence>NSpace(f)</evidence> s'il existe une machine de Turing <b>non-déterministe</b> M telle que \(C_e(n) = O(f(n))\)
+                    </li>
+                </ul>
+            </div>
+            <div class="cours">
+                <h5>Problèmes traitables</h5>
+                Deux classes :
+                <ul>
+                    <li>
+                        \(P = \cup_{c\in\mathbb{R}^+}DTime(n^c)\)
+                    </li>
+                    <li>
+                        \(NP = \cup_{c\in\mathbb{R}^+}NTime(n^c)\)
+                    </li>
+                </ul>
+                <div class="exemple font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    Par convention, les problèmes qui appartiennent à la classe P sont dits <b>polynomiaux</b>
+                    et sont considérés comme <b>traitables</b>.
+                </div>
             </div>
         </div>
     </div>

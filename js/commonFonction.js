@@ -30,14 +30,18 @@ var setSticky = function (evt) {
     var position = el.style.position;
     if (position != "sticky" || position == "") {
         el.style.position = "sticky";
-        el.style.backgroundColor = "orange";
-        el.style.top = "40px";
-        evt.textContent = "";
+        evt.style.backgroundColor = "orange";
+        evt.style.opacity = "1";
+        el.style.zIndex = "999999";
+        el.style.top = "0px";
+        evt.textContent = "Libérer l'élement";
     } else {
         el.style.position = "initial";
-        el.style.backgroundColor = "initial";
+        evt.style.backgroundColor = "#C8C8C8";
+        evt.style.opacity = "initial";
+        el.style.zIndex = "1";
         el.style.position = "initial";
-        evt.textContent = "";
+        evt.textContent = "Epingler l'élement";
     }
 }
 

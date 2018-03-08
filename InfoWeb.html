@@ -27,10 +27,10 @@
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
+                    <li class="nav-item">
                         <a id="buttonIndex" class="nav-link" href="index.html">Accueil<span class="sr-only">(current)</span></a>
                     </li>
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Informatique
                         </a>
@@ -40,8 +40,8 @@
                             <a class="dropdown-item" href="InfoInformatiqueGraphique.html">Informatique graphique</a>
                             <a class="dropdown-item" href="InfoConversion.html">Convertisseurs</a>
                             <a class="dropdown-item" href="InfoUnicode.html">Unicode</a>
-                            <a class="dropdown-item" href="InfoTools.html">Outils</a> 
-                            <a class="dropdown-item" href="InfoWeb.html">Dév. Web</a> 
+                            <a class="dropdown-item" href="InfoTools.html">Outils</a>
+                            <a class="dropdown-item" href="InfoWeb.html">Dév. Web</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -64,7 +64,31 @@
 
     <!-- corps-->
     <div class="modeAffichage">
+        <a href="#mathJaxInfo">
+            <nav id="mathJaxInfo" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                <h4 class="titre">MathJax</h4>
+            </nav>
+        </a>
+        <div class="cours">
+            <p>
 
+                MathJax est un moteur d'affichage Javascript d'expression mathématique.
+            </p>
+            <p>
+                Lien vers le site :
+                <a href="https://www.mathjax.org/">MathJax </a>
+            </p>
+            <h5>Utilisation HTML</h5>
+            <p>
+                Insérer cette référence de script dans le head de la page HTML
+            </p>
+            <p>
+                < script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></ script>
+            </p>
+        </div>
+        <div class="exemple">
+
+        </div>
     </div>
 
     <script>actualiserModeAffichage();</script>
