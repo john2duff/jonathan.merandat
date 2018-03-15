@@ -640,23 +640,24 @@ void redimension(int width, int height) {}
                     <img src="img/infoVisu4.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
                     <img src="img/infoVisu5.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
                     <div class="exemple">
-                            Projection parallèle d'un cube<br />
-                          <img src="img/infoVisu6.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" /> <br />
-                            Projection perspective d'un cube<br />
-                            <img src="img/infoVisu7.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                        Projection parallèle d'un cube<br />
+                        <img src="img/infoVisu6.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" /> <br />
+                        Projection perspective d'un cube<br />
+                        <img src="img/infoVisu7.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
                     </div>
                 </div>
                 <div class="cours">
                     <h5>Mathématiques pour les projections</h5>
                     Soit un point \(P=(x,y,z)\) de l'objet à projeter et un point \(P_r=(x_p,y_p,z_p)\) <br />
                     <img src="img/infoVisu8.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" /> <br />
-                    <p>Nous allons determiner les relations en les coordonnées du point de l'objet \((x,y,z)\) et les coordonnées du point de l'objet dans le plan de projection \((x_p,y_p,z_p)\). 
+                    <p>
+                        Nous allons determiner les relations en les coordonnées du point de l'objet \((x,y,z)\) et les coordonnées du point de l'objet dans le plan de projection \((x_p,y_p,z_p)\).
                         La figure ci-dessous illustre la calcul de la coordonnée \(y_p\) en se plaçant dans le plan \(x=0\).
                     </p>
                     <img src="img/infoVisu9.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" /><br />
                     <evidence>Projection perspective</evidence> <br />
                     <img src="img/infoVisu10.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
-                    <img src="img/infoVisu11.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" /> 
+                    <img src="img/infoVisu11.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" />
                     <img src="img/infoVisu12.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
                     <img src="img/infoVisu13.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" /> <br />
                     <evidence>Projection parallèle</evidence><br />
@@ -665,12 +666,85 @@ void redimension(int width, int height) {}
                     <img src="img/infoVisu16.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
                 </div>
             </div>
-            <div class="exemple">
-                <h5><b>Exercices</b></h5>
-                <h5>Transformation de visualisation</h5>
+            <div class="cours">
+                <h5>Elimination des parties cachées</h5>
+                <p>Si on affiche un cube bleu puis que l'on se recule et que l'on affiche une sphère verte, le dernier objet affiché se retrouve au premier plan. En utilisant l'algorithme des faces cachées, l'ordre dans lequel on trace l'objet n'a pas d'importance. L'objet le plus proche de l'observateur sera au premier plan.</p>
+                <div class="exemple">
+                    Il existe deux méthodes : 
+                    <ul>
+                        <li>
+                            <p>
+                            <evidence>Algorithme méthode basée image</evidence> :
+
+                            </p>
+                            <p>
+                                <font color="red">Début</font> <br />
+                                <font color="blue">Pour</font> chaque pixel de l'image <font color="blue"> Faire</font> <br />
+                                &nbsp;&nbsp;Déterminer le rayon visuel reliant le centre de la rojection et le pixel de l'image.<br />
+                                &nbsp;&nbsp;Déterminer l'objet le plus proche de l'observateur.<br />
+                                &nbsp;&nbsp;Afficher le pixel en utilisant la couleur appropriée.<br />
+                                <font color="red">Fin</font>
+                            </p>
+                            <p>Si la scène contient \(n\) objets et \(p\) pixels, il faut examiner chaque objet pour chaque pixel soit <evidence>\(n \times p\) configuration possibles</evidence></p>
+                        </li>
+                        <li>
+                            <p>
+                                <evidence>Algorithme méthode basée objets</evidence> :
+
+                            </p>
+                            <p>
+                                <font color="red">Début</font> <br />
+                                <font color="blue">Pour</font> chaque objet de la scène<font color="blue"> Faire</font> <br />
+                                &nbsp;&nbsp;Déterminer les parties de l'objet non occultées par d'autres parties du même objet ou par d'autres objets.<br />
+                                &nbsp;&nbsp;Afficher le pixel en utilisant la couleur appropriée.<br />
+                                <font color="red">Fin</font>
+                            </p>
+                            <p>Si la scène contient \(n\) objets et \(p\) pixels, il faut examiner chaque objet par rapport aux autres objets soit <evidence>\(n \times n\) configuration possibles</evidence></p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="exemple font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    En général, \(n\) est très inférieur à \(p\), donc le second algorithme demande moins de calcul. Mais pour la seconde méthode, les opérations sont plus complexes, car il faut comparer des objets entre eux. En conséquence, ce deuxième type d'algorithme est souvent plus lent que ceux de la première méthode.
+                </div>
+            </div>
+            <div class="cours">
+                <h5>Algorithme du z-buffer</h5>
+                <p>
+                    Développé par Edwin Catmull, l'algorithme z-buffer est un algorithme basé image. C'est l'un des plus simples à mettre en oeuvre
+                    aussi bien au niveau logiciel qu'au niveau matériel.
+                </p>
+                <div class="exemple">
+                    <font color="red">Constantes</font> <br />
+                    &nbsp;&nbsp;XSIZE = 1024<br />
+                    &nbsp;&nbsp;YSIZE = 768<br />
+                    <font color="red">Variables</font> <br />
+                    &nbsp;&nbsp;COUL = tableau de XSIZE x YSIZE de couleurs<br />
+                    &nbsp;&nbsp;PROF = tableau de XSIZE x YSIZE d'entiers<br />
+                    <font color="red">Début</font> <br />
+                    Initialiser le tableau PROF avec la valeur de z du plan arrière<br />
+                    Initialiser le tableau COUL avec la couleur de fond<br />
+                    <font color="blue">Pour</font> chaque objet à représenter<font color="blue"> Faire</font> <br />
+                    <font color="blue">&nbsp;&nbsp;Pour</font> chaque pixel p=(x,y) de l'objet<font color="blue"> Faire</font> <br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;Calculer la profondeur z de l'objet au pixel p=(x,y)<br />
+                    <font color="blue">&nbsp;&nbsp;&nbsp;&nbsp;Si</font> z > PROF[x,y]<font color="blue"> Alors</font> <br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROF[x,y] &#8592; z<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COUL[x,y] &#8592; couleur de l'objet au pixel (x,y)<br />
+                    <font color="blue">&nbsp;&nbsp;&nbsp;&nbsp;Fin Si</font><br/>
+                    <font color="blue">&nbsp;&nbsp;Fin Pour</font><br />
+                    <font color="blue">Fin Pour</font><br />
+                    <font color="red">Fin</font>
+                </>
             </div>
         </div>
-
+            <div class="exemple">
+                <b>OpenGL</b><br />
+                <p>
+                    - Le tableau nommé <i>GL_DEPTH_BUFFER_BIT</i> est un tableau contenant les informations sur la profondeur. <br />
+                    - Le tableau <i>GL_COLOR_BUFFER_BIT</i> est un tableau contenant les informations sur les couleurs. <br />
+                    - La fonction <i>glClear</i> permet d'effacer ce tableau. Les fonctions <i>glEnable(GL_DEPTH_TEST)</i> et <i>glDisable(GL_DEPTH_TEST)</i> permettent d'utiliser ou non le z-buffer lors de l'affichage.
+                </p>
+            </div>
     </div>
 
 
