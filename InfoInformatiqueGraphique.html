@@ -670,11 +670,11 @@ void redimension(int width, int height) {}
                 <h5>Elimination des parties cachées</h5>
                 <p>Si on affiche un cube bleu puis que l'on se recule et que l'on affiche une sphère verte, le dernier objet affiché se retrouve au premier plan. En utilisant l'algorithme des faces cachées, l'ordre dans lequel on trace l'objet n'a pas d'importance. L'objet le plus proche de l'observateur sera au premier plan.</p>
                 <div class="exemple">
-                    Il existe deux méthodes : 
+                    Il existe deux méthodes :
                     <ul>
                         <li>
                             <p>
-                            <evidence>Algorithme méthode basée image</evidence> :
+                                <evidence>Algorithme méthode basée image</evidence> :
 
                             </p>
                             <p>
@@ -730,13 +730,13 @@ void redimension(int width, int height) {}
                     <font color="blue">&nbsp;&nbsp;&nbsp;&nbsp;Si</font> z > PROF[x,y]<font color="blue"> Alors</font> <br />
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROF[x,y] &#8592; z<br />
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COUL[x,y] &#8592; couleur de l'objet au pixel (x,y)<br />
-                    <font color="blue">&nbsp;&nbsp;&nbsp;&nbsp;Fin Si</font><br/>
+                    <font color="blue">&nbsp;&nbsp;&nbsp;&nbsp;Fin Si</font><br />
                     <font color="blue">&nbsp;&nbsp;Fin Pour</font><br />
                     <font color="blue">Fin Pour</font><br />
                     <font color="red">Fin</font>
-                </>
+                    </>
+                </div>
             </div>
-        </div>
             <div class="exemple">
                 <b>OpenGL</b><br />
                 <p>
@@ -745,15 +745,66 @@ void redimension(int width, int height) {}
                     - La fonction <i>glClear</i> permet d'effacer ce tableau. Les fonctions <i>glEnable(GL_DEPTH_TEST)</i> et <i>glDisable(GL_DEPTH_TEST)</i> permettent d'utiliser ou non le z-buffer lors de l'affichage.
                 </p>
             </div>
-    </div>
+            <div id="visuPlan">
+                <a href="#infoVisualisationPlan">
+                    <nav id="infoVisualisationPlan" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                        <h4 class="titre">Visualisation dans le plan</h4>
+                    </nav>
+                </a>
+                <div class="cours">
+                    <h5>Tracé d'un segment de droite</h5>
+                    <p>Discrétisation d'un segment</p>
+                    <img src="img/infoVisuPlan1.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <p><b>Equation cartésienne d'une droite</b></p>
+                    <p>
+                        Soit \(A = (x_a, y_a)\) et \(B = (x_b, y_b)\) avec la droite D. <br />
+                        La pente est donnée par la relation \(m = \frac{d_y}{d_x}\).
+                    </p>
+                    <img src="img/infoVisuPlan2.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <p>
+                        \(m = \frac{d_y}{d_x}\) <br />
+                        \(y_a = \frac{d_y}{d_x}x_a + b\) <br />
+                        \(b = y_a - \frac{d_y}{d_x}x_a\) <br /><br />
+
+                        \(F(x,y) = mx + b - y = 0 \) <br />
+                        \(F(x,y) = \frac{d_y}{d_x}x + b-y \) <br />
+                        \(F(x,y) = \frac{d_y}{d_x}x + y_a - \frac{d_y}{d_x}x_a-y \) <br />
+                        \(F(x,y) = \frac{d_y}{d_x}x + \frac{d_x}{d_x}y_a - \frac{d_y}{d_x}x_a - \frac{d_x}{d_x}y \) <br />
+                        \(F(x,y) = {d_y}x + {d_x}y_a - {d_y}x_a - {d_x}y \) <br />
+                        \(F(x,y) = {d_y}(x - x_a) - {d_x}(y - y_a) \) <br />
+                    </p>
+                </div>
+                <div class="cours">
+                    <h5>Quadrant et symétrie</h5>
+                    <img src="img/infoVisuPlan3.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                </div>
+                <div class="cours">
+                    <h5>Position d'un point par rapport à un segment</h5>
+                    <img src="img/infoVisuPlan4.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <ul>
+                        <li>Si \(F(x_m, y_m) < 0\) alors le point M est situé au-dessus de la droite. </li>
+                        <li>Si \(F(x_m, y_m) > 0\) alors le point M est situé au-dessous de la droite. </li>
+                        <li>Si \(F(x_m, y_m) = 0\) alors le point M est situé sur la droite. </li>
+                    </ul>
+                    <div class="exemple">
+                        <p>Soit deux points \(A = \begin{pmatrix}1 \\ 1\end{pmatrix}\) et \(B = \begin{pmatrix}3 \\ 2\end{pmatrix}\) et deux points \(H = \begin{pmatrix}3 \\ 3\end{pmatrix}\) et \(L = \begin{pmatrix}3 \\ 1\end{pmatrix}\)</p>
+                        <img src="img/infoVisuPlan5.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" /> <br />
+                        \(F(x,y) = (x-1) - 2(y-1) =0\) <br /><br />
+                        \(F(3,y_i) = F(3,?) = (3-1) - 2(y_i-1) = 0 \rightarrow y_i = 2\) <br />
+                        \(F(3,y_H) = F(3,3) = y_i-3 = 2-3 < 0\) <evidence>H est au-dessus</evidence> <br />
+                        \(F(3,y_L) = F(3,1) = y_i-1 = 2-1 > 0\) <evidence>L est en-dessous</evidence> <br />
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
-    <script>actualiserModeAffichage();</script>
-    <!--Optional JavaScript -->
-    <!--jQuery first, then Popper.js, then Bootstrap JS -->
+        <script>actualiserModeAffichage();</script>
+        <!--Optional JavaScript -->
+        <!--jQuery first, then Popper.js, then Bootstrap JS -->
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>
