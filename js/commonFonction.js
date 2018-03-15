@@ -47,7 +47,7 @@ var setSticky = function (evt) {
 
 const CONTAINER = "container";
 const CONTAINER_FLUID = "container-fluid";
-var modeAffichage = CONTAINER_FLUID;
+var modeAffichage = CONTAINER;
 
 var actualiserModeAffichage = function () {
     var t = document.getElementsByClassName("modeAffichage");
