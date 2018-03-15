@@ -23,6 +23,8 @@
     <link rel="stylesheet" href="codemirror-5.34.0/theme/ambiance.css">
     <script src="codemirror-5.34.0/clike.js"></script>
 
+    <!--MathJax-->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
 
     <title>Informatique graphique</title>
 
@@ -483,6 +485,7 @@ void redimension(int width, int height) {}
                     Pour ajouter un facteur d'échelle suivant la matrice de facteur d'échelle S(S<sub>x</sub>, S<sub>y</sub>): <br />
                     <img src="img/transfo5.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
                 </p>
+                <p>On multiplie P<sub>1</sub> avec le facteur d'échelle S(S<sub>x</sub>, S<sub>y</sub>)</p>
                 <img src="img/transfo4.png" style="max-width:400px;width:100%;" class="figure-img img-fluid rounded" alt="">
             </div>
             <div class="cours">
@@ -571,6 +574,100 @@ void redimension(int width, int height) {}
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div id="visu">
+            <a href="#infoVisualisation">
+                <nav id="infoVisualisation" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                    <h4 class="titre">Visualisation dans l'espace</h4>
+                </nav>
+            </a>
+            <div class="cours">
+                <h5>Caméra</h5>
+                <p>La caméra est un programme qui va nous permettre de produire une image dans une fenêtre</p>
+                <p>Le repère \(\vec{u}, \vec{v}, \vec{n}\) pour la caméra et le repère \(\vec{x}, \vec{y}, \vec{z}\) pour la scène à représenter.</p>
+                <img src="img/infoVisu1.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                <img src="img/infoVisu2.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+            </div>
+            <div class="exemple">
+                Pour prendre une photo avec la caméra nous devons effectuer les actions suivantes :
+                <ul>
+                    <li><evidence>Spécifier le type de projection</evidence> permettant de passer d'un espace à un plan (projection parallèles et perspectives).</li>
+                    <li><evidence>Spécifier les paramètres de vue</evidence>, position et orientation de l'oeil et du plan de vue ou la scène à afficher.</li>
+                    <li><evidence>Supprimer les objets invisibles</evidence>. Cette opération nommée clipping permet de supprimer les objets se trouvant dans le volume de projection.</li>
+                    <li>
+                        <evidence>Afficher la projection</evidence> dans la fenêtre. Les coordonnées du monde réel sont transformées en coordonnées fenêtre.
+                        On étudiera l'alogrithme classique nommé <i>z-buffer</i>
+                    </li>
+                </ul>
+            </div>
+            <div class="cours">
+                <h5>Transformation de visualisation</h5>
+                Cette transformation spécifie la position de la caméra ainsi que sa direction.
+                <div class="exemple">
+                    <h5>OpenGL</h5>
+                    <p>
+                        - La bibliothèque OpenGL ne possède pas de fonctions spécifiques pour placer la caméra.
+                        C'est pourquoi dans le fichier base.c la fonction <i>display</i> appelant la fonction <i>description</i> commence par un appel à une translation <i>glTranslated</i> (0,0,-2*coord).
+                        La scène est donc déplacée à la coordonnée z = -2*coord par rapport à la caméra qui reste toujours fixe à l'origine 0 orientée dans le sens de l'axe \(-\vec{z}\)
+                    </p>
+                    <img src="img/infoVisu3.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <p>
+                        - La bibliothèque place dans la même matrice les tranformations de modélisation et les transformations permettant de spécifier le point de vue.
+                        Cette matrice est nommé <i>GL_MODELVIEW</i>. L'appel à la fonction <i>glMatrixMode(GL_MODELVIEW)</i> permet de spécifier que les transformations suivantes s'appliqueront à la matrice modèle-vue.
+                    </p>
+                    <p>
+                        - Pour initialiser la matrice, nous utiliserons la fonction <i>glLoadIdentity()</i> qui place, dans la matrice concernée, la matrice identité. La fonction <i>resize</i>
+                        (redimensionnement de la fenêtre) du fichier base.c se termine en mettant en fonctionnement la matrice de modèle-vue.
+                    </p>
+                </div>
+            </div>
+            <div class="cours">
+                <h5>Projections</h5>
+                <p>Les projections permettent de passer d'une représentation de la scène dans l'espace à trois dimensions à une représentation dans le plan à deux dimensions.</p>
+                <div class="exemple font-italic">
+                    <img class="logoInfo" src="img/logo-info.png" height="25" />
+                    Nous verrons ici uniquement les projections planaire, c'est à dire les projections sur un plan.
+                </div>
+                <div class="cours">
+                    <h5>Projections géométriques planes</h5>
+                    <p>
+                        Les projections transforment les points d'un système de coordonnées de dimension  \(n\) en des points dans un système de coordonnées de dimension \(n-1\).
+                    </p>
+                    <p>Les <b>projecteurs</b> sont les rayons droits qui partent du <b>centre de projection</b>, passent par chaque point de l'objet et intersectent un <b>plan de projection</b>.</p>
+                    <p>Ce centre de projection peut être à une distance <b>infinie</b>, c'est le cas avec la <evidence>projection parallèle</evidence>, ou à une distance <b>finie</b>, c'est le cas avec la <evidence>projection perspective</evidence>.</p>
+                    <img src="img/infoVisu4.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <img src="img/infoVisu5.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <div class="exemple">
+                            Projection parallèle d'un cube<br />
+                          <img src="img/infoVisu6.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" /> <br />
+                            Projection perspective d'un cube<br />
+                            <img src="img/infoVisu7.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    </div>
+                </div>
+                <div class="cours">
+                    <h5>Mathématiques pour les projections</h5>
+                    Soit un point \(P=(x,y,z)\) de l'objet à projeter et un point \(P_r=(x_p,y_p,z_p)\) <br />
+                    <img src="img/infoVisu8.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" /> <br />
+                    <p>Nous allons determiner les relations en les coordonnées du point de l'objet \((x,y,z)\) et les coordonnées du point de l'objet dans le plan de projection \((x_p,y_p,z_p)\). 
+                        La figure ci-dessous illustre la calcul de la coordonnée \(y_p\) en se plaçant dans le plan \(x=0\).
+                    </p>
+                    <img src="img/infoVisu9.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" /><br />
+                    <evidence>Projection perspective</evidence> <br />
+                    <img src="img/infoVisu10.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <img src="img/infoVisu11.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" /> 
+                    <img src="img/infoVisu12.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <img src="img/infoVisu13.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" /> <br />
+                    <evidence>Projection parallèle</evidence><br />
+                    <img src="img/infoVisu14.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <img src="img/infoVisu15.png" style="max-width:200px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                    <img src="img/infoVisu16.png" style="max-width:300px;width:100%;" class="figure-img img-fluid rounded" alt"" />
+                </div>
+            </div>
+            <div class="exemple">
+                <h5><b>Exercices</b></h5>
+                <h5>Transformation de visualisation</h5>
             </div>
         </div>
 
