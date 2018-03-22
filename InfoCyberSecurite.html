@@ -499,6 +499,54 @@
         </div>
     </div>
 
+    <div class="modeAffichage">
+        <a href="#infoVisualisationPlan">
+            <nav id="infoVisualisationPlan" class="navbar sticky-top navbar-light barTitre" onclick="showTitle(this);">
+                <h4 class="titre">Vulnérabilités par injection XSS et SQLi</h4>
+            </nav>
+        </a>
+        <div class="cours">
+            <h5>Cross-Site Scripting ou XSS</h5>
+            <p>
+                Le Cross-Site Scripting ou XSS est une attaque par injection qui exploite les interactions entre une application Web et ses utilisateurs.
+            </p>
+            <p>
+                Un attaquant peut par exemple :
+                <ul>
+                    <li>Voler une session en récupérant le cookie et prendre possession du compte</li>
+                    <li>Diffuser des vers (comme <em>Sammy Worm</em> dans <i>MySpace</i>)</li>
+                    <li>Accéder à l'historique du navigateur</li>
+                    <li>Contrôler le navigateur à distance</li>
+                    <li>Scanner et exploiter des applications intranet</li>
+                    <li>Scanner les fichiers stockés sur le poste client</li>
+                    <li>Installer un Trojan</li>
+                    <li>Rediriger l'utilisateur vers un site externe</li>
+                    <li>Défigurer un site</li>
+                </ul>
+            </p>
+        </div>
+        <div class="exemple">
+            <h5>Exemple d'injection : </h5>
+                <xmp><script>XX = [ICI]</script></xmp>
+                <xmp><img src="[ICI]" /></xmp>
+            <xmp><div style=[ICI]:bla></xmp>
+                <xmp><style>div{'aa:a[ICI]aa'}</style></xmp>
+                <xmp><body onload:"[ICI]"> </body></xmp>
+            <xmp><div onmouseover:'XX(1,'[ICI]')'></div></xmp>
+            <p>Et la liste n'est pas du tout exhaustive!</p>
+           
+        </div>
+        <div class="cours">
+            <h5>XSS non-persistant</h5>
+            <p>
+
+            </p>
+            <h5>XSS persistant</h5>
+            <p>
+
+            </p>
+        </div>
+    </div>
     <script>actualiserModeAffichage();</script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

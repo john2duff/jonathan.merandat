@@ -1,3 +1,4 @@
+
 function buildElement(element, className, id, innerHTML, textContent, style) {
     var elementHTML = document.createElement(element);
     if (className != undefined) { elementHTML.className = className; }
