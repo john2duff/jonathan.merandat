@@ -2,6 +2,14 @@ html {
     font-size: 1rem;
 }
 
+<<<<<<< HEAD
+=======
+ul {
+    padding-left: 2em;
+    padding-top: 0.5em;
+}
+
+>>>>>>> daebf581245e4d79d7649d16fe96538521a90f21
 @include media-breakpoint-up(sm) {
     html {
         font-size: 1.2rem;
@@ -20,6 +28,11 @@ html {
     }
 }
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> daebf581245e4d79d7649d16fe96538521a90f21
 .tiret{
     list-style-type:none;
 }
@@ -49,7 +62,14 @@ html {
     box-shadow: 8px 8px 12px #aaa;
     margin-left: -10px;
     margin-right: -10px;
+<<<<<<< HEAD
     border-radius: 3px;
+=======
+    /*border-radius: 3px;*/x
+    margin-bottom: 3px;
+    margin-top: 3px;
+    z-index:999;
+>>>>>>> daebf581245e4d79d7649d16fe96538521a90f21
 }
 a > .barTitre > .titre {
     text-decoration: none;
@@ -91,11 +111,24 @@ evidence {
     width:100%;
 }
 
+<<<<<<< HEAD
+=======
+.flex-row-vcenter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+>>>>>>> daebf581245e4d79d7649d16fe96538521a90f21
 .conversionBin{
     padding:1em;
 }
 .text-conversionBin{
+<<<<<<< HEAD
     width:150px;
+=======
+    width:120px;
+>>>>>>> daebf581245e4d79d7649d16fe96538521a90f21
 }
 
 .logoInfo{
@@ -118,8 +151,24 @@ evidence {
     z-index:99999;
 }
 
+<<<<<<< HEAD
 .stickyButton{
     z-index:99999;
+=======
+.stickyButton {
+    position: absolute;
+    z-index: 1;
+    opacity: 0.2;
+    position: relative;
+    float: right;
+}
+.stickyButton:hover{
+    opacity:1;
+}
+.stickyElement {
+    display:flex;
+    flex-direction:column;
+>>>>>>> daebf581245e4d79d7649d16fe96538521a90f21
 }
 
 .CodeMirror, .CodeMirror-scroll {
