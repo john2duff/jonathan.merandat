@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
  <head>
   <meta charset="utf-8"/>
@@ -42,19 +42,25 @@
  </head>
  <body onclick="keypress();" onkeypress="keypress();">
     <div id="global">
-        <canvas id="canvas"  style="display:none;"></canvas>
+        <canvas id="canvas" onclick="keypress();" style="display:none;"></canvas>
         <div id="personnages" style="display:flex;z-index:999;">
-            <div class="personnage" >
-                <img id="paul" src="img/personnage/paul.jpg" width=100 height=100 onclick="go('paul');"/>
+            <div class="personnage">
+                <img id="paul" src="img/personnage/paul.jpg" width=100 height=100 onclick="go();" />
                 <label>Paul</label>
             </div>
-            <div class="personnage" >
-                <img id="cath" src="img/personnage/cath.jpg" width=100 onclick="go('cath');"/>
+            <div class="personnage">
+                <img id="cath" src="img/personnage/cath.jpg" width=100 onclick="go();" />
                 <label>Cath</label>
             </div>
-            <div class="personnage" >
-                <img id="celine" src="img/personnage/celine.jpg"width=100 onclick="go('celine');"/>
+            <div class="personnage">
+                <img id="celine" src="img/personnage/celine.jpg" width=100 onclick="go();" />
                 <label>Céline</label>
+            </div>
+            <div class="objets" style="display:none;">
+                <img id="celine1" src="img/objet/celine1.png" width=100 />
+                <img id="paul1" src="img/objet/paul1.jpg" width=100 />
+                <img id="celine2" src="img/objet/celine2.jpg" width=100  />
+                <img id="cath1" src="img/objet/cath1.png" width=100 />
             </div>
         </div>
     </div>
@@ -69,6 +75,18 @@
         var largeur = global.offsetWidth;  
         canvas.width = largeur;
         canvas.height = hauteur;
+        var maxObjetLeft = 2000;
+        var minObjetLeft = 500;
+        var maxObjetTop = 100;
+        var minObjetTop = 500;
+
+        function rdm() {
+            return Math.round(Math.random() * (maxObjetLeft - minObjetLeft) + minObjetLeft, 0);
+        }
+
+        function rdm3() {
+            return Math.round(Math.random() * (maxObjetTop - minObjetTop) + minObjetTop, 0);
+        }
 
         var ctx; 
         var ctx = canvas.getContext("2d");
@@ -84,7 +102,18 @@
         var GREEN1_LIGHT = COUL(65, 182, 113, 0.8);
         var BLUE = COUL(72, 213, 232, 1);
 
-        
+        /**DEFINITIONS PERSONNAGE**/
+        var idPersonnage=0;
+
+        /**DEFINITIONS OBJETS**/
+        var objets = [["paul1"], ["celine1", "celine2"], ["cath1"]];
+        var objetsDecalage = [[rdm()], [rdm(), rdm()], [rdm()]];
+        var nbreObjet = 6;
+        function rdm2() {
+            return Math.round(Math.random() * (objets[idPersonnage].length-1 - 0) + 0,0);
+        }
+        var objetTireAuSort;
+
         /**DEFINITIONS FOND**/
         var ratioHsol = 0.2;
         var ratioHmontagne = [0.7, 0.7, 0.7];
@@ -99,8 +128,10 @@
         var vitesseMouvementFond = 2000; 
         var hauteurSaut = hauteur * 0.6;
         var saut;
-        var phaseMonte= false;
-        var gravite = 9.8; /*metre par seconde au carré*/
+        var phaseMonte = false;
+        var coefEasy = 0.15;
+        var vyAller = 1 + coefEasy ;
+        var vyRetour = 1 - coefEasy ;
         var hauteurImagePersonnage = 70;
         var topPersonnage = Math.round((hauteur * (1-ratioHsol))-hauteurImagePersonnage,0);
         var topPerso = topPersonnage;
@@ -117,6 +148,8 @@
         }
         var hauteurMontagne = longueurs(ratioHmontagne, hauteur);
         var largeurMontagne = longueurs(ratioLmontagne, largeur);
+
+        
 
         /**FOND**/
         var fond = {
@@ -147,22 +180,31 @@
                     ctx.lineTo(p3, hauteur -hauteurSol );
                     ctx.fill();
                 }
+                /*Objet à prendre*/
+                for (var i = 0; i < nbreObjet; i++) {
+                    leftObjet = objetsDecalage[idPersonnage];
+                    if (leftObjet < 0) {
+                        objetsDecalage[idPersonnage] = rdm();
+                    } else {
+                        objetsDecalage[idPersonnage] -= pasTranslationFond;
+                    }
+                    ctx.drawImage(document.getElementById(objets[idPersonnage][objetTireAuSort]),
+                        objetsDecalage[idPersonnage], rdm3(),
+                        hauteurImagePersonnage, hauteurImagePersonnage);
+                }
                 /*sol*/
                 ctx.fillStyle = MARRON2_LIGHT;
                 ctx.fillRect(0,hauteur-hauteurSol,largeur,hauteur);
                 /*personnage*/
-            
-                    if (phaseMonte && topPerso > topPersonnage - hauteurSaut){
-                        topPerso -= pasTranslationFond;
-                    }else if (topPerso < topPersonnage){
-                        topPerso += pasTranslationFond;                    
-                        phaseMonte = false;
-                    }else{
-                        topPerso = topPersonnage;
-                        saut = false;
-                    }
-
-                
+                if (phaseMonte && topPerso > topPersonnage - hauteurSaut) {
+                    topPerso *= vyRetour;
+                } else if (topPerso < topPersonnage) {
+                    topPerso *= vyAller;                    
+                    phaseMonte = false;
+                }else{
+                    topPerso = topPersonnage;
+                    saut = false;
+                }
                 ctx.drawImage(  document.getElementById(this.personnage),
                                 leftPersonnage, topPerso, 
                                 hauteurImagePersonnage, hauteurImagePersonnage);
@@ -183,24 +225,38 @@
         }
 
         var keypress = function (){
-
             if (event.key == "p" && jenEnCours){
                 window.cancelAnimationFrame(raf);
                 jenEnCours=false;
             }else if (event.key == "p" && !jenEnCours){
                 raf = window.requestAnimationFrame(draw);
                 jenEnCours=true;
-            }else if (event.key == " " && jenEnCours){
+            }else if ((event.type = "click" || event.key == " ") && jenEnCours){
                 saute();
             }
         }
-        var go = function(personnage){
-            fond.personnage = personnage;
+        canvas.addEventListener('click', function () { keypress(); });
+
+        var go = function(){
+            fond.personnage = event.target.id;
+            switch (event.target.id) {
+                case "paul":
+                    idPersonnage = 0;
+                    break;
+                case "cath":
+                    idPersonnage = 1;
+                    break;
+                case "celine":
+                    idPersonnage = 2;
+                    break;
+            }
+            objetTireAuSort = rdm2();
             canvas.style.display = "block";
             personnages.style.display = "none";
             raf = window.requestAnimationFrame(draw);
             jenEnCours=true;
         }
+
 
     </script>
 
