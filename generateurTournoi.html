@@ -1,19 +1,180 @@
-<html>
-    <head>
-        <title>Générateur de tournoi de Badminton</title>
-    </head>
-    <body>
+<!doctype html>
+<html lang="fr">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <input type="button">Save saveCookie</input>
+        <meta charset="UTF-8">
+        <title>Générateur de tournoi de Badminton</title>
+        <style>
+            .itemList {
+                display: flex;
+                flex-direction: row;
+                padding: 10px;
+                background-color: lightgray;
+                border-radius: 5px;
+                margin: 10px;
+            }
+            .allParamItem {
+                display: flex;
+                flex: 1 1 auto;
+            }
+            .paramItem {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                margin: 0px 5px;
+            }
+            .labelParamItem{
+                color: gray;
+                font-size: 0.7em;
+                margin: 0px;
+                padding-left: 5px;
+            }
+            .valueParamItem{
+                color:black;
+                font-size: 1em;
+                padding:5px;
+            }
+
+        </style>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    </head>
+    <body onload="refresh();">
+
+        <div id="header" class="container">
+            <div>
+                <label for="bdTournoi">Sélectionner un fichier importer (.txt)</label>
+                <input type="file" id="bdTournoi" name="bdTournoi" accept=".json">
+            </div>
+            <input type="button" value="Refresh" onclick="refresh();">  
+        </div>
+        
+
+        <div id="joueurs" class="container">
+            
+        </div>
 
         <script>
-            function saveCookie(nom, prenom){
-                var cookiePath = "/GenerateurTournoi/";
-                var cookieContent = "nom=" + nom + ";prenom=" + prenom + ";";
-                var cookieExpire = new Date() + 30;
-                document.cookie = cookieContent + cookieExpire + cookiePath;
+        
+        function refresh(){
+            refreshList("joueur");
+        }
+
+//----------View
+
+            function refreshList(item){
+                var listModel = getBDItem(item, "array");
+                var listView = initView(item, "array");
+                listView.appendChild(buildElement("h2", "Liste des " + item + "s"));
+                for (var i = 0; i < listModel.length; i++){
+                    listView.appendChild(this.buildItemList(item, listModel[i], i));
+                }
             }
+
+            //construire l'affichage d'un item dans une liste
+            function buildItemList(item, content, compt){
+                var div = buildElement("div", "", "item" + compt, "itemList " + item);
+                var id = compt + "" + key;
+                var divAllParams = buildElement("div", "", "allParamItem" + compt, "allParamItem " + item);
+                for (var key in content){
+                    var divParam = buildElement("div", "", "paramItem" + compt, "paramItem " + item);
+                    divParam.appendChild(buildElement("label", key, "labelParamItem" + item + + id, "labelParamItem " + item))
+                    if (typeof(content[key]) == "object"){
+                        divParam.appendChild(buildItemList(item + "-" + id, content[key], id));
+                    } else{
+                        divParam.appendChild(buildElement("span", content[key], "valueParamItem" + item + id, "valueParamItem " + item));
+                    }
+                    divAllParams.appendChild(divParam);
+                }
+                div.appendChild(divAllParams);
+
+                var buttonEdit = buildElement("button", "Editer");
+                buttonEdit.setAttribute("class", "btn btn-outline-secondary");
+                div.appendChild(buttonEdit);
+                
+                return div;
+            }
+
+            function buildElement(type, innerHTML, id, className){
+                var elt = document.createElement(type);
+                if (id != undefined) elt.setAttribute("id", id);
+                if (className != undefined) elt.setAttribute("class", className);
+                if (innerHTML != undefined) elt.innerHTML = innerHTML;
+                return elt;
+            }   
+
+            function getView(nomView, type, parent){
+                var id;
+                if (type == "array"){
+                    id = nomView + "s";
+                }else{
+                    id = nomView;
+                }
+                return document.getElementById(id);
+            }
+
+            function initView(nomView, type){
+                var listView = getView(nomView, type);
+                listView.innerHTML = "";
+                return listView;
+            }
+            
+//----------Model BD
+
+            //Récupérer toute la base de donnée
+            function getBDItem(key, type, source){
+                if (source == undefined) source = localStorage.getItem("generateurTournoi");
+                source = JSON.parse(source);           
+                if (type == "array") key += "s";
+                return getBDItemRecursif(source, key, 0);
+            }
+
+            function getBDItemRecursif(source, key){
+                for (var i in source) {
+                    if (i == key){
+                        return source[i];
+                    }else if (typeof(source[i]) == "object"){
+                        return getBDItemRecursif(source, key);
+                    }
+                }
+            }
+
+            function saveBD(source){
+                localStorage.setItem("generateurTournoi", JSON.stringify(source));
+            }
+
+            function saveBDItem(item){
+                var all;
+                if (item == "joueur") {
+                    all += JSON.parse(item);
+                } else{
+                    all += JSON.parse(getBDItem("joueur"));
+                }
+                saveBD(all);
+            }
+
+            var importDatas;
+            //import
+            document.getElementById("bdTournoi").addEventListener('change', function() {   
+                var fichier = new FileReader(); 
+                fichier.onload = function() { 
+                    var json = JSON.parse(fichier.result);
+                    saveBD(json);
+                    refresh();
+                }   
+                fichier.readAsText(this.files[0]); 
+            });
+
+
+            
         </script>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
 
     </body> 
 

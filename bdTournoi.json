@@ -1,0 +1,12 @@
+{
+    "joueurs": [
+        {
+            "nom": "Test",
+            "prenom": "Jonathan"
+        },
+        {
+            "nom": "Jobard",
+            "prenom": "Celine"
+        }
+    ]
+}
