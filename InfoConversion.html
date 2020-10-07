@@ -72,7 +72,8 @@
                   <h4 class="titre">Bin - décimal - hexa</h4>
               </nav>
           </a>
-          <div class="conversionBin">
+        <center>
+          <div class="conversionBin" style="margin:20px">
               <div class="input-group mb-3" style="max-width:600px;">
                   <div class="input-group-prepend">
                       <span class="input-group-text text-conversionBin" id="basic-addon1">Binaire</span>
@@ -93,6 +94,7 @@
                   <input id="inputHexa" onkeydown="testHexa(this);" pattern="[A-F]" oninput="changeHexa(this.value);" type="text" class="form-control text-uppercase" placeholder="2B" aria-label="Username" aria-describedby="basic-addon3">
               </div>
           </div>
+          </center>
       </div>
 
       <script>actualiserModeAffichage();</script>
