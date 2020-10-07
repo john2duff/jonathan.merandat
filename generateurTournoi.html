@@ -25,6 +25,7 @@
                 flex-direction: column;
                 justify-content: center;
                 margin: 0px 5px;
+                width: 100px;
             }
             .labelParamItem{
                 color: gray;
@@ -38,6 +39,16 @@
                 padding:5px;
             }
 
+            #header{
+                background-color: #c6e1c6;
+                display: flex;
+                flex-direction: row;
+            }
+            #logoBadLevier{
+                height: 50px;
+                width: 50px;
+            }
+
         </style>
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -45,6 +56,7 @@
     <body onload="refresh();">
 
         <div id="header" class="container">
+            <img id="logoBadLevier" src="./img/logoBadLevier.jpg"/>
             <div>
                 <label for="bdTournoi">Sélectionner un fichier importer (.txt)</label>
                 <input type="file" id="bdTournoi" name="bdTournoi" accept=".json">
@@ -167,8 +179,6 @@
                 }   
                 fichier.readAsText(this.files[0]); 
             });
-
-
             
         </script>
 
