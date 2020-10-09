@@ -1,12 +1,16 @@
+
 {
-    "joueurs": [
-        {
-            "nom": "Test",
-            "prenom": "Jonathan"
-        },
-        {
-            "nom": "Jobard",
-            "prenom": "Celine"
-        }
+    "joueurs": [ 
+        ["Nom", "Prenom", "Genre"],
+        ["string", "string", "genre"],
+        ["Merandat", "Jonathan", "Homme"],
+        ["Jobard", "Céline", "Femme"],
+        ["Noblot", "Amandine", "Femme"],
+        ["Aranda", "Rodolph", "Homme"],
+        ["Davy", "Guinchard", "Homme"]
+    ], 
+    "preparation": [
+        ["Nombre_terrain_disponible", "integer", 5],
+        ["Nombre_tour", "integer", 5]
     ]
 }

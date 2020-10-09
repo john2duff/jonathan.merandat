@@ -2,14 +2,6 @@ html {
     font-size: 1rem;
 }
 
-<<<<<<< HEAD
-=======
-ul {
-    padding-left: 2em;
-    padding-top: 0.5em;
-}
-
->>>>>>> daebf581245e4d79d7649d16fe96538521a90f21
 @include media-breakpoint-up(sm) {
     html {
         font-size: 1.2rem;
@@ -151,24 +143,8 @@ evidence {
     z-index:99999;
 }
 
-<<<<<<< HEAD
 .stickyButton{
     z-index:99999;
-=======
-.stickyButton {
-    position: absolute;
-    z-index: 1;
-    opacity: 0.2;
-    position: relative;
-    float: right;
-}
-.stickyButton:hover{
-    opacity:1;
-}
-.stickyElement {
-    display:flex;
-    flex-direction:column;
->>>>>>> daebf581245e4d79d7649d16fe96538521a90f21
 }
 
 .CodeMirror, .CodeMirror-scroll {

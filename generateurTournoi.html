@@ -12,13 +12,17 @@
                 display: flex;
                 flex-direction: row;
                 padding: 10px;
-                background-color: lightgray;
-                border-radius: 5px;
+                background-color: white;
+                /* border-radius: 5px; */
                 margin: 10px;
+                flex-wrap: wrap;
+                box-shadow: 4px 5px 11px 1px #c3c3c3;
             }
             .allParamItem {
                 display: flex;
                 flex: 1 1 auto;
+                flex-wrap: wrap;
+                flex-direction: row;
             }
             .paramItem {
                 display: flex;
@@ -39,14 +43,17 @@
                 padding:5px;
             }
 
-            #header{
-                background-color: #c6e1c6;
-                display: flex;
-                flex-direction: row;
-            }
             #logoBadLevier{
-                height: 50px;
-                width: 50px;
+                max-height: 50px;
+            }
+
+            .barItem{
+                background-color: #e3e3e3;
+                padding: 10px;
+            }
+            .sensInverse{
+                flex-direction: column;
+                flex-wrap: initial;
             }
 
         </style>
@@ -56,58 +63,238 @@
     <body onload="refresh();">
 
         <div id="header" class="container">
-            <img id="logoBadLevier" src="./img/logoBadLevier.jpg"/>
-            <div>
-                <label for="bdTournoi">Sélectionner un fichier importer (.txt)</label>
-                <input type="file" id="bdTournoi" name="bdTournoi" accept=".json">
-            </div>
-            <input type="button" value="Refresh" onclick="refresh();">  
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <img id="logoBadLevier" class="rounded mx-auto d-block img-thumbnail" href="#" src="./img/logoBadLevier.jpg"/>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a id="buttonJoueurs" class="nav-link" href="#joueurs">Joueurs<span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item active">
+                            <a id="buttonConfig" class="nav-link" href="#config">Config</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a id="buttonTournoi" class="nav-link" href="#tournoi">Tournoi</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Import/Export
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <label class="dropdown-item btn-file">
+                                    Import <input id="bdTournoi" type="file" accept=".json" style="display: none;">
+                                </label>
+                                <label class="dropdown-item" onclick="exportTournoi();">
+                                    Export 
+                                </label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                
+            </nav>
         </div>
         
-
-        <div id="joueurs" class="container">
-            
+        <div class="container-fluid">
+            <div id="joueurs" class="container liste"></div>
+            <div id="preparation" class="container"></div>
         </div>
+
 
         <script>
-        
-        function refresh(){
-            refreshList("joueur");
-        }
 
+        //configuration du logiciel
+        var mainConfig = {
+            "listes": [
+                ["genre", "string", ["Homme", "Femme"]],
+                ["niveau", "string", ["P12", "P11", "P10"]]
+            ],
+            "nomBd": "generateurTournoi",
+        }
+        
 //----------View
 
-            function refreshList(item){
-                var listModel = getBDItem(item, "array");
-                var listView = initView(item, "array");
-                listView.appendChild(buildElement("h2", "Liste des " + item + "s"));
-                for (var i = 0; i < listModel.length; i++){
-                    listView.appendChild(this.buildItemList(item, listModel[i], i));
-                }
+            var modeAffichageEnum = {
+                formulaire: "Formulaire", 
+                tableau: "Tableau"
+            }
+            var currentModeAffichage = modeAffichageEnum.formulaire;
+
+            window.addEventListener("resize", function(){
+                refresh();
+            });
+
+            var sens = {
+                "joueurs": true,
+                "preparation": true
             }
 
-            //construire l'affichage d'un item dans une liste
-            function buildItemList(item, content, compt){
-                var div = buildElement("div", "", "item" + compt, "itemList " + item);
-                var id = compt + "" + key;
-                var divAllParams = buildElement("div", "", "allParamItem" + compt, "allParamItem " + item);
-                for (var key in content){
-                    var divParam = buildElement("div", "", "paramItem" + compt, "paramItem " + item);
-                    divParam.appendChild(buildElement("label", key, "labelParamItem" + item + + id, "labelParamItem " + item))
-                    if (typeof(content[key]) == "object"){
-                        divParam.appendChild(buildItemList(item + "-" + id, content[key], id));
-                    } else{
-                        divParam.appendChild(buildElement("span", content[key], "valueParamItem" + item + id, "valueParamItem " + item));
-                    }
-                    divAllParams.appendChild(divParam);
+            function refresh(){
+                if (window.innerWidth > 500){
+                        currentModeAffichage = modeAffichageEnum.tableau; 
+                    }else{
+                        currentModeAffichage = modeAffichageEnum.formulaire; 
                 }
-                div.appendChild(divAllParams);
+                refreshList("joueurs", "Joueurs", 2, sens["joueurs"]); 
+                refreshList("preparation", "Préparation", 1, sens["preparation"]);
+            }
 
-                var buttonEdit = buildElement("button", "Editer");
-                buttonEdit.setAttribute("class", "btn btn-outline-secondary");
-                div.appendChild(buttonEdit);
+            //bArray s'il s'agit d'une liste d'élement similaire
+            function refreshList(item, titre, dimension, sensNormal){
+                var listModel = getBDItem(item);
+                var listView = initView(item);
+                var divBarItem = buildElement("div");
+                if (sensNormal == undefined) sensNormal = true;
                 
-                return div;
+                var bFormulaire = currentModeAffichage == modeAffichageEnum.formulaire;
+                var bTableau = currentModeAffichage == modeAffichageEnum.tableau;
+
+                var divTitre = buildElement("div", undefined, undefined, "sticky-top barItem");
+                divTitre.style = "display:flex;flex-direction:row;justify-content:space-between;";
+                divTitre.appendChild(buildElement("h2", titre));
+                var buttonInverse = buildElement("button", "Inverse", undefined, "btn btn-light");
+                buttonInverse.setAttribute("onclick", "inverseSens('" + item + "');");
+                buttonInverse.value = "Inverse";
+                divTitre.appendChild(buttonInverse);
+                listView.appendChild(divTitre);
+                
+                if (bFormulaire) {
+                    listView.appendChild(buildListForm(item, listModel, dimension, sensNormal));
+                }else if (bTableau) {
+                    listView.appendChild(buildTable(item, listModel, dimension, sensNormal));
+                }
+                
+            }
+
+            function inverseSens(item){
+                sens[item] = !sens[item];  
+                refresh();
+            }
+
+            /****  CREATION TABLE  ******/
+            {
+
+                function buildTable (item, listModel, dimension, sensNormal){
+                    var currentTr;
+                    var table = buildElement("table", undefined, "listTableau" + item, "table");
+                    var thead = buildElement("thead", undefined, "headerListTableau");
+                    var tbody = buildElement("tbody", undefined, "bodyListTableau");
+                    var dim1 = dimension == 1;
+                    var dim2 = dimension == 2;
+                
+                    if (dim1){
+                        if (sensNormal){
+                            //remplissage du header
+                            currentTr = buildElement("tr");
+                            for (var i = 0; i < listModel.length; i++){
+                                currentTr.appendChild(this.buildHeaderCell(listModel[i][0], listModel[i][1]));
+                            }
+                            thead.appendChild(currentTr);
+                            //remplissage du body
+                            currentTr = buildElement("tr");
+                            for (var i = 0; i < listModel.length; i++){
+                                currentTr.appendChild(this.buildBodyCell(listModel[i][2]));
+                            }  
+                            tbody.appendChild(currentTr);
+                        } else{
+                            //remplissage du body
+                            for (var i = 0; i < listModel.length; i++){
+                                currentTr = buildElement("tr");
+                                currentTr.appendChild(this.buildHeaderCell(listModel[i][0], listModel[i][1]));
+                                currentTr.appendChild(this.buildBodyCell(listModel[i][2]));
+                                tbody.appendChild(currentTr);
+                            }
+                        }
+                    }else if (dim2){
+                        if (sensNormal){
+                            //remplissage du header
+                            currentTr = buildElement("tr");
+                            for (var i = 0; i < listModel[0].length; i++){
+                                currentTr.appendChild(this.buildHeaderCell(listModel[0][i], listModel[1][i]));
+                            }
+                            thead.appendChild(currentTr);
+                            //remplissage du body
+                            for (var i = 2; i < listModel.length; i++){
+                                currentTr = buildElement("tr");
+                                for (var k = 0; k < listModel[i].length; k++){
+                                    currentTr.appendChild(this.buildBodyCell(listModel[i][k]));
+                                }
+                                tbody.appendChild(currentTr);
+                            }
+                        }else{
+                            //remplissage du body
+                            for (var i = 0; i < listModel[0].length; i++){
+                                currentTr = buildElement("tr");
+                                currentTr.appendChild(this.buildHeaderCell(listModel[0][i], listModel[1][i]));
+                                for (var j = 2; j < listModel.length; j++){
+                                    currentTr.appendChild(this.buildBodyCell(listModel[j][i]));
+                                }
+                                tbody.appendChild(currentTr);
+                            }
+                        }
+                    }
+                    table.appendChild(thead);
+                    table.appendChild(tbody);
+                    return table;
+                }
+
+                function buildHeaderCell(header, headerType){
+                    currentContent = header.replace(/_/g, " ");
+                    currentTd = buildElement("th",  currentContent);
+                    currentTd.setAttribute("type", headerType);
+                    return currentTd;
+                }
+
+                function buildBodyCell(content){
+                    return buildElement("td", content);
+                }
+            
+            }
+
+            /****  CREATION FORMULAIRE  ******/
+            {
+                function buildListForm(item, listModel, dimension, sensNormal){
+                    var dim1 = dimension == 1;
+                    var dim2 = dimension == 2;
+                    var styleSensInverse = sensNormal ? "" : "sensInverse ";
+                    var divRetour = buildElement("div");
+                    if (dim1) {
+                       
+
+                    } else if (dim2) {
+                        divRetour = buildElement("div");
+                        var divAllParams;
+                        for (var i = 2; i < listModel.length; i++){
+                            div = buildElement("div", "", undefined, "itemList " + styleSensInverse + item);
+                            divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse + item);
+                            for (var j = 0; j < listModel[0].length; j++){
+                                divAllParams.appendChild(this.buildItemForm(item, listModel[0][j],  listModel[1][j], listModel[i][j], i));
+                            }
+                            div.appendChild(divAllParams);
+                            var buttonEdit = buildElement("button", "Editer");
+                            buttonEdit.setAttribute("class", "btn btn-outline-secondary");
+                            div.appendChild(buttonEdit);
+                            divRetour.appendChild(div);
+                        }
+                    }
+                    return divRetour;
+                }
+
+                //construire l'affichage d'un item dans une liste
+                function buildItemForm(item, header, headerType, content, compt){
+                    var id = compt + "" + header;
+                    var divParam = buildElement("div", "", "paramItem" + compt, "paramItem " + item);
+                    var label = buildElement("label", header, "labelParamItem" + item + + id, "labelParamItem " + item);
+                    label.setAttribute("type", headerType);
+                    divParam.appendChild(label);
+                    divParam.appendChild(buildElement("span", content, "valueParamItem" + item + id, "valueParamItem " + item));                    
+                    return divParam;
+                }
             }
 
             function buildElement(type, innerHTML, id, className){
@@ -118,18 +305,14 @@
                 return elt;
             }   
 
-            function getView(nomView, type, parent){
-                var id;
-                if (type == "array"){
-                    id = nomView + "s";
-                }else{
-                    id = nomView;
-                }
-                return document.getElementById(id);
+            function getView(nomView){
+                var node = document.getElementById(nomView);
+                if (node == null) console.error("L'élément HTML " + nomView + " n'existe pas." );
+                return node;
             }
 
-            function initView(nomView, type){
-                var listView = getView(nomView, type);
+            function initView(nomView){
+                var listView = getView(nomView);
                 listView.innerHTML = "";
                 return listView;
             }
@@ -137,25 +320,37 @@
 //----------Model BD
 
             //Récupérer toute la base de donnée
-            function getBDItem(key, type, source){
-                if (source == undefined) source = localStorage.getItem("generateurTournoi");
+            function getBDItem(key, source){
+                if (source == undefined) source = localStorage.getItem(mainConfig["nomBd"]);
                 source = JSON.parse(source);           
-                if (type == "array") key += "s";
-                return getBDItemRecursif(source, key, 0);
+                return getBDItemRecursif(source, key);
             }
+            
 
             function getBDItemRecursif(source, key){
                 for (var i in source) {
                     if (i == key){
                         return source[i];
                     }else if (typeof(source[i]) == "object"){
-                        return getBDItemRecursif(source, key);
+                        var retour = getBDItemRecursif(source[i], key);
+                        if (retour != null) return retour;
                     }
                 }
+                return null;
+            }
+
+            function getListe(nomListe){
+                var listes = this.getBDItem("listes");
+                for (var i = 0; i < listes.length; i++){
+                    if (listes[i][0] == nomListe){
+                        return liste[i][2];
+                    }
+                }
+                return null;
             }
 
             function saveBD(source){
-                localStorage.setItem("generateurTournoi", JSON.stringify(source));
+                localStorage.setItem(mainConfig["nomBd"], JSON.stringify(source));
             }
 
             function saveBDItem(item){
@@ -179,6 +374,19 @@
                 }   
                 fichier.readAsText(this.files[0]); 
             });
+
+            function exportTournoi() {
+                downloadFile(localStorage.getItem(mainConfig["nomBd"]));
+            }
+
+            function downloadFile(data, name, type){
+                name = "tournoi - " + new Date();
+                type = "text/plain";
+                var anchor = document.createElement("a");
+                anchor.href = window.URL.createObjectURL(new Blob([data], {type}));
+                anchor.download = name;
+                anchor.click();
+            }
             
         </script>
 
