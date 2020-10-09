@@ -50,12 +50,23 @@
             .barItem{
                 background-color: #e3e3e3;
                 padding: 10px;
+                display:flex;
+                flex-direction:row;
+                justify-content:space-between;
+                flex:1 1 auto;
+            }
+            .barItemInterface{
+                margin: 0px 5px;
+            }
+            .barItemTitre{
+                margin-left: 10px;
             }
             .sensInverse{
                 flex-direction: column;
                 flex-wrap: initial;
             }
 
+            
         </style>
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -71,20 +82,11 @@
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
-                        <li class="nav-item active">
-                            <a id="buttonJoueurs" class="nav-link" href="#joueurs">Joueurs<span class="sr-only">(current)</span></a>
-                        </li>
-                        <li class="nav-item active">
-                            <a id="buttonConfig" class="nav-link" href="#config">Config</a>
-                        </li>
-                        <li class="nav-item active">
-                            <a id="buttonTournoi" class="nav-link" href="#tournoi">Tournoi</a>
-                        </li>
-                        <li class="nav-item dropdown">
+                        <li class="nav-item dropdown" >
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Import/Export
                             </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <div class="dropdown-menu" style="z-index:1030;" aria-labelledby="navbarDropdownMenuLink">
                                 <label class="dropdown-item btn-file">
                                     Import <input id="bdTournoi" type="file" accept=".json" style="display: none;">
                                 </label>
@@ -133,6 +135,10 @@
                 "joueurs": true,
                 "preparation": true
             }
+            var edition = {
+                "joueurs": true,
+                "preparation": true
+            }
 
             function refresh(){
                 if (window.innerWidth > 500){
@@ -155,12 +161,18 @@
                 var bTableau = currentModeAffichage == modeAffichageEnum.tableau;
 
                 var divTitre = buildElement("div", undefined, undefined, "sticky-top barItem");
-                divTitre.style = "display:flex;flex-direction:row;justify-content:space-between;";
-                divTitre.appendChild(buildElement("h2", titre));
-                var buttonInverse = buildElement("button", "Inverse", undefined, "btn btn-light");
+                var titre = buildElement("h3", titre, undefined, "barItemTitre");
+                divTitre.appendChild(titre);
+                var divInterfaces = buildElement("div");
+                var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-light barItemInterface");
                 buttonInverse.setAttribute("onclick", "inverseSens('" + item + "');");
                 buttonInverse.value = "Inverse";
-                divTitre.appendChild(buttonInverse);
+                divInterfaces.appendChild(buttonInverse);
+                var buttonEdition = buildElement("button", "Editer", undefined, "btn btn-light barItemInterface");
+                buttonEdition.setAttribute("onclick", "inverseEdition('" + item + "');");
+                buttonEdition.value = "Editer";
+                divInterfaces.appendChild(buttonEdition);
+                divTitre.appendChild(divInterfaces);
                 listView.appendChild(divTitre);
                 
                 if (bFormulaire) {
@@ -173,6 +185,10 @@
 
             function inverseSens(item){
                 sens[item] = !sens[item];  
+                refresh();
+            }
+            function inverseEdition(item){
+                edition[item] = !edition[item];  
                 refresh();
             }
 
@@ -276,9 +292,9 @@
                                 divAllParams.appendChild(this.buildItemForm(item, listModel[0][j],  listModel[1][j], listModel[i][j], i));
                             }
                             div.appendChild(divAllParams);
-                            var buttonEdit = buildElement("button", "Editer");
+                            /*var buttonEdit = buildElement("button", "Editer");
                             buttonEdit.setAttribute("class", "btn btn-outline-secondary");
-                            div.appendChild(buttonEdit);
+                            div.appendChild(buttonEdit);*/
                             divRetour.appendChild(div);
                         }
                     }
