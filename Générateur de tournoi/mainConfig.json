@@ -1,0 +1,123 @@
+{
+    "nativeTypes": ["string", "integer"],
+    "model": {
+        "genre": { 
+            "title": "Liste des genres", 
+            "desc": "Etes-vous un homme ou une femme ?",
+            "columns": [
+                {   "title": "genre",
+                    "desc": "Le genre", 
+                    "type": "string",
+                    "datas": ["Homme", "Femme"], 
+                    "defaultValue": "Homme"
+                }
+            ],
+            "multiplicity": "n",
+            "persistent": false 
+        },
+        "niveau": {
+            "title": "Liste des niveaux", 
+            "desc": "Les niveaux existants", 
+            "columns": [
+                {   "title": "Niveau",
+                    "desc": "Le genre", 
+                    "type": "string",
+                    "datas": ["P12", "P11", "P10"],
+                    "defaultValue": "P12"
+                }
+            ],
+            "multiplicity": "n",
+            "persistent": false
+        },
+        "typeTournoi": {
+            "title": "Les types de tournoi", 
+            "desc": "Il peut s'agir d'un tournoi simple ou double", 
+            "columns": [
+                {   "title": "Type de tournoi",
+                    "desc": "Le type de tournoi", 
+                    "type": "string",
+                    "datas": ["Simple", "Double"],
+                    "defaultValue": "Simple"
+                }
+            ],
+            "multiplicity": "n",
+            "persistent": false
+        },
+        "nombreTour": {
+            "title": "Nombre de tour", 
+            "desc": "Combien de tour va-t-on faire ?", 
+            "columns": [
+                {   "title": "Nombre de tour",
+                    "desc": "Le nombre de tour", 
+                    "type": "integer",
+                    "defaultValue": 1,
+                    "restriction": {
+                        "min": 0,
+                        "max": 10
+                    }
+                }
+            ],
+            "multiplicity": "1",
+            "persistent": false
+        },
+        "joueurs": {
+            "title": "Joueurs",
+            "desc": "Il s'agit de la liste des joueurs",
+            "columns": [
+                {   "title": "Nom", 
+                    "desc": "Ton petit nom",
+                    "type": "string", 
+                    "defaultValue": ""
+                },
+                {   "title": "Prénom", 
+                    "desc": "Ton petit prénom",
+                    "type": "string", 
+                    "defaultValue": ""
+                }, 
+                {   "title": "Genre", 
+                    "type": "genre"
+                },
+                {   "title": "Niveau", 
+                    "type": "niveau"
+                }
+            ], 
+            "multiplicity": "n",
+            "persistent": true
+        }, 
+        "preparation": {
+            "title": "Préparation",
+            "desc": "Préparation du tournoi", 
+            "columns": [
+                { "type": "typeTournoi" },
+                { "type": "nombreTour" }
+            ],
+            "multiplicity": "n",
+            "persistent": true
+        },
+        "nomDataBase": {
+            "title": "Nom base de données", 
+            "desc": "Nom du fichier base de données",
+            "columns": [
+                {   "title": "Nom base de données", 
+                    "desc": "Nom base de données",
+                    "type": "string", 
+                    "datas": "generateurTournoi"
+                }
+            ],
+            "multiplicity": "n",
+            "persistent": false
+        }
+    },
+    "views": {
+        "joueurs": {
+            "modelLink": "joueurs",
+            "actions": ["add", "remove", "edit", "sensRevert"], 
+            "sens": true
+        }, 
+        "preparation": {
+            "modelLink": "preparation",
+            "actions": ["edit", "sensRevert"], 
+            "sens": true
+        }
+    }
+}
