@@ -65,8 +65,27 @@
                 flex-direction: column;
                 flex-wrap: initial;
             }
+            .popup {
+                display: flex;
+                flex-direction: column;
 
-            
+            }
+            .bodyPopup{
+                flex: 1 1 auto;
+            }
+            .popupMask {
+                background-color: rgba(0.5, 255, 250, 252);
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0px;
+                height: 0px;
+            }
+            .popupView{
+                width: 80%;
+                height: 80%;
+                margin: auto;
+            }
         </style>
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -103,6 +122,9 @@
         </div>
         
         <div id="global" class="container-fluid"></div>
+        <div id="popupMask" class="popupMask">
+            <div id="popupView" class="popupView"></div>
+        </div>
 
         <script>
 
@@ -177,6 +199,8 @@
         }
 
         var globalDiv = document.getElementById("global");
+        var popupMask = document.getElementById("popupMask");
+        var popupDiv = document.getElementById("popupView");
         
 //----------View
             var TABLEAU = "Tableau";
@@ -193,13 +217,18 @@
 
             function refresh(){
                 refreshModeAffichage();
-                var domView;
                 for (var viewName in mainConfig["views"]){
-                    domView = initView(viewName);
-                    domView.innerHTML = "";
-                    domView.appendChild(buildBarItem(mainConfig["views"][viewName], viewName));
-                    domView.appendChild(buildView(mainConfig["views"][viewName], viewName));
+                    refreshView(mainConfig["views"][viewName], viewName);
                 }
+                if (popupIsVisible()) refreshPopup();
+            }
+
+            function refreshView(view, viewName){
+                var domView = initView(viewName);
+                domView.innerHTML = "";
+                var dimension = view["type"].includes("array>") ? 2 : 1;
+                domView.appendChild(buildBarItem(view, viewName, dimension));
+                domView.appendChild(buildView(view, viewName, dimension, false));
             }
 
             function initView(viewName) {
@@ -212,7 +241,7 @@
                 return domView;
             }
 
-            function buildView(view, viewName) {
+            function buildView(view, viewName, dimension, modeEdition) {
                 var type = view["type"];
                 var typeArray = type.includes("array>");
                 var dynObj = getBDItem(viewName);
@@ -228,47 +257,39 @@
                     //objet stocké (persistents) 
                     else {
                         var mdd;
-                        if (typeArray) {
+                        if (dimension == 2) {
                             type = type.split(">")[1]; //on récupére le type dans le tableau
                             mdd = mainConfig["dynObjects"][type];
-                            return buildArray(view, mdd, dynObj, 2);
+                            return buildArray(view, viewName, mdd, dynObj, dimension, modeEdition);
                         }else {
                             mdd = mainConfig["dynObjects"][type];
-                            return buildArray(view, mdd, dynObj, 1);
+                            return buildArray(view, viewName, mdd, dynObj, dimension, modeEdition);
                         }
                     }
                 }               
             }
 
             //Construit l'entête de la vue
-            function buildBarItem(view, viewName){
+            function buildBarItem(view, viewName, dimension){
                 var divTitre = buildElement("div", undefined, undefined, "sticky-top barItem");
                 divTitre.setAttribute("title", view["desc"]);
                 var titre = buildElement("h3", view["title"], undefined, "barItemTitre");
                 divTitre.appendChild(titre);
                 var divInterfaces = buildElement("div");
-                if (view["actions"].includes("sensRevert")){
-                    var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-light barItemInterface");
-                    buttonInverse.setAttribute("onclick", "inverseSens('" + viewName + "');");
-                    buttonInverse.value = "Inverse";
-                    divInterfaces.appendChild(buttonInverse);
-                }
-                
-                /*var buttonEdition = buildElement("button", "Editer", undefined, "btn btn-light barItemInterface");
-                buttonEdition.setAttribute("onclick", "inverseEdition('" + item + "');");
-                buttonEdition.value = "Editer";
-                divInterfaces.appendChild(buttonEdition);*/
-
+                if (view["actions"].includes("sensRevert")) 
+                    divInterfaces.appendChild(buildInverse(viewName));
+                if (view["actions"].includes("edit") && dimension == 1)
+                    divInterfaces.appendChild(buildEdit(viewName));
                 divTitre.appendChild(divInterfaces);
                 return divTitre;
             }
             
             //construit une liste d'élement à deux dimensions
-            function buildArray(view, mdd, dynObj, dimension){
-                if (currentModeAffichage == FORMULAIRE) {
-                    return buildListForm(view, mdd, dynObj, dimension);
+            function buildArray(view, viewName, mdd, dynObj, dimension, modeEdition){
+                if (currentModeAffichage == FORMULAIRE || modeEdition) {
+                    return buildListForm(view, viewName, mdd, dynObj, dimension, modeEdition);
                 }else {
-                    return buildTable(view, mdd, dynObj, dimension);
+                    return buildTable(view, viewName, mdd, dynObj, dimension);
                 }
             }
 
@@ -276,12 +297,60 @@
                 return buildElement("span", dynObj);
             }
 
-            function buildItem(mdd, dynObj){
-
+            function buildInverse(viewName){
+                var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-light barItemInterface");
+                buttonInverse.setAttribute("onclick", "inverseSens('" + viewName + "');");
+                buttonInverse.value = "Inverse";
+                return buttonInverse;
             }
 
-            function refreshViewRecursif(obj){
+            function buildEdit(viewName){
+                var buttonEdition = buildElement("button", "Editer", undefined, "btn btn-light barItemInterface");
+                buttonEdition.setAttribute("onclick", "inverseEdition('" + viewName + "');");
+                buttonEdition.value = "Editer";
+                return buttonEdition;
+            }
 
+            function refreshPopup(){
+                popupDiv.innerHTML = "";
+                popupDiv.innerHTML = buildPopup().innerHTML;
+            }
+
+            function buildPopup(actionName, view, viewName, mdd, dynObj, dimension) {
+                var popup = buildElement("div", undefined, "popupEdition", "popup");
+
+                popup.appendChild(buildHeaderPopup(actionName, view, viewName, mdd, dynObj, dimension));
+
+                var bodyPopup = buildElement("div", undefined, undefined, "bodyPopup");
+                bodyPopup.appendChild(buildView(view, viewName, true));
+                popup.appendChild(bodyPopup);
+
+                popup.appendChild(buildFooterPopup(actionName, view, viewName, mdd, dynObj, dimension));
+                return popup;
+            }
+
+            function buildHeaderPopup(actionName, view, viewName, mdd, dynObj, dimension){
+                var headerPopup = buildElement("div");
+                var title = buildElement("h3", actionName + " " + viewName);
+                headerPopup.appendChild(title);
+                return headerPopup;
+            }
+            function buildFooterPopup(actionName, view, viewName, mdd, dynObj, dimension){
+                var footerPopup = buildElement("div");
+
+                return footerPopup;
+            }
+
+            function popupIsVisible(){
+                return popupMask.style["display"] == "block";
+            }
+
+            function showPopup(){
+                popupMask.style["display"] = "block";
+            }
+
+            function hidePopup(){
+                popupMask.style["display"] = "none";
             }
 
 //---------- ACTION 
@@ -290,15 +359,14 @@
                 mainConfig["views"][viewName]["sens"] = !mainConfig["views"][viewName]["sens"];  
                 refresh();
             }
-            function inverseEdition(item){
-                edition[item] = !edition[item];  
-                refresh();
+            function edit(){
+                showPopup();
             }
 
             /****  CREATION TABLE  ******/
             {
 
-                function buildTable (view, mdd, dynObj, dimension){
+                function buildTable (view, viewName, mdd, dynObj, dimension){
                     var currentTr;
                     var table = buildElement("table", undefined, undefined, "table");
                     var thead = buildElement("thead", undefined, undefined, "headerListTableau");
@@ -330,18 +398,25 @@
                             }
                         }
                     }else if (dim2){
+                        var editable = view["actions"].includes("edit");
                         if (view["sens"]){
                             //remplissage du header
                             currentTr = buildElement("tr");
                             for (var i = 0; i < mdd["datas"].length; i++){
                                 currentTr.appendChild(this.buildHeaderCell(mdd["datas"][i]));
                             }
+                            if (editable) currentTr.appendChild(buildElement("th"));
                             thead.appendChild(currentTr);
                             //remplissage du body
                             for (var i = 0; i < dynObj.length; i++){
                                 currentTr = buildElement("tr");
                                 for (var k = 0; k < dynObj[i].length; k++){
                                     currentTr.appendChild(this.buildBodyCell(dynObj[i][k]));
+                                }
+                                if (editable) {
+                                    var td = buildElement("td");
+                                    td.appendChild(buildEdit(viewName));
+                                    currentTr.appendChild(td); 
                                 }
                                 tbody.appendChild(currentTr);
                             }
@@ -369,22 +444,30 @@
                     return currentTd;
                 }
 
-                function buildBodyCell(dynObj){
-                    return buildElement("td", dynObj);
+                function buildBodyCell(dynObj) {
+                        return buildElement("td", dynObj);
                 }
             
             }
 
             /****  CREATION FORMULAIRE  ******/
             {
-                function buildListForm(view, mdd, dynObj, dimension){
+                function buildListForm(view, viewName, mdd, dynObj, dimension, editionMode){
                     var dim1 = dimension == 1;
                     var dim2 = dimension == 2;
                     var styleSensInverse = view["sens"] ? "" : "sensInverse ";
                     var divRetour = buildElement("div");
 
                     if (dim1) {
-                       
+                        divRetour = buildElement("div");
+                        var divAllParams;
+                        for (var i = 0; i < dynObj.length; i++){
+                            div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
+                            divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
+                            divAllParams.appendChild(this.buildItemForm(mdd["datas"][i], dynObj[0], editionMode));
+                            div.appendChild(divAllParams);
+                            divRetour.appendChild(div);
+                        }
 
                     } else if (dim2) {
                         divRetour = buildElement("div");
@@ -393,12 +476,10 @@
                             div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
                             divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
                             for (var j = 0; j < dynObj[i].length; j++){
-                                divAllParams.appendChild(this.buildItemForm(mdd["datas"][j], dynObj[i][j]));
+                                divAllParams.appendChild(this.buildItemForm(mdd["datas"][j], dynObj[i][j], editionMode));
                             }
+                            if (view["actions"].includes("edit")) divAllParams.appendChild(buildEdit(viewName));
                             div.appendChild(divAllParams);
-                            /*var buttonEdit = buildElement("button", "Editer");
-                            buttonEdit.setAttribute("class", "btn btn-outline-secondary");
-                            div.appendChild(buttonEdit);*/
                             divRetour.appendChild(div);
                         }
                     }
@@ -406,12 +487,22 @@
                 }
 
                 //construire l'affichage d'un item dans une liste
-                function buildItemForm(mdd, dynObj){
+                function buildItemForm(mdd, dynObj, editionMode){
                     var divParam = buildElement("div", "", undefined, "paramItem");
                     var label = buildElement("label", mdd[0], undefined, "labelParamItem");
                     label.setAttribute("type", mdd[1]);
                     divParam.appendChild(label);
-                    divParam.appendChild(buildElement("span", dynObj, undefined, "valueParamItem"));                    
+                    if (editionMode){
+                        var input;
+                        if (mdd["type"] == "string") {
+                            input = buildElement("input", undefined, undefined, "valueParamItem");
+                            input.value = dynObj;
+                            input.placeholder = mdd["desc"];
+                        }
+                        divParam.appendChild(input);                    
+                    }else {
+                        divParam.appendChild(buildElement("span", dynObj, undefined, "valueParamItem"));                    
+                    }
                     return divParam;
                 }
             }
@@ -480,7 +571,7 @@
 
             function downloadFile(data, name, type){
                 name = "tournoi - " + new Date();
-                type = "json";
+                type = "application/json";
                 var anchor = document.createElement("a");
                 anchor.href = window.URL.createObjectURL(new Blob([data], {type}));
                 anchor.download = name;
