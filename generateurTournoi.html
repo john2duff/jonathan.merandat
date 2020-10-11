@@ -8,6 +8,7 @@
         <meta charset="UTF-8">
         <title>Générateur de tournoi de Badminton</title>
         <style>
+           
             .itemList {
                 display: flex;
                 flex-direction: row;
@@ -58,8 +59,9 @@
             .barItemInterface{
                 margin: 0px 5px;
             }
-            .barItemTitre{
+            .titleBarItem{
                 margin-left: 10px;
+                margin-bottom: 0px;
             }
             .sensInverse{
                 flex-direction: column;
@@ -72,19 +74,38 @@
             }
             .bodyPopup{
                 flex: 1 1 auto;
+                overflow: auto;
+            }
+            .headerPopup{
+                background-color: gray;
+                padding: 10px;
+                border-top-left-radius: 5px;
+                border-top-right-radius: 5px;
+            }
+            .titleHeaderPopup{
+                margin-bottom: 0px;
+            }
+            .footerPopup{
+                background-color: gray;
             }
             .popupMask {
-                background-color: rgba(0.5, 255, 250, 252);
+                background-color: rgb(0 0 0 / 60%);
                 position: fixed;
                 width: 100%;
                 height: 100%;
                 top: 0px;
-                height: 0px;
+                left: 0px;
+                z-index: 1031;
+                justify-content: center;
+                align-items: center;
+                display: none;
             }
             .popupView{
                 width: 80%;
                 height: 80%;
                 margin: auto;
+                background-color: #bbbbbb;
+                border-radius: 5px;
             }
         </style>
         <!-- Bootstrap CSS -->
@@ -220,7 +241,6 @@
                 for (var viewName in mainConfig["views"]){
                     refreshView(mainConfig["views"][viewName], viewName);
                 }
-                if (popupIsVisible()) refreshPopup();
             }
 
             function refreshView(view, viewName){
@@ -273,13 +293,13 @@
             function buildBarItem(view, viewName, dimension){
                 var divTitre = buildElement("div", undefined, undefined, "sticky-top barItem");
                 divTitre.setAttribute("title", view["desc"]);
-                var titre = buildElement("h3", view["title"], undefined, "barItemTitre");
+                var titre = buildElement("h4", view["title"], undefined, "titleBarItem");
                 divTitre.appendChild(titre);
                 var divInterfaces = buildElement("div");
                 if (view["actions"].includes("sensRevert")) 
                     divInterfaces.appendChild(buildInverse(viewName));
                 if (view["actions"].includes("edit") && dimension == 1)
-                    divInterfaces.appendChild(buildEdit(viewName));
+                    divInterfaces.appendChild(buildEdit(view, viewName, mainConfig["dynObjects"][view["type"]], getBDItem(viewName)));
                 divTitre.appendChild(divInterfaces);
                 return divTitre;
             }
@@ -304,16 +324,16 @@
                 return buttonInverse;
             }
 
-            function buildEdit(viewName){
+            function buildEdit(view, viewName, mdd, dynObj){
                 var buttonEdition = buildElement("button", "Editer", undefined, "btn btn-light barItemInterface");
-                buttonEdition.setAttribute("onclick", "inverseEdition('" + viewName + "');");
+                buttonEdition.onclick = edit.bind(this, view, viewName, mdd, dynObj);
                 buttonEdition.value = "Editer";
                 return buttonEdition;
             }
 
-            function refreshPopup(){
+            function refreshPopup(actionName, view, viewName, mdd, dynObj){
                 popupDiv.innerHTML = "";
-                popupDiv.innerHTML = buildPopup().innerHTML;
+                popupDiv.innerHTML = buildPopup(actionName, view, viewName, mdd, dynObj).innerHTML;
             }
 
             function buildPopup(actionName, view, viewName, mdd, dynObj, dimension) {
@@ -322,7 +342,7 @@
                 popup.appendChild(buildHeaderPopup(actionName, view, viewName, mdd, dynObj, dimension));
 
                 var bodyPopup = buildElement("div", undefined, undefined, "bodyPopup");
-                bodyPopup.appendChild(buildView(view, viewName, true));
+                bodyPopup.appendChild(buildListForm(view, viewName, mdd, dynObj, dimension, true));
                 popup.appendChild(bodyPopup);
 
                 popup.appendChild(buildFooterPopup(actionName, view, viewName, mdd, dynObj, dimension));
@@ -330,23 +350,24 @@
             }
 
             function buildHeaderPopup(actionName, view, viewName, mdd, dynObj, dimension){
-                var headerPopup = buildElement("div");
-                var title = buildElement("h3", actionName + " " + viewName);
+                var headerPopup = buildElement("div", undefined, undefined, "headerPopup");
+                var title = buildElement("h4", actionName, undefined, "titleHeaderPopup");
                 headerPopup.appendChild(title);
                 return headerPopup;
             }
             function buildFooterPopup(actionName, view, viewName, mdd, dynObj, dimension){
-                var footerPopup = buildElement("div");
+                var footerPopup = buildElement("div", undefined, undefined, "footerPopup");
 
                 return footerPopup;
             }
 
             function popupIsVisible(){
-                return popupMask.style["display"] == "block";
+                return popupMask.style["display"] != "none";
             }
 
-            function showPopup(){
-                popupMask.style["display"] = "block";
+            function showPopup(actionName, view, viewName, mdd, dynObj){
+                refreshPopup(actionName, view, viewName, mdd, dynObj);
+                popupMask.style["display"] = "flex";
             }
 
             function hidePopup(){
@@ -359,8 +380,8 @@
                 mainConfig["views"][viewName]["sens"] = !mainConfig["views"][viewName]["sens"];  
                 refresh();
             }
-            function edit(){
-                showPopup();
+            function edit(view, viewName, mdd, dynObj){
+                showPopup("Modification", view, viewName, mdd, dynObj);
             }
 
             /****  CREATION TABLE  ******/
@@ -415,7 +436,7 @@
                                 }
                                 if (editable) {
                                     var td = buildElement("td");
-                                    td.appendChild(buildEdit(viewName));
+                                    td.appendChild(buildEdit(view, viewName, mdd["datas"], dynObj[i]));
                                     currentTr.appendChild(td); 
                                 }
                                 tbody.appendChild(currentTr);
@@ -461,13 +482,13 @@
                     if (dim1) {
                         divRetour = buildElement("div");
                         var divAllParams;
+                        div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
+                        divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
                         for (var i = 0; i < dynObj.length; i++){
-                            div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
-                            divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
                             divAllParams.appendChild(this.buildItemForm(mdd["datas"][i], dynObj[0], editionMode));
-                            div.appendChild(divAllParams);
-                            divRetour.appendChild(div);
                         }
+                        div.appendChild(divAllParams);
+                        divRetour.appendChild(div);
 
                     } else if (dim2) {
                         divRetour = buildElement("div");
@@ -478,7 +499,8 @@
                             for (var j = 0; j < dynObj[i].length; j++){
                                 divAllParams.appendChild(this.buildItemForm(mdd["datas"][j], dynObj[i][j], editionMode));
                             }
-                            if (view["actions"].includes("edit")) divAllParams.appendChild(buildEdit(viewName));
+                            if (view["actions"].includes("edit")) 
+                                divAllParams.appendChild(buildEdit(view, viewName, mdd["datas"][i], dynObj[i]));
                             div.appendChild(divAllParams);
                             divRetour.appendChild(div);
                         }
