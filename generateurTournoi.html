@@ -102,89 +102,192 @@
             </nav>
         </div>
         
-        <div class="container-fluid">
-            <div id="joueurs" class="container liste"></div>
-            <div id="preparation" class="container"></div>
-        </div>
-
+        <div id="global" class="container-fluid"></div>
 
         <script>
 
         //configuration du logiciel
         var mainConfig = {
-            "listes": [
-                ["genre", "string", ["Homme", "Femme"]],
-                ["niveau", "string", ["P12", "P11", "P10"]]
-            ],
-            "nomBd": "generateurTournoi",
+            "nativeTypes": ["string", "integer"],
+            "fixedObjects": {
+                "dataBaseName": {
+                    "title": "Nom base de données", 
+                    "desc": "Nom du fichier base de données" ,
+                    "type": "string", 
+                    "datas" : "generateurTournoi" },
+                "genre": { 
+                    "title": "Genre", 
+                    "desc": "Etes-vous un homme ou une femme ?",
+                    "type": "array>string",
+                    "datas": ["Homme", "Femme"] },
+                "niveau": {
+                    "title": "Niveau", 
+                    "desc": "Le niveau du joueur", 
+                    "type": "array>string",
+                    "datas": ["P12", "P11", "P10"] },
+                "typeTournoi": {
+                    "title": "Type de tournoi", 
+                    "desc": "Il peut s'agir d'un tournoi simple ou double", 
+                    "type": "array>string",
+                    "datas": ["Simple", "Double"] },
+                "nombreTour": {
+                    "title": "Nombre de tour", 
+                    "desc": "Combien de tour va-t-on faire ?", 
+                    "type": "integer",
+                    "datas": ["0-10"] }
+            },
+            "dynObjects": { //représente tous les objets à stocker
+                "joueur": {
+                    "title": "Joueur",
+                    "desc": "Joueur de badminton",
+                    "type": "object",
+                    "datas": [
+                        ["Nom", "string", "Ton petit nom"],
+                        ["Prénom", "string", "Ton petit prénom"],
+                        ["Genre", "genre"], 
+                        ["Niveau", "niveau"]
+                    ]
+                }, 
+                "preparation": {
+                    "title": "Préparation", 
+                    "desc": "Préparation du tournoi", 
+                    "type": "object",
+                    "datas": [
+                        ["Type tournoi", "typeTournoi", "Le type du tournoi"],
+                        ["Nombre de tour", "nombreTour", "Le nombre de tour"]
+                    ]
+                }
+            }, 
+            "views": {
+                "joueurs": {
+                    "title": "Joueurs",
+                    "desc": "Il s'agit de la liste de tous les joueurs",
+                    "type": "array>joueur",
+                    "actions": ["add", "remove", "edit", "sensRevert"], 
+                    "sens": true
+                }, 
+                "preparation": {
+                    "title": "Préparation",
+                    "type": "preparation",
+                    "actions": ["edit", "sensRevert"], 
+                    "sens": true
+                }
+            },
+            
         }
+
+        var globalDiv = document.getElementById("global");
         
 //----------View
-
-            var modeAffichageEnum = {
-                formulaire: "Formulaire", 
-                tableau: "Tableau"
-            }
-            var currentModeAffichage = modeAffichageEnum.formulaire;
+            var TABLEAU = "Tableau";
+            var FORMULAIRE = "Formulaire";
+            var currentModeAffichage = TABLEAU;
 
             window.addEventListener("resize", function(){
                 refresh();
             });
 
-            var sens = {
-                "joueurs": true,
-                "preparation": true
-            }
-            var edition = {
-                "joueurs": true,
-                "preparation": true
+            function refreshModeAffichage(){
+                currentModeAffichage = window.innerWidth > 500 ? TABLEAU : FORMULAIRE; 
             }
 
             function refresh(){
-                if (window.innerWidth > 500){
-                        currentModeAffichage = modeAffichageEnum.tableau; 
-                    }else{
-                        currentModeAffichage = modeAffichageEnum.formulaire; 
+                refreshModeAffichage();
+                var domView;
+                for (var viewName in mainConfig["views"]){
+                    domView = initView(viewName);
+                    domView.innerHTML = "";
+                    domView.appendChild(buildBarItem(mainConfig["views"][viewName], viewName));
+                    domView.appendChild(buildView(mainConfig["views"][viewName], viewName));
                 }
-                refreshList("joueurs", "Joueurs", 2, sens["joueurs"]); 
-                refreshList("preparation", "Préparation", 1, sens["preparation"]);
             }
 
-            //bArray s'il s'agit d'une liste d'élement similaire
-            function refreshList(item, titre, dimension, sensNormal){
-                var listModel = getBDItem(item);
-                var listView = initView(item);
-                var divBarItem = buildElement("div");
-                if (sensNormal == undefined) sensNormal = true;
-                
-                var bFormulaire = currentModeAffichage == modeAffichageEnum.formulaire;
-                var bTableau = currentModeAffichage == modeAffichageEnum.tableau;
+            function initView(viewName) {
+                var domView = document.getElementById(viewName); 
+                if (domView == null){
+                    domView = buildElement("div", undefined, viewName, "container");
+                    globalDiv.appendChild(domView);
+                }
+                domView.innerHTML = "";
+                return domView;
+            }
 
+            function buildView(view, viewName) {
+                var type = view["type"];
+                var typeArray = type.includes("array>");
+                var dynObj = getBDItem(viewName);
+
+                //s'il s'agit d'un type primitif
+                if (mainConfig["nativeTypes"].includes(type)) {
+                    return buildNativeType(dynObj);
+                } else {
+                    //si le type a été définie dans les objets fixes (en dur dans le code)
+                    if (mainConfig["fixedObjects"][type] != undefined) {
+
+                    }
+                    //objet stocké (persistents) 
+                    else {
+                        var mdd;
+                        if (typeArray) {
+                            type = type.split(">")[1]; //on récupére le type dans le tableau
+                            mdd = mainConfig["dynObjects"][type];
+                            return buildArray(view, mdd, dynObj, 2);
+                        }else {
+                            mdd = mainConfig["dynObjects"][type];
+                            return buildArray(view, mdd, dynObj, 1);
+                        }
+                    }
+                }               
+            }
+
+            //Construit l'entête de la vue
+            function buildBarItem(view, viewName){
                 var divTitre = buildElement("div", undefined, undefined, "sticky-top barItem");
-                var titre = buildElement("h3", titre, undefined, "barItemTitre");
+                divTitre.setAttribute("title", view["desc"]);
+                var titre = buildElement("h3", view["title"], undefined, "barItemTitre");
                 divTitre.appendChild(titre);
                 var divInterfaces = buildElement("div");
-                var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-light barItemInterface");
-                buttonInverse.setAttribute("onclick", "inverseSens('" + item + "');");
-                buttonInverse.value = "Inverse";
-                divInterfaces.appendChild(buttonInverse);
-                var buttonEdition = buildElement("button", "Editer", undefined, "btn btn-light barItemInterface");
-                buttonEdition.setAttribute("onclick", "inverseEdition('" + item + "');");
-                buttonEdition.value = "Editer";
-                divInterfaces.appendChild(buttonEdition);
-                divTitre.appendChild(divInterfaces);
-                listView.appendChild(divTitre);
-                
-                if (bFormulaire) {
-                    listView.appendChild(buildListForm(item, listModel, dimension, sensNormal));
-                }else if (bTableau) {
-                    listView.appendChild(buildTable(item, listModel, dimension, sensNormal));
+                if (view["actions"].includes("sensRevert")){
+                    var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-light barItemInterface");
+                    buttonInverse.setAttribute("onclick", "inverseSens('" + viewName + "');");
+                    buttonInverse.value = "Inverse";
+                    divInterfaces.appendChild(buttonInverse);
                 }
                 
+                /*var buttonEdition = buildElement("button", "Editer", undefined, "btn btn-light barItemInterface");
+                buttonEdition.setAttribute("onclick", "inverseEdition('" + item + "');");
+                buttonEdition.value = "Editer";
+                divInterfaces.appendChild(buttonEdition);*/
+
+                divTitre.appendChild(divInterfaces);
+                return divTitre;
+            }
+            
+            //construit une liste d'élement à deux dimensions
+            function buildArray(view, mdd, dynObj, dimension){
+                if (currentModeAffichage == FORMULAIRE) {
+                    return buildListForm(view, mdd, dynObj, dimension);
+                }else {
+                    return buildTable(view, mdd, dynObj, dimension);
+                }
             }
 
-            function inverseSens(item){
-                sens[item] = !sens[item];  
+            function buildNativeType(dynObj){
+                return buildElement("span", dynObj);
+            }
+
+            function buildItem(mdd, dynObj){
+
+            }
+
+            function refreshViewRecursif(obj){
+
+            }
+
+//---------- ACTION 
+
+            function inverseSens(viewName){
+                mainConfig["views"][viewName]["sens"] = !mainConfig["views"][viewName]["sens"];  
                 refresh();
             }
             function inverseEdition(item){
@@ -195,60 +298,60 @@
             /****  CREATION TABLE  ******/
             {
 
-                function buildTable (item, listModel, dimension, sensNormal){
+                function buildTable (view, mdd, dynObj, dimension){
                     var currentTr;
-                    var table = buildElement("table", undefined, "listTableau" + item, "table");
-                    var thead = buildElement("thead", undefined, "headerListTableau");
-                    var tbody = buildElement("tbody", undefined, "bodyListTableau");
+                    var table = buildElement("table", undefined, undefined, "table");
+                    var thead = buildElement("thead", undefined, undefined, "headerListTableau");
+                    var tbody = buildElement("tbody", undefined, undefined, "bodyListTableau");
                     var dim1 = dimension == 1;
                     var dim2 = dimension == 2;
                 
                     if (dim1){
-                        if (sensNormal){
+                        if (view["sens"]){
                             //remplissage du header
                             currentTr = buildElement("tr");
-                            for (var i = 0; i < listModel.length; i++){
-                                currentTr.appendChild(this.buildHeaderCell(listModel[i][0], listModel[i][1]));
+                            for (var i = 0; i < mdd["datas"].length; i++){
+                                currentTr.appendChild(this.buildHeaderCell(mdd["datas"][i]));
                             }
                             thead.appendChild(currentTr);
                             //remplissage du body
                             currentTr = buildElement("tr");
-                            for (var i = 0; i < listModel.length; i++){
-                                currentTr.appendChild(this.buildBodyCell(listModel[i][2]));
+                            for (var i = 0; i < dynObj.length; i++){
+                                currentTr.appendChild(this.buildBodyCell(dynObj[i]));
                             }  
                             tbody.appendChild(currentTr);
                         } else{
                             //remplissage du body
-                            for (var i = 0; i < listModel.length; i++){
+                            for (var i = 0; i < dynObj.length; i++){
                                 currentTr = buildElement("tr");
-                                currentTr.appendChild(this.buildHeaderCell(listModel[i][0], listModel[i][1]));
-                                currentTr.appendChild(this.buildBodyCell(listModel[i][2]));
+                                currentTr.appendChild(this.buildHeaderCell(mdd["datas"][i]));
+                                currentTr.appendChild(buildBodyCell(dynObj[i]));
                                 tbody.appendChild(currentTr);
                             }
                         }
                     }else if (dim2){
-                        if (sensNormal){
+                        if (view["sens"]){
                             //remplissage du header
                             currentTr = buildElement("tr");
-                            for (var i = 0; i < listModel[0].length; i++){
-                                currentTr.appendChild(this.buildHeaderCell(listModel[0][i], listModel[1][i]));
+                            for (var i = 0; i < mdd["datas"].length; i++){
+                                currentTr.appendChild(this.buildHeaderCell(mdd["datas"][i]));
                             }
                             thead.appendChild(currentTr);
                             //remplissage du body
-                            for (var i = 2; i < listModel.length; i++){
+                            for (var i = 0; i < dynObj.length; i++){
                                 currentTr = buildElement("tr");
-                                for (var k = 0; k < listModel[i].length; k++){
-                                    currentTr.appendChild(this.buildBodyCell(listModel[i][k]));
+                                for (var k = 0; k < dynObj[i].length; k++){
+                                    currentTr.appendChild(this.buildBodyCell(dynObj[i][k]));
                                 }
                                 tbody.appendChild(currentTr);
                             }
                         }else{
                             //remplissage du body
-                            for (var i = 0; i < listModel[0].length; i++){
+                            for (var i = 0; i < mdd["datas"].length; i++){
                                 currentTr = buildElement("tr");
-                                currentTr.appendChild(this.buildHeaderCell(listModel[0][i], listModel[1][i]));
-                                for (var j = 2; j < listModel.length; j++){
-                                    currentTr.appendChild(this.buildBodyCell(listModel[j][i]));
+                                currentTr.appendChild(this.buildHeaderCell(mdd["datas"][i]));
+                                for (var j = 0; j < dynObj[i].length; j++){
+                                    currentTr.appendChild(this.buildBodyCell(dynObj[i][j]));
                                 }
                                 tbody.appendChild(currentTr);
                             }
@@ -259,37 +362,38 @@
                     return table;
                 }
 
-                function buildHeaderCell(header, headerType){
-                    currentContent = header.replace(/_/g, " ");
-                    currentTd = buildElement("th",  currentContent);
-                    currentTd.setAttribute("type", headerType);
+                function buildHeaderCell(mdd){
+                    currentTd = buildElement("th", mdd[0]);
+                    currentTd.setAttribute("type", mdd[1]);
+                    currentTd.setAttribute("title", mdd[2]);
                     return currentTd;
                 }
 
-                function buildBodyCell(content){
-                    return buildElement("td", content);
+                function buildBodyCell(dynObj){
+                    return buildElement("td", dynObj);
                 }
             
             }
 
             /****  CREATION FORMULAIRE  ******/
             {
-                function buildListForm(item, listModel, dimension, sensNormal){
+                function buildListForm(view, mdd, dynObj, dimension){
                     var dim1 = dimension == 1;
                     var dim2 = dimension == 2;
-                    var styleSensInverse = sensNormal ? "" : "sensInverse ";
+                    var styleSensInverse = view["sens"] ? "" : "sensInverse ";
                     var divRetour = buildElement("div");
+
                     if (dim1) {
                        
 
                     } else if (dim2) {
                         divRetour = buildElement("div");
                         var divAllParams;
-                        for (var i = 2; i < listModel.length; i++){
-                            div = buildElement("div", "", undefined, "itemList " + styleSensInverse + item);
-                            divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse + item);
-                            for (var j = 0; j < listModel[0].length; j++){
-                                divAllParams.appendChild(this.buildItemForm(item, listModel[0][j],  listModel[1][j], listModel[i][j], i));
+                        for (var i = 0; i < dynObj.length; i++){
+                            div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
+                            divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
+                            for (var j = 0; j < dynObj[i].length; j++){
+                                divAllParams.appendChild(this.buildItemForm(mdd["datas"][j], dynObj[i][j]));
                             }
                             div.appendChild(divAllParams);
                             /*var buttonEdit = buildElement("button", "Editer");
@@ -302,13 +406,12 @@
                 }
 
                 //construire l'affichage d'un item dans une liste
-                function buildItemForm(item, header, headerType, content, compt){
-                    var id = compt + "" + header;
-                    var divParam = buildElement("div", "", "paramItem" + compt, "paramItem " + item);
-                    var label = buildElement("label", header, "labelParamItem" + item + + id, "labelParamItem " + item);
-                    label.setAttribute("type", headerType);
+                function buildItemForm(mdd, dynObj){
+                    var divParam = buildElement("div", "", undefined, "paramItem");
+                    var label = buildElement("label", mdd[0], undefined, "labelParamItem");
+                    label.setAttribute("type", mdd[1]);
                     divParam.appendChild(label);
-                    divParam.appendChild(buildElement("span", content, "valueParamItem" + item + id, "valueParamItem " + item));                    
+                    divParam.appendChild(buildElement("span", dynObj, undefined, "valueParamItem"));                    
                     return divParam;
                 }
             }
@@ -321,17 +424,7 @@
                 return elt;
             }   
 
-            function getView(nomView){
-                var node = document.getElementById(nomView);
-                if (node == null) console.error("L'élément HTML " + nomView + " n'existe pas." );
-                return node;
-            }
-
-            function initView(nomView){
-                var listView = getView(nomView);
-                listView.innerHTML = "";
-                return listView;
-            }
+ 
             
 //----------Model BD
 
@@ -350,16 +443,6 @@
                     }else if (typeof(source[i]) == "object"){
                         var retour = getBDItemRecursif(source[i], key);
                         if (retour != null) return retour;
-                    }
-                }
-                return null;
-            }
-
-            function getListe(nomListe){
-                var listes = this.getBDItem("listes");
-                for (var i = 0; i < listes.length; i++){
-                    if (listes[i][0] == nomListe){
-                        return liste[i][2];
                     }
                 }
                 return null;
@@ -397,7 +480,7 @@
 
             function downloadFile(data, name, type){
                 name = "tournoi - " + new Date();
-                type = "text/plain";
+                type = "json";
                 var anchor = document.createElement("a");
                 anchor.href = window.URL.createObjectURL(new Blob([data], {type}));
                 anchor.download = name;

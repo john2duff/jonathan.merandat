@@ -1,8 +1,6 @@
 
 {
     "joueurs": [ 
-        ["Nom", "Prenom", "Genre", "Niveau"],
-        ["string", "string", "genre", "niveau"],
         ["Merandat", "Jonathan", "Homme", "P12"],
         ["Jobard", "Céline", "Femme", "P11"],
         ["Noblot", "Amandine", "Femme", "P11"],
@@ -10,14 +8,7 @@
         ["Davy", "Guinchard", "Homme", "P11"]
     ], 
     "preparation": [
-        ["Type_de_tournoi", "option", ["Simple", "Double"]],
-        ["Nombre_terrain_disponible", "integer", 5],
-        ["Nombre_tour", "integer", 5], 
-        ["Handicap_P12", "integer", 0],
-        ["Handicap_P11", "integer", 2],
-        ["Handicap_P10", "integer", 4], 
-        ["Contraintes", "object", [
-            ["Adversaire toujours différents"]
-        ]]
+        "Simple",
+         5
     ]
 }
