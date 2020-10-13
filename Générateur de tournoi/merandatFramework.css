@@ -1,4 +1,18 @@
-
+.container{
+    padding:0px;
+    overflow: auto;;
+}
+.table{
+    overflow: auto;
+}
+.stickyLeft{
+    position: sticky;
+    left: 0px;
+}
+.stickyTop{
+    position: sticky;
+    top: 0px;
+}
 .itemList {
     display: flex;
     flex-direction: row;
@@ -45,6 +59,10 @@
     flex-direction:row;
     justify-content:space-between;
     flex:1 1 auto;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    left:0px;
 }
 .barItemInterface{
     margin: 0px 5px;
