@@ -194,9 +194,6 @@
 
     //Construit l'entête de la vue
     function buildHeaderView(view, viewName, modelLink){
-        //context de l'objet à afficher
-        var horizontal = modelLink["columns"].length > 1 && modelLink["multiplicity"] == "1";
-        var both = modelLink["columns"].length > 1 && modelLink["multiplicity"] == "n";
         var divTitre = buildElement("div", undefined, undefined, "stickyTop stickyLeft barItem");
         divTitre.setAttribute("title", modelLink["desc"]);
         var titre = buildElement("h4", modelLink["title"], undefined, "titleBarItem");
@@ -204,8 +201,6 @@
         var divInterfaces = buildElement("div");
         if (view["actions"].includes("sensRevert")) 
             divInterfaces.appendChild(buildInverse(viewName));
-        if (view["actions"].includes("edit") && horizontal)
-            divInterfaces.appendChild(buildEdit(view, viewName, modelLink));
         divTitre.appendChild(divInterfaces);
         return divTitre;
     }
@@ -215,246 +210,189 @@
         if (currentModeAffichage == FORMULAIRE || modeEdition) {
             return buildListForm(view, viewName, modelLink, datasLS, modeEdition);
         }else {
-            return buildTable(view, viewName, modelLink, datasLS);
+            return buildListTable(view, viewName, modelLink, datasLS);
         }
     }
 
     /****  CREATION TABLE  ******/
     {
-        function buildTable (view, viewName, modelLink, datasLS){
-            var currentTr;
+        function buildListTable (view, viewName, modelLink, datasLS){
             var table = buildElement("table", undefined, undefined, "table");
-            var thead = buildElement("thead", undefined, undefined, "headerListTableau");
-            var tbody = buildElement("tbody", undefined, undefined, "bodyListTableau");
             var columns = getColumns(modelLink);
+            var sens = view["sens"];
             
-            //context de l'objet à afficher
-            var one = modelLink["columns"].length == 1 && modelLink["multiplicity"] == "1";
-            var vertical = modelLink["columns"].length == 1 && modelLink["multiplicity"] == "n";
-            var horizontal = modelLink["columns"].length > 1 && modelLink["multiplicity"] == "1";
-            var both = modelLink["columns"].length > 1 && modelLink["multiplicity"] == "n";
-
             var editable = view["actions"].includes("edit");
 
-            if (one){
-                if (view["sens"]){
-                    //remplissage du header
-                    currentTr = buildElement("tr");
-                    currentTr.appendChild(this.buildHeaderCell(columns[0]));
-                    //action editer header
-                    if (editable){
-                        currentTr.appendChild(this.buildHeaderCell(""));
-                    }
-                    thead.appendChild(currentTr);
-                    //remplissage du body
-                    currentTr = buildElement("tr");
-                    currentTr.appendChild(this.buildBodyCell(datasLS));
-                    if (editable){
-                        var td = buildElement("td");
-                        td.appendChild(buildEdit(view, viewName, modelLink, datasLS));
-                        currentTr.appendChild(td); 
-                    }
-                    tbody.appendChild(currentTr);
-                } else{
-                    //remplissage du body
-                    currentTr = buildElement("tr");
-                    currentTr.appendChild(buildHeaderCell(columns[0]));
-                    currentTr.appendChild(buildBodyCell(datasLS));
-                    if (editable){
-                        var td = buildElement("td");
-                        td.appendChild(buildEdit(view, viewName, modelLink, datasLS));
-                        currentTr.appendChild(td); 
-                    }
-                }
-            } else if (vertical){
-                if (view["sens"]){
-                    //remplissage du header
-                    currentTr = buildElement("tr");
-                    for (var i = 0; i < columns.length; i++){
-                        currentTr.appendChild(this.buildHeaderCell(columns[i]));
-                    }
-                    //action editer header
-                    if (editable)
-                        currentTr.appendChild(buildElement("th"));
-    
-                    thead.appendChild(currentTr);
-                    //remplissage du body
-                    for (var i = 0; i < datasLS.length; i++){
-                        currentTr = buildElement("tr");
-                        currentTr.appendChild(this.buildBodyCell(datasLS[i]));
-                        //action editer body
-                        if (editable){
-                            var td = buildElement("td");
-                            td.appendChild(buildEdit(view, viewName, modelLink, datasLS));
-                            currentTr.appendChild(td); 
-                        }
-                        tbody.appendChild(currentTr);
-                    }  
-                } else{
-                    //remplissage du body
-                    currentTr = buildElement("tr");
-                    var currentTh;
-                    for (var i = 0; i < columns.length; i++){
-                        currentTh = this.buildHeaderCell(columns[i]);
-                        currentTh.classList.add("stickyLeft");
-                        currentTr.appendChild(currentTh);
-                        for (var j = 0; j < datasLS.length; j++){
-                            currentTr.appendChild(this.buildBodyCell(datasLS[i]));
-                        }
-                    }
-                    tbody.appendChild(currentTr);
-                }
-            } else if (horizontal){
-                if (view["sens"]){
-                    //remplissage du header
-                    currentTr = buildElement("tr");
-                    for (var i = 0; i < columns.length; i++){
-                        currentTr.appendChild(this.buildHeaderCell(columns[i]));
-                    }
-    
-                    thead.appendChild(currentTr);
-                    //remplissage du body
-                    currentTr = buildElement("tr");
-                    for (var i = 0; i < datasLS.length; i++){
-                        currentTr.appendChild(this.buildBodyCell(datasLS[i]));
-                    }  
-                    tbody.appendChild(currentTr);
-                } else{
-                    //remplissage du body
-                    var currentTh;
-                    for (var i = 0; i < columns.length; i++){
-                        currentTr = buildElement("tr");
-                        currentTh = this.buildHeaderCell(columns[i]);
-                        currentTh.classList.add("stickyLeft");
-                        currentTr.appendChild(currentTh);
-                        currentTr.appendChild(this.buildBodyCell(datasLS[i]));
-                        tbody.appendChild(currentTr);
-                    }
-                }
-            } else if (both) {
-                if (view["sens"]){
-                    //remplissage du header
-                    currentTr = buildElement("tr");
-                    for (var i = 0; i < columns.length; i++){
-                        currentTr.appendChild(this.buildHeaderCell(columns[i]));
-                    }
-                    if (editable) currentTr.appendChild(buildElement("th"));
-                    thead.appendChild(currentTr);
-                    //remplissage du body
-                    for (var i = 0; i < datasLS.length; i++){
-                        currentTr = buildElement("tr");
-                        for (var k = 0; k < datasLS[i].length; k++){
-                            currentTr.appendChild(this.buildBodyCell(datasLS[i][k]));
-                        }
-                        if (editable) {
-                            var td = buildElement("td");
-                            td.appendChild(buildEdit(view, viewName, modelLink, datasLS));
-                            currentTr.appendChild(td); 
-                        }
-                        tbody.appendChild(currentTr);
-                    }
-                } else{
-                     //remplissage du body
-                     for (var i = 0; i < columns.length; i++){
-                        currentTr = buildElement("tr");
-                        currentTr.appendChild(this.buildHeaderCell(columns[i]));
-                        for (var j = 0; j < datasLS.length; j++){
-                            currentTr.appendChild(this.buildBodyCell(datasLS[j][i]));
-                        }
-                        tbody.appendChild(currentTr);
-                    }
-                }       
+            //remplissage du header
+            if (sens){
+                var thead = buildHeaderTable(columns, editable, sens); 
+                table.appendChild(thead);
+            }
+            
+            //remplissage du body
+            var tbody;
+            if (sens){
+                tbody = buildBodyTable(view, viewName, columns, datasLS, editable);
+            }else{
+                tbody = buildBodyTableSensInverse(view, viewName, columns, datasLS, editable);
             }
 
-            table.appendChild(thead);
             table.appendChild(tbody);
             return table;
         }
 
-        function buildHeaderCell(modelLink){
-            currentTd = buildElement("th", modelLink["title"]);
-            currentTd.setAttribute("type", modelLink["type"]);
-            currentTd.setAttribute("title", modelLink["desc"]);
-            return currentTd;
+        function buildHeaderTable(columns, editable, sens){
+            if (!sens) return;
+            var thead = buildElement("thead", undefined, undefined, "headerTable");
+            var currentTr = buildElement("tr");
+            for (var i = 0; i < columns.length; i++){
+                currentTr.appendChild(this.buildHeaderCell(columns[i]));
+            }
+            if (editable) currentTr.appendChild(buildElement("th"));
+            thead.appendChild(currentTr);
+            return thead;
         }
 
-        function buildBodyCell(dynObj) {
-            return buildElement("td", dynObj);
+        function buildBodyTable(view, viewName, columns, datasLS, editable, idEdition) {
+            editable &= idEdition == undefined; 
+            var tbody = buildElement("thead", undefined, undefined, "bodyTable");
+            var currentTr;
+            currentTr = buildElement("tr");
+            for (var i = 0; i < datasLS.length; i++){
+                if (typeof(datasLS[i]) === "object"){
+                    currentTr = buildRecordTable(datasLS[i], i);
+                    if (editable) {
+                        currentTr.appendChild(buildBodyEditCell(view, viewName, columns, datasLS)); 
+                    }
+                }else{
+                    for (var i = 0; i < columns.length; i++){
+                        buildRecordTable(datasLS[i], i, currentTr);
+                    }
+                }
+                tbody.appendChild(currentTr);
+            }
+
+            if (editable && typeof(datasLS[0]) !== "object"){
+                currentTr = buildElement("tr");
+                for (var i = 0; i < columns.length; i++){
+                    currentTr.appendChild(buildBodyEditCell(view, viewName, columns, datasLS)); 
+                }
+                tbody.appendChild(currentTr);
+            }
+
+            return tbody;
+        }
+
+        function buildBodyTableSensInverse(view, viewName, columns, datasLS, editable, id) {
+            var tbody = buildElement("thead", undefined, undefined, "bodyTable");
+            var currentTr;
+        
+            for (var i = 0; i < columns.length; i++){
+                currentTr = buildElement("tr");
+                currentTr.appendChild(this.buildHeaderCell(columns[i]));
+                if (typeof(datasLS[i]) === "object"){
+                    for (var j = 0; j < datasLS.length; j++){
+                        buildRecordTable(datasLS[j][i], j, currentTr);
+                    }
+                }else{
+                    buildRecordTable(datasLS[i], 0, currentTr);
+                    currentTr.appendChild(buildBodyEditCell(view, viewName, columns, datasLS)); 
+                }
+                
+                tbody.appendChild(currentTr);
+            }
+            if (editable && typeof(datasLS[0]) === "object"){
+                currentTr = buildElement("tr");
+                currentTr.appendChild(buildHeaderCell(view, viewName, columns, datasLS)); 
+                for (var j = 0; j < datasLS.length; j++){
+                    currentTr.appendChild(buildBodyEditCell(view, viewName, columns, datasLS)); 
+                }
+                tbody.appendChild(currentTr);
+            }
+            
+            return tbody;
+        }
+
+        function buildRecordTable(datasLS, id, currentTr){
+            if (currentTr == undefined) currentTr = buildElement("tr", undefined, id);
+            if (typeof(datasLS) === "object"){
+                for (var j = 0; j < datasLS.length; j++){
+                    currentTr.appendChild(this.buildBodyCell(datasLS[j], j));
+                }
+            }else{
+                currentTr.appendChild(this.buildBodyCell(datasLS, 0));
+            }
+            return currentTr;
+        }
+
+        function buildHeaderCell(modelLink){
+            if (modelLink == undefined) {
+                return buildElement("th");
+            }else{
+                currentTd = buildElement("th", modelLink["title"]);
+                currentTd.setAttribute("type", modelLink["type"]);
+                currentTd.setAttribute("title", modelLink["desc"]);
+                return currentTd;
+            }
+        }
+
+        function buildBodyEditCell(view, viewName, modelLink, datasLS){
+            var td = buildElement("td");
+            td.appendChild(buildEdit(view, viewName, modelLink, datasLS));
+            return td;
+        }
+
+        function buildBodyCell(datasLS, id) {
+            return buildElement("td", datasLS, id);
         }
 
     }
 
     /****  CREATION FORMULAIRE  ******/
     {
-        function buildListForm(view, viewName, modelLink, datasLS, editionMode){
+        function buildListForm(view, viewName, modelLink, datasLS, modeEdition){
             var columns = getColumns(modelLink);
 
-            //context de l'objet à afficher
-            var one = modelLink["columns"].length == 1 && modelLink["multiplicity"] == "1";
-            var vertical = modelLink["columns"].length == 1 && modelLink["multiplicity"] == "n";
-            var horizontal = modelLink["columns"].length > 1 && modelLink["multiplicity"] == "1";
-            var both = modelLink["columns"].length > 1 && modelLink["multiplicity"] == "n";
-
-            var styleSensInverse = view["sens"] ? "" : "sensInverse ";
-            var divRetour = buildElement("div");
-            var editable = view["actions"].includes("edit") && !editionMode;
+            var sens = view["sens"];
+            var divRetour = buildElement("div", undefined, viewName);
+            var editable = view["actions"].includes("edit");
             
-            if (one) {
-                divRetour = buildElement("div");
-                var divAllParams;
-                div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
-                divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
-                divAllParams.appendChild(this.buildItemForm(columns[0], datasLS, editionMode, view["sens"]));
-                div.appendChild(divAllParams);
-                divRetour.appendChild(div);
-            } else if (vertical) {
-                divRetour = buildElement("div");
-                var divAllParams;
-                div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
-                divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
-                for (var i = 0; i < datasLS.length; i++){
-                    divAllParams.appendChild(buildItemForm(columns[i], datasLS[i], editionMode, view["sens"]));
-                }
-                div.appendChild(divAllParams);
-                divRetour.appendChild(div); 
-            } else if (horizontal){
-                divRetour = buildElement("div");
-                var divAllParams;
-                div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
-                divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
-                for (var i = 0; i < datasLS.length; i++){
-                    divAllParams.appendChild(this.buildItemForm(columns[i], datasLS[i], editionMode, view["sens"]));
-                }
-                div.appendChild(divAllParams);
-                divRetour.appendChild(div); 
-            } else if (both){
-                divRetour = buildElement("div");
-                var divAllParams;
-                for (var i = 0; i < datasLS.length; i++){
-                    div = buildElement("div", "", undefined, "itemList " + styleSensInverse);
-                    divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem " + styleSensInverse);
-                    for (var j = 0; j < columns.length; j++){
-                        divAllParams.appendChild(this.buildItemForm(columns[j], datasLS[i][j], editionMode, view["sens"]));
-                    }
-                    if (editable){
-                        divAllParams.appendChild(buildEdit(view, viewName, modelLink, datasLS[i]));
-                    }
-                    div.appendChild(divAllParams);
-                    
-                    divRetour.appendChild(div);
-                }
-            }
+            divRetour = buildElement("div");
 
+            var divAllParams;
+            for (var i = 0; i < datasLS.length; i++){
+                div = buildElement("div", undefined, undefined, "itemList ");
+                divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem" + (sens ? "" : "Inverse "));
+                divAllParams.appendChild(buildRecordForm(columns, datasLS[i], sens, i, modeEdition));
+                if (editable){
+                    divAllParams.appendChild(buildEdit(view, viewName, modelLink, datasLS[i]));
+                }
+                div.appendChild(divAllParams);
+                
+                divRetour.appendChild(div);
+            }
             return divRetour;
         }
 
+        function buildRecordForm(columns, datasLS, sens, id, modeEdition){
+            var div = buildElement("div", null, id, "recordForm" + (sens ? "" : "Inverse "));
+            if (typeof(datasLS) === "object"){
+                for (var j = 0; j < columns.length; j++){
+                    div.appendChild(this.buildItemForm(columns[j], datasLS[j], sens, id, modeEdition));
+                }
+            }else{
+                div.appendChild(this.buildItemForm(columns, datasLS, modeEdition, sens, id, modeEdition));
+            }
+            return div;
+        }
+
         //construire l'affichage d'un item dans une liste
-        function buildItemForm(column, datasLS, editionMode){
-            var divParam = buildElement("div", "", undefined, "paramItem ");
+        function buildItemForm(column, datasLS, sens, id, modeEdition){
+            var divParam = buildElement("div", "", undefined, "recordItemForm" + (sens ? "" : "Inverse "));
             var label = buildElement("label", column["title"], undefined, "labelParamItem");
             label.setAttribute("type", column["type"]);
             divParam.appendChild(label);
-            if (editionMode){
+            if (modeEdition){
                 divParam.appendChild(buildItemEdition(column, datasLS)); 
             }else {
                 divParam.appendChild(buildElement("span", datasLS, undefined, "valueParamItem"));                    
@@ -548,9 +486,7 @@
 
         var bodyPopup = buildElement("div", undefined, undefined, "bodyPopup");
         bodyPopup.appendChild(buildHeaderView(view, viewName, modelLink));
-        for (var i = 0; i < modelLink["columns"].length; i++){
-            bodyPopup.appendChild(buildItemForm(modelLink["columns"][i], datasLS[i], true, true));
-        }
+        bodyPopup.appendChild(buildBodyView(view, viewName, modelLink, true))
         popup.appendChild(bodyPopup);
 
         popup.appendChild(buildFooterPopup(actionName, view, viewName, modelLink, datasLS));

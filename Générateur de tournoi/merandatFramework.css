@@ -13,6 +13,15 @@
     position: sticky;
     top: 0px;
 }
+.allParamItem {
+    display: flex;
+    flex-direction: row;
+}
+.allParamItemInverse {
+    flex-direction: column;
+    display: flex;
+    flex: 1 1 auto;
+}
 .itemList {
     display: flex;
     flex-direction: row;
@@ -23,19 +32,36 @@
     flex-wrap: wrap;
     box-shadow: 4px 5px 11px 1px #c3c3c3;
 }
-.allParamItem {
+.recordForm {
     display: flex;
     flex: 1 1 auto;
     flex-wrap: wrap;
     flex-direction: row;
 }
-.paramItem {
+.recordFormInverse {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+.recordItemForm {
     display: flex;
     flex-direction: column;
     justify-content: center;
     margin: 0px 5px;
     width: 100px;
 }
+
+.recordItemFormInverse{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 0px 5px;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1 1 auto;
+}
+
 .labelParamItem{
     color: gray;
     font-size: 0.7em;
@@ -70,14 +96,6 @@
 .titleBarItem{
     margin-left: 10px;
     margin-bottom: 0px;
-}
-.sensInverse{
-    flex-direction: column;
-    flex-wrap: initial;
-}
-.sensInverse2{
-    flex-direction: row;
-    flex-wrap: initial;
 }
 .popup {
     display: flex;
