@@ -1,21 +1,35 @@
 
 //---------- INIT
 {
+    var mainConfig;
     var globalDiv;
     var popupMask;
     var popupDiv;
+    var dbName; //le nom de la base de données globale
+    var db; //la base de données globale
 
-    function init(){
+    function init(dataBaseName, idButtonImport, config){
+
+        dbName = dataBaseName;
+        if (dbName != undefined){
+            db = JSON.parse(localStorage.getItem(dbName));
+        }else{
+            console.error("problème dans le nom de la base de données");
+        }
+
+        mainConfig = config;
+
         //création des éléments structurant
-        globalDiv = buildElement("div", undefined, "global", "container-fluid");
+        globalDiv = buildElement("div", undefined, "global", "container");
         document.body.appendChild(globalDiv);
         popupMask = buildElement("div", undefined, "popupMask", "popupMask");
         document.body.appendChild(popupMask);
         popupDiv = buildElement("div", undefined, "popupView", "popupView");
         popupMask.appendChild(popupDiv);
 
+
         //import
-        document.getElementById("bdTournoi").addEventListener('change', function() {   
+        document.getElementById(idButtonImport).addEventListener('change', function() {   
             var fichier = new FileReader(); 
             fichier.onload = function() { 
                 var json = JSON.parse(fichier.result);
@@ -28,133 +42,8 @@
 
 }   
 
-//--------- MODEL
-
-    //explication de la syntaxe 
-    //... TODO
-
-    //Récupération de la configuration principale
-    var mainConfig = {
-        "nativeTypes": ["string", "integer"],
-        "model": {
-            "genre": { 
-                "title": "Genre", 
-                "desc": "Etes-vous un homme ou une femme ?",
-                "columns": [
-                    {   "title": "Genre",
-                        "desc": "Le genre", 
-                        "type": "string",
-                        "datas": ["Homme", "Femme"], 
-                        "defaultValue": "Homme"
-                    }
-                ],
-                "multiplicity": "n",
-                "persistent": false 
-            },
-            "niveau": {
-                "title": "Liste des niveaux", 
-                "desc": "Les niveaux existants", 
-                "columns": [
-                    {   "title": "Niveau",
-                        "desc": "Le genre", 
-                        "type": "string",
-                        "datas": ["P12", "P11", "P10"],
-                        "defaultValue": "P12"
-                    }
-                ],
-                "multiplicity": "n",
-                "persistent": false
-            },
-            "typeTournoi": {
-                "title": "Les types de tournoi", 
-                "desc": "Il peut s'agir d'un tournoi simple ou double", 
-                "columns": [
-                    {   "title": "Type de tournoi",
-                        "desc": "Le type de tournoi", 
-                        "type": "string",
-                        "datas": ["Simple", "Double"],
-                        "defaultValue": "Simple"
-                    }
-                ],
-                "multiplicity": "n",
-                "persistent": false
-            },
-            "nombreTour": {
-                "title": "Nombre de tour", 
-                "desc": "Combien de tour va-t-on faire ?", 
-                "columns": [
-                    {   "title": "Nombre de tour",
-                        "desc": "Le nombre de tour", 
-                        "type": "integer",
-                        "defaultValue": 1,
-                        "restriction": {
-                            "min": 0,
-                            "max": 10
-                        }
-                    }
-                ],
-                "multiplicity": "1",
-                "persistent": false
-            },
-            "joueurs": {
-                "title": "Joueurs",
-                "desc": "Il s'agit de la liste des joueurs",
-                "columns": [
-                    {   "title": "Nom", 
-                        "desc": "Ton petit nom",
-                        "type": "string", 
-                        "defaultValue": "",
-                    },
-                    {   "title": "Prénom", 
-                        "desc": "Ton petit prénom",
-                        "type": "string", 
-                        "defaultValue": "",
-                    }, 
-                    {   "type": "genre" },
-                    {   "type": "niveau" }
-                ], 
-                "multiplicity": "n",
-                "persistent": true
-            }, 
-            "preparation": {
-                "title": "Préparation",
-                "desc": "Préparation du tournoi", 
-                "columns": [
-                    { "type": "typeTournoi" },
-                    { "type": "nombreTour" }
-                ],
-                "multiplicity": "1",
-                "persistent": true
-            },
-            "nomDataBase": {
-                "title": "Nom base de données", 
-                "desc": "Nom du fichier base de données",
-                "columns": [
-                    {   "title": "Nom base de données", 
-                        "desc": "Nom base de données",
-                        "type": "string", 
-                        "datas": "generateurTournoi"
-                    }
-                ],
-                "multiplicity": "n",
-                "persistent": false
-            }
-        },
-        "views": {
-            "joueurs": {
-                "modelLink": "joueurs",
-                "actions": ["add", "remove", "edit", "sensRevert"], 
-                "sens": true
-            }, 
-            "preparation": {
-                "modelLink": "preparation",
-                "actions": ["edit", "sensRevert"], 
-                "sens": true
-            }
-        }
-    }
-
-//----------View
+/****  VIEW ******/
+{
     var TABLEAU = "Tableau";
     var FORMULAIRE = "Formulaire";
     var currentModeAffichage = TABLEAU;
@@ -165,341 +54,427 @@
 
     function refresh(){
         currentModeAffichage = window.innerWidth > 500 ? TABLEAU : FORMULAIRE;
-        for (var viewName in mainConfig["views"]){
-            refreshView(mainConfig["views"][viewName], viewName);
+        var model;
+        for (var modelName in mainConfig["models"]){
+            model = mainConfig["models"][modelName];
+            if (model["view"]["display"] === true){
+                refreshView(model, modelName, getBDItem(modelName));
+            }
         }
     }
 
-    function refreshView(view, viewName){
-        var domView = initView(viewName);
-        domView.innerHTML = "";
-        var modelLink = getConfigModel(view["modelLink"]);
-        if (modelLink == undefined){
-            console.error("Model lié à la vue introuvable : " + view["modelLink"]);
-            return;
+    function refreshView(model, modelName, datas, root, titre){
+        switch (model["view"]["layout"]){
+            case "TOFR": //tableOrFormResponsive
+                refreshViewTOFR(model, modelName, datas, root, titre);
+            break;
         }
-        domView.appendChild(buildHeaderView(view, viewName, modelLink));
-        domView.appendChild(buildBodyView(view, viewName, modelLink, false));
     }
 
-    function initView(viewName) {
-        var domView = document.getElementById(viewName); 
+    function refreshViewTOFR(model, modelName, datas, root, titre){
+        var domView = initView(modelName, root);
+        domView.innerHTML = buildView(model, modelName, datas, false, titre).innerHTML;
+    }
+
+    function initView(modelName, root) {
+        if (root == undefined) root = globalDiv;
+        var domView = document.getElementById(modelName); 
         if (domView == null){
-            domView = buildElement("div", undefined, viewName, "container");
-            globalDiv.appendChild(domView);
+            domView = buildElement("div", undefined, modelName, "container");
+            root.appendChild(domView);
         }
         domView.innerHTML = "";
         return domView;
     }   
 
+    function buildView(model, modelName, datas, modeEdition, titre){
+        var div = buildElement("div");
+        div.appendChild(buildHeaderView(model, modelName, datas, titre));
+        div.appendChild(buildBodyView(model, modelName, datas, modeEdition));
+        return div;
+    }
+
     //Construit l'entête de la vue
-    function buildHeaderView(view, viewName, modelLink){
+    function buildHeaderView(model, modelName, datas, titre){
+        if (titre == undefined) titre = model["title"];
         var divTitre = buildElement("div", undefined, undefined, "stickyTop stickyLeft barItem");
-        divTitre.setAttribute("title", modelLink["desc"]);
-        var titre = buildElement("h4", modelLink["title"], undefined, "titleBarItem");
+        divTitre.setAttribute("title", model["desc"]);
+        var titre = buildElement("h4", titre, undefined, "titleBarItem");
         divTitre.appendChild(titre);
         var divInterfaces = buildElement("div");
-        if (view["actions"].includes("sensRevert")) 
-            divInterfaces.appendChild(buildInverse(viewName));
+        if (model["view"]["actions"].includes("sensRevert")) {
+            divInterfaces.appendChild(buildInverse(modelName));
+        }
         divTitre.appendChild(divInterfaces);
         return divTitre;
     }
 
-    function buildBodyView(view, viewName, modelLink, modeEdition) {
-        var datasLS = getBDItem(viewName);
+    function buildBodyView(model, modelName, datas, modeEdition) {
         if (currentModeAffichage == FORMULAIRE || modeEdition) {
-            return buildListForm(view, viewName, modelLink, datasLS, modeEdition);
+            return buildListForm(model, modelName, datas, modeEdition);
         }else {
-            return buildListTable(view, viewName, modelLink, datasLS);
+            return buildListTable(model, modelName, datas);
         }
     }
+}
 
-    /****  CREATION TABLE  ******/
-    {
-        function buildListTable (view, viewName, modelLink, datasLS){
-            var table = buildElement("table", undefined, undefined, "table");
-            var columns = getColumns(modelLink);
-            var sens = view["sens"];
-            
-            var editable = view["actions"].includes("edit");
+/****  CREATION TABLE  ******/
+{
+    function buildListTable (model, modelName, datas, croisement){
+        var table = buildElement("table", undefined, modelName, "table");
+        var sens = model["view"]["sens"];
+        var dimensionNone = model["dimension"] === "none";
+        var dimensionVerti = model["dimension"] === "verti";
+        var editable = model["view"]["actions"].includes("edit");
+        var croisement1 = croisement === "1";
 
-            //remplissage du header
-            if (sens){
-                var thead = buildHeaderTable(columns, editable, sens); 
-                table.appendChild(thead);
-            }
-            
-            //remplissage du body
-            var tbody;
-            if (sens){
-                tbody = buildBodyTable(view, viewName, columns, datasLS, editable);
-            }else{
-                tbody = buildBodyTableSensInverse(view, viewName, columns, datasLS, editable);
-            }
-
-            table.appendChild(tbody);
-            return table;
+        //remplissage du header
+        if (sens && !croisement1){
+            var thead = buildHeaderTable(model, editable, sens); 
+            table.appendChild(thead);
         }
-
-        function buildHeaderTable(columns, editable, sens){
-            if (!sens) return;
-            var thead = buildElement("thead", undefined, undefined, "headerTable");
-            var currentTr = buildElement("tr");
-            for (var i = 0; i < columns.length; i++){
-                currentTr.appendChild(this.buildHeaderCell(columns[i]));
-            }
-            if (editable) currentTr.appendChild(buildElement("th"));
-            thead.appendChild(currentTr);
-            return thead;
-        }
-
-        function buildBodyTable(view, viewName, columns, datasLS, editable, idEdition) {
-            editable &= idEdition == undefined; 
-            var tbody = buildElement("thead", undefined, undefined, "bodyTable");
-            var currentTr;
-            currentTr = buildElement("tr");
-            for (var i = 0; i < datasLS.length; i++){
-                if (typeof(datasLS[i]) === "object"){
-                    currentTr = buildRecordTable(datasLS[i], i);
-                    if (editable) {
-                        currentTr.appendChild(buildBodyEditCell(view, viewName, columns, datasLS)); 
-                    }
-                }else{
-                    for (var i = 0; i < columns.length; i++){
-                        buildRecordTable(datasLS[i], i, currentTr);
-                    }
-                }
-                tbody.appendChild(currentTr);
-            }
-
-            if (editable && typeof(datasLS[0]) !== "object"){
-                currentTr = buildElement("tr");
-                for (var i = 0; i < columns.length; i++){
-                    currentTr.appendChild(buildBodyEditCell(view, viewName, columns, datasLS)); 
-                }
-                tbody.appendChild(currentTr);
-            }
-
-            return tbody;
-        }
-
-        function buildBodyTableSensInverse(view, viewName, columns, datasLS, editable, id) {
-            var tbody = buildElement("thead", undefined, undefined, "bodyTable");
-            var currentTr;
         
-            for (var i = 0; i < columns.length; i++){
-                currentTr = buildElement("tr");
-                currentTr.appendChild(this.buildHeaderCell(columns[i]));
-                if (typeof(datasLS[i]) === "object"){
-                    for (var j = 0; j < datasLS.length; j++){
-                        buildRecordTable(datasLS[j][i], j, currentTr);
-                    }
+        //remplissage du body
+        var tbody;
+        if (sens){
+            tbody = buildBodyTable(model, modelName, datas, editable, croisement);
+        }else{
+            tbody = buildBodyTableSensInverse(model, modelName, datas, editable);
+        }
+
+        table.appendChild(tbody);
+        return table;
+    }
+
+    function buildHeaderTable(model, editable){
+        var thead = buildElement("thead", undefined, undefined, "headerTable");
+        var currentTr = buildElement("tr");
+        var dimensionBoth = model["dimension"] === "both";
+        var columns = model["columns"];
+
+        var column;
+        for (var i = 0; i < columns.length; i++){
+            column = getColumn(columns[i], true);
+            currentTr.appendChild(this.buildHeaderCell(column["title"], column["type"], column["desc"]));
+        }
+
+        if (editable && dimensionBoth) currentTr.appendChild(buildElement("th"));
+        thead.appendChild(currentTr);
+        return thead;
+    }
+
+    function buildBodyTable(model, modelName, datas, editable) {
+        var columns = model["columns"];
+        var dimensionBoth = model["dimension"] === "both";
+        var tbody = buildElement("tbody", undefined, undefined, "bodyTable");
+        var currentTr;
+        if (typeof(datas) != "object") datas = [datas];
+
+        for (var i = 0; i < datas.length; i++){
+            currentTr = buildElement("tr", undefined, i);
+            buildRecordTable(columns, datas[i], i, currentTr);
+            if (editable && dimensionBoth){
+                currentTr.appendChild(buildBodyEditCell(model, modelName, columns, datas)); 
+            }
+
+            tbody.appendChild(currentTr);
+        }
+
+        return tbody;
+    }
+
+    function buildRecordTable(columns, datas, id, currentTr){
+        for (var i = 0; i < columns.length; i++){
+            if (isNativeType(columns[i])){
+                currentTr.appendChild(buildBodyCell(datas[i], id));
+            }else{
+                var croisement = columns[i]["croisement"];
+                if (croisement === "1"){
+                    currentTr.appendChild(buildBodyCell(datas[i], id));
                 }else{
-                    buildRecordTable(datasLS[i], 0, currentTr);
-                    currentTr.appendChild(buildBodyEditCell(view, viewName, columns, datasLS)); 
+                    var model = getModel(columns[i]["type"]);
+                    currentTr.appendChild(buildListTable(model, columns[i]["type"], datas[i], croisement));
                 }
-                
-                tbody.appendChild(currentTr);
-            }
-            if (editable && typeof(datasLS[0]) === "object"){
-                currentTr = buildElement("tr");
-                currentTr.appendChild(buildHeaderCell(view, viewName, columns, datasLS)); 
-                for (var j = 0; j < datasLS.length; j++){
-                    currentTr.appendChild(buildBodyEditCell(view, viewName, columns, datasLS)); 
-                }
-                tbody.appendChild(currentTr);
-            }
-            
-            return tbody;
-        }
-
-        function buildRecordTable(datasLS, id, currentTr){
-            if (currentTr == undefined) currentTr = buildElement("tr", undefined, id);
-            if (typeof(datasLS) === "object"){
-                for (var j = 0; j < datasLS.length; j++){
-                    currentTr.appendChild(this.buildBodyCell(datasLS[j], j));
-                }
-            }else{
-                currentTr.appendChild(this.buildBodyCell(datasLS, 0));
-            }
-            return currentTr;
-        }
-
-        function buildHeaderCell(modelLink){
-            if (modelLink == undefined) {
-                return buildElement("th");
-            }else{
-                currentTd = buildElement("th", modelLink["title"]);
-                currentTd.setAttribute("type", modelLink["type"]);
-                currentTd.setAttribute("title", modelLink["desc"]);
-                return currentTd;
             }
         }
-
-        function buildBodyEditCell(view, viewName, modelLink, datasLS){
-            var td = buildElement("td");
-            td.appendChild(buildEdit(view, viewName, modelLink, datasLS));
-            return td;
-        }
-
-        function buildBodyCell(datasLS, id) {
-            return buildElement("td", datasLS, id);
-        }
-
     }
 
-    /****  CREATION FORMULAIRE  ******/
-    {
-        function buildListForm(view, viewName, modelLink, datasLS, modeEdition){
-            var columns = getColumns(modelLink);
-
-            var sens = view["sens"];
-            var divRetour = buildElement("div", undefined, viewName);
-            var editable = view["actions"].includes("edit");
-            
-            divRetour = buildElement("div");
-
-            var divAllParams;
-            for (var i = 0; i < datasLS.length; i++){
-                div = buildElement("div", undefined, undefined, "itemList ");
-                divAllParams = buildElement("div", "", "allParamItem" + i, "allParamItem" + (sens ? "" : "Inverse "));
-                divAllParams.appendChild(buildRecordForm(columns, datasLS[i], sens, i, modeEdition));
-                if (editable){
-                    divAllParams.appendChild(buildEdit(view, viewName, modelLink, datasLS[i]));
-                }
-                div.appendChild(divAllParams);
-                
-                divRetour.appendChild(div);
+    function buildBodyTableSensInverse(model, modelName, datas, editable) {
+        var columns = model["columns"];
+        var dimensionBoth = model["dimension"] === "both";
+        var tbody = buildElement("tbody", undefined, undefined, "bodyTable");
+        var currentTr;
+        var datasCustom;
+        var column;
+        for (var i = 0; i < columns.length; i++){
+            currentTr = buildElement("tr");
+            column = getColumn(columns[i], true);
+            currentTr.appendChild(this.buildHeaderCell(column["title"], column["type"], column["desc"]));
+            datasCustom = [];
+            for (var j = 0; j < datas.length; j++){
+                datasCustom.push(datas[j][i]);
             }
-            return divRetour;
+            buildRecordTableInverse(columns[i], datasCustom, i, currentTr);
+            tbody.appendChild(currentTr);
         }
+        if (editable && dimensionBoth){
+            currentTr = buildElement("tr");
+            currentTr.appendChild(buildElement("th"));
+            for (var i = 0; i < datas.length; i++){
+                currentTr.appendChild(buildBodyEditCell(model, modelName, columns, datas)); 
+            }
+            tbody.appendChild(currentTr);
+        }
+        
+        return tbody;
+    }
 
-        function buildRecordForm(columns, datasLS, sens, id, modeEdition){
-            var div = buildElement("div", null, id, "recordForm" + (sens ? "" : "Inverse "));
-            if (typeof(datasLS) === "object"){
-                for (var j = 0; j < columns.length; j++){
-                    div.appendChild(this.buildItemForm(columns[j], datasLS[j], sens, id, modeEdition));
-                }
+    function buildRecordTableInverse(column, datas, id, currentTr){
+        for (var i = 0; i < datas.length; i++){
+            if (isNativeType(column)){
+                currentTr.appendChild(buildBodyCell(datas[i], id));
             }else{
-                div.appendChild(this.buildItemForm(columns, datasLS, modeEdition, sens, id, modeEdition));
-            }
-            return div;
-        }
-
-        //construire l'affichage d'un item dans une liste
-        function buildItemForm(column, datasLS, sens, id, modeEdition){
-            var divParam = buildElement("div", "", undefined, "recordItemForm" + (sens ? "" : "Inverse "));
-            var label = buildElement("label", column["title"], undefined, "labelParamItem");
-            label.setAttribute("type", column["type"]);
-            divParam.appendChild(label);
-            if (modeEdition){
-                divParam.appendChild(buildItemEdition(column, datasLS)); 
-            }else {
-                divParam.appendChild(buildElement("span", datasLS, undefined, "valueParamItem"));                    
-            }
-            return divParam;
-        }
-
-        function buildItemEdition(column, datasLS, divRetour){
-            
-            if (divRetour == undefined) 
-                divRetour = buildElement("div");
-
-            if (mainConfig["nativeTypes"].includes(column["type"])){
-                if (column["type"] == "string") {
-                    input = buildElement("input", undefined, undefined, "valueParamItem");
-                    input.value = datasLS;
-                    input.placeholder = column["desc"];
-                }else {
-                    
-                }
-                return input;
-            }else{
-                for (var i in mainConfig["model"]){
-                    if (i == column["type"]){
-                        for (var j = 0; j < mainConfig["model"][i]["columns"].length; j++){
-                            divRetour.appendChild(buildItemEdition(mainConfig["model"][i]["columns"][j], datasLS, divRetour));
-                        }
-                    }
+                var croisement = column["croisement"];
+                if (croisement === "1"){
+                    currentTr.appendChild(buildBodyCell(datas[i], id));
+                }else{
+                    var model = getModel(column["type"]);
+                    currentTr.appendChild(buildListTable(model, column["type"], datas[i], croisement));
                 }
             }
-
-            return divRetour;
         }
-
     }
 
-    function getColumns(modelLink){
-        var columns = [];
-        for (var i = 0; i < modelLink["columns"].length; i++) {
-            if (!mainConfig["nativeTypes"].includes(modelLink["columns"][i]["type"])){
-                getRecursifColumn(mainConfig["model"], modelLink["columns"][i], columns);
+    function buildHeaderCell(title, type, desc){
+        var th = buildElement("th", title);
+        th.setAttribute("type", type);
+        th.setAttribute("title", desc);
+        return th;
+    }
+
+    function buildBodyEditCell(model, modelName, datas){
+        var td = buildElement("td");
+        td.appendChild(buildEdit(model, modelName, datas));
+        return td;
+    }
+
+    function buildBodyCell(datas, id) {
+        return buildElement("td", datas, id);
+    }
+
+}
+
+/****  CREATION FORMULAIRE  ******/
+{
+    function buildListForm(model, modelName, datas, modeEdition){
+        var dimension = model["dimension"];
+
+        var sens = model["view"]["sens"];
+        var divRetour = buildElement("div", undefined, modelName);
+        var editable = model["view"]["actions"].includes("edit");
+        var columns = model["columns"];
+        
+        divRetour = buildElement("div");
+
+        var divAllParams;
+        var div;
+        if (typeof(datas) != "object") datas = [datas];
+
+        for (var i = 0; i < datas.length; i++){
+            div = buildElement("div", undefined, undefined, "recordForm" + (sens ? "" : "Inverse "));
+            divAllParams = buildElement("div", "", "allRecordItemForm" + i, "allRecordItemForm" + (sens ? "" : "Inverse "));
+            buildRecordForm(columns, datas[i], sens, modeEdition, divAllParams);
+            div.appendChild(divAllParams);
+            if (editable){
+                div.appendChild(buildEdit(model, modelName, datas[i]));
+            }
+            divRetour.appendChild(div);
+        }
+        
+        return divRetour;
+    }
+
+    function buildRecordForm(columns, datas, sens, modeEdition, div){
+        for (var i = 0; i < columns.length; i++){
+            if (isNativeType(columns[i])){
+                div.appendChild(buildItemForm(columns[i], datas[i], sens, i, modeEdition));
             }else{
-                columns.push(modelLink["columns"][i]);
+                var croisement = columns[i]["croisement"];
+                if (croisement === "1"){
+                    var column = getColumn(columns[i], true);
+                    div.appendChild(buildItemForm(column, datas[i], sens, i, modeEdition));
+                }else{
+                    var model = getModel(columns[i]["type"]);
+                    currentTr.appendChild(buildListForm(model, columns[i]["type"], datas[i], modeEdition));
+                }
             }
+
         }
-        return columns;
-    }
-    function getRecursifColumn(node, column, columns){
-        for (var i in node){
-            if (i == column["type"]){
-                for (var j = 0; j < node[i]["columns"].length; j++){
-                    if (!mainConfig["nativeTypes"].includes(node[i]["columns"][j]["type"])){
-                        var retour = [];
-                        getRecursifColumn(mainConfig["model"], node[i]["columns"][j], retour);
-                    }else{
-                        columns.push(node[i]["columns"][j]);
-                    }
-                } 
-            }
-        }
-        return null;
     }
 
-    function buildNativeType(dynObj){
-        return buildElement("span", dynObj);
+    //construire l'affichage d'un item dans une liste
+    function buildItemForm(column, datas, sens, id, modeEdition) {
+        var divParam = buildElement("div", "", undefined, "recordItemForm" + (sens ? "" : "Inverse "));
+        var label = buildElement("label", column["title"], undefined, "labelParamItem");
+        label.setAttribute("type", column["type"]);
+        divParam.appendChild(label);
+        if (modeEdition){
+            divParam.appendChild(buildItemEdition(column, datas)); 
+        }else {
+            divParam.appendChild(buildElement("span", datas, undefined, "valueParamItem"));                    
+        }
+        return divParam;
     }
 
-    function buildInverse(viewName){
+    function buildItemEdition(column, datas){
+        
+        if (datas == null) datas = column["defaultValue"];
+
+        if (column["type"] == "string") {
+            input = buildElement("input", undefined, undefined, "valueParamItem");
+            input.type = "text";
+            input.value = datas;
+            input.placeholder = column["desc"];
+        }else if (column["type"] == "integer") {
+            input = buildElement("input", undefined, undefined, "valueParamItem");
+            input.type = "number";
+            input.value = datas;
+            input.placeholder = column["desc"];
+            input.setAttribute("min", column["restriction"]["min"]);
+            input.setAttribute("max", column["restriction"]["max"]);
+        }
+        return input;
+    }
+
+}
+
+function getColumn(column, first){
+    var retour = [];
+    if (mainConfig["nativeTypes"].includes(column["type"])){
+        retour.push(column);
+        return first ? column : retour;
+    }else {
+        var model = getModel(column["type"]);
+        if (model == null){
+            console.error("Ce type : " + column["type"] + " n'est pas défini dans les modèles");
+        }else{
+            for (var i = 0; i < model["columns"].length; i++){
+                retour.push(getColumn(model["columns"][i], first));
+            }
+            return first ? model["columns"][0] : retour;
+        }
+    }
+
+}
+
+function isNativeType(column){
+    return mainConfig["nativeTypes"].includes(column["type"]);
+}
+
+function buildNativeType(dynObj){
+    return buildElement("span", dynObj);
+}
+
+/****  ACTIONS ******/
+{
+    function buildInverse(modelName){
         var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-light barItemInterface");
-        buttonInverse.setAttribute("onclick", "inverseSens('" + viewName + "');");
+        buttonInverse.setAttribute("onclick", "inverseSens('" + modelName + "');");
         buttonInverse.value = "Inverse";
         return buttonInverse;
     }
 
-    function buildEdit(view, viewName, modelLink, datasLS){
+    function buildEdit(model, modelName, columns, datas){
         var buttonEdition = buildElement("button", "Editer", undefined, "btn btn-light barItemInterface");
-        buttonEdition.onclick = edit.bind(this, view, viewName, modelLink, datasLS);
+        buttonEdition.onclick = edit.bind(this, model, modelName, columns, datas);
         buttonEdition.value = "Editer";
         return buttonEdition;
     }
 
-    function refreshPopup(actionName, view, viewName, modelLink, datasLS){
-        popupDiv.innerHTML = "";
-        popupDiv.innerHTML = buildPopup(actionName, view, viewName, modelLink, datasLS).innerHTML;
+    
+    function buildValid(model, modelName, modelLink, datas){
+        var buttonValid = buildElement("button", "Valider", undefined, "btn btn-primary buttonValidEdit");
+        buttonValid.onclick = validEdit.bind(this, model, modelName, columns);
+        buttonValid.value = "Editer";
+        return buttonValid;
     }
 
-    function buildPopup(actionName, view, viewName, modelLink, datasLS) {
+    
+    function buildCancel(){
+        var buttonCancel = buildElement("button", "Editer", undefined, "btn btn-secondary buttonCancelEdit");
+        buttonCancel.onclick = cancelEdit.bind(this);
+        buttonCancel.value = "Editer";
+        return buttonCancel;
+    }
+
+    function inverseSens(modelName){
+        mainConfig["models"][modelName]["view"]["sens"] = !mainConfig["models"][modelName]["view"]["sens"];  
+        refresh();
+    }
+    function edit(model, modelName, modelLink, datas){
+        showPopup("Modification - " + modelName, model, modelName, modelLink, datas, true);
+    }
+    function validEdit(model, modelName){
+
+        var columns = model["columns"];
+        //on récupère les données
+        for (var i = 0; i < columns.length; i++){
+            getInputValue(columns[i], popupDiv);
+        }
+        //enregistrer les modif
+
+        //fermer la popup
+        hidePopup();
+        refresh();
+    }
+    function cancelEdit(model, modelName, modelLink, datas){
+        showPopup("Modification - " + modelName, model, modelName, modelLink, datas, true);
+    }
+
+    function getInputValue(column, div){
+        var input = div.querySelector(column["title"]);
+        var type = column["type"];
+        if (mainConfig["nativeTypes"].includes(type)) {
+            console.error("type non reconnu : " + type);
+            return;
+        }
+        switch (column["type"]){
+            case "string":
+                return input.value;
+            case "integer":
+                return input.value;
+            default: 
+            console.error("type onn reconnu : " + column["type"]);
+                break;
+        }
+    }
+}
+
+/****  POPUP ******/
+{
+    function refreshPopup(actionName, model, modelName, modelLink, datas, modeEdition){
+        popupDiv.innerHTML = "";
+        popupDiv.innerHTML = buildPopup(actionName, model, modelName, modelLink, datas, modeEdition).innerHTML;
+    }
+
+    function buildPopup(titre, model, modelName, modelLink, datas, modeEdition) {
         var popup = buildElement("div", undefined, "popupEdition", "popup");
 
-        popup.appendChild(buildHeaderPopup(actionName, view, viewName, modelLink, datasLS));
-
         var bodyPopup = buildElement("div", undefined, undefined, "bodyPopup");
-        bodyPopup.appendChild(buildHeaderView(view, viewName, modelLink));
-        bodyPopup.appendChild(buildBodyView(view, viewName, modelLink, true))
+        bodyPopup.appendChild(buildView(model, modelName, modelLink, datas, modeEdition, titre));
         popup.appendChild(bodyPopup);
 
-        popup.appendChild(buildFooterPopup(actionName, view, viewName, modelLink, datasLS));
+        popup.appendChild(buildFooterPopup(actionName, model, modelName, modelLink, datas));
         return popup;
     }
 
-    function buildHeaderPopup(actionName, view, viewName, mdd, dynObj, dimension){
+    function buildHeaderPopup(actionName, model, modelName, mdd, dynObj, dimension){
         var headerPopup = buildElement("div", undefined, undefined, "headerPopup");
         var title = buildElement("h4", actionName, undefined, "titleHeaderPopup");
         headerPopup.appendChild(title);
         return headerPopup;
     }
-    function buildFooterPopup(actionName, view, viewName, mdd, dynObj, dimension){
+    function buildFooterPopup(actionName, model, modelName, mdd, dynObj, dimension){
         var footerPopup = buildElement("div", undefined, undefined, "footerPopup");
 
         return footerPopup;
@@ -509,59 +484,58 @@
         return popupMask.style["display"] != "none";
     }
 
-    function showPopup(actionName, view, viewName, modelLink, datasLS){
-        refreshPopup(actionName, view, viewName, modelLink, datasLS);
+    function showPopup(actionName, model, modelName, modelLink, datas, modeEdition){
+        refreshPopup(actionName, model, modelName, modelLink, datas, modeEdition);
         popupMask.style["display"] = "flex";
     }
 
     function hidePopup(){
         popupMask.style["display"] = "none";
     }
+}
 
-    //---------- ACTION 
-
-    function inverseSens(viewName){
-        mainConfig["views"][viewName]["sens"] = !mainConfig["views"][viewName]["sens"];  
-        refresh();
-    }
-    function edit(view, viewName, modelLink, datasLS){
-        showPopup("Modification", view, viewName, modelLink, datasLS);
-    }
-
-    
-
-    
-
+/****  MISC ******/
+{
     function buildElement(type, innerHTML, id, className){
         var elt = document.createElement(type);
         if (id != undefined) elt.setAttribute("id", id);
         if (className != undefined) elt.setAttribute("class", className);
         if (innerHTML != undefined) elt.innerHTML = innerHTML;
         return elt;
-    }   
-
-
+    }  
+}
+    
 //---------- BASE DE DONNEE LOCALE
 {
 
-    function getConfigModel(item){
-        var retour = mainConfig["model"][item];
-        if (retour == undefined) console.error("Model config inconnu : " + item);
+    function getModel(item){
+        var retour = mainConfig["models"][item];
+        if (retour == undefined) console.error("Model inconnu : " + item);
         return retour;
     }
 
-    function getBDItem(key, source){
-        if (source == undefined) source = localStorage.getItem(getConfigModel("nomDataBase"));
-        source = JSON.parse(source);           
-        return getBDItemRecursif(source, key);
+    function saveBDItem(itemName, item, root){
+        if (root == undefined) root = db;
+        for (var i in root) {
+            if (i == itemName){
+                root[i] = item;
+                saveBD();
+                return;
+            }else if (typeof(root[i]) == "object"){
+                saveItem(itemName, item, root[i]);
+            }
+        }
+        console.error("Item pour enregistrement non trouvé");
+        return null;
     }
 
-    function getBDItemRecursif(source, key){
-        for (var i in source) {
+    function getBDItem(key, root){
+        if (root == undefined) root = db;
+        for (var i in root) {
             if (i == key){
-                return source[i];
-            }else if (typeof(source[i]) == "object"){
-                var retour = getBDItemRecursif(source[i], key);
+                return root[i];
+            }else if (typeof(root[i]) == "object"){
+                var retour = getBDItem(key, root[i]);
                 if (retour != null) return retour;
             }
         }
@@ -569,10 +543,9 @@
     }
 
     function saveBD(source){
-        localStorage.setItem(getConfigModel("nomDataBase"), JSON.stringify(source));
+        if (source == undefined) source = db;
+        localStorage.setItem(dbName, JSON.stringify(source));
     }
-
-    
 
     //export
     function exportTournoi() {

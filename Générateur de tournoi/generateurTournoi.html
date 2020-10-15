@@ -14,7 +14,7 @@
         <script src="./merandatFramework.js"></script>
         <link rel="stylesheet" href="./merandatFramework.css">
     </head>
-    <body onload="init(); refresh();">
+    <body onload="">
 
 
         <div id="header" class="container">
@@ -51,6 +51,156 @@
                 </div>
             </nav>
         </div>
+
+        <script>
+
+            //dimension : none / verti / horiz / both 
+
+            //Récupération de la configuration principale
+            var config = {
+                "nativeTypes": ["string", "integer"],
+                "models": {
+                    "genre": { 
+                        "title": "Genre", 
+                        "desc": "Etes-vous un homme ou une femme ?",
+                        "columns": [
+                            {   "title": "Genre",
+                                "desc": "Le genre", 
+                                "type": "string",
+                                "datas": ["Homme", "Femme"], 
+                                "defaultValue": "Homme"
+                            }
+                        ],
+                        "dimension": "verti",
+                        "persistent": false,
+                        "view": {
+                            "display": false,
+                            "layout": "TOFR",
+                            "actions": [],
+                            "sens": true
+                        }
+                    },
+                    "niveau": {
+                        "title": "Niveaux", 
+                        "desc": "Les niveaux existants", 
+                        "columns": [
+                            {   "title": "Niveau",
+                                "desc": "Le genre", 
+                                "type": "string",
+                                "datas": ["P12", "P11", "P10"],
+                                "defaultValue": "P12"
+                            }
+                        ],
+                        "dimension": "verti",
+                        "persistent": false, 
+                        "view": {
+                            "display": false,
+                            "layout": "TOFR",
+                            "actions": [],
+                            "sens": true
+                        }
+                    },
+                    "typeTournoi": {
+                        "title": "Type de tournoi", 
+                        "desc": "Il peut s'agir d'un tournoi simple ou double", 
+                        "columns": [
+                            {   "title": "Type de tournoi",
+                                "desc": "Le type de tournoi", 
+                                "type": "string",
+                                "datas": ["Simple", "Double"],
+                                "defaultValue": "Simple"
+                            }
+                        ],
+                        "dimension": "verti",
+                        "persistent": false, 
+                        "view": {
+                            "display": false,
+                            "layout": "TOFR",
+                            "actions": [],
+                            "sens": true
+                        }
+                    },
+                    "nombreTour": {
+                        "title": "Nombre de tour", 
+                        "desc": "Combien de tour va-t-on faire ?", 
+                        "columns": [
+                            {   "title": "Nombre de tour",
+                                "desc": "Le nombre de tour", 
+                                "type": "integer",
+                                "defaultValue": 1,
+                                "restriction": {
+                                    "min": 0,
+                                    "max": 10
+                                }
+                            }
+                        ],
+                        "dimension": "none",
+                        "persistent": false,
+                        "view": {
+                            "display": false,
+                            "layout": "TOFR",
+                            "actions": [],
+                            "sens": true
+                        }
+                    },
+                    "joueurs": {
+                        "title": "Joueurs",
+                        "desc": "C'est ici que vous pouvez renseigner la liste des joueurs. \n Cochez ceux qui participent au tournoi.",
+                        "columns": [
+                            {   "title": "Nom", 
+                                "desc": "Ton petit nom",
+                                "type": "string", 
+                                "defaultValue": "",
+                            },
+                            {   "title": "Prénom", 
+                                "desc": "Ton petit prénom",
+                                "type": "string", 
+                                "defaultValue": "",
+                            }, 
+                            {   "type": "genre", 
+                                "croisement": "1"    
+                            },
+                            {   "type": "niveau", 
+                                "croisement": "1"   
+                            }
+                        ], 
+                        "dimension": "both",
+                        "persistent": true,
+                        "view": {
+                            "display": true,
+                            "layout": "TOFR",
+                            "actions": ["add", "remove", "edit", "sensRevert"],
+                            "sens": true
+                        }
+                    }, 
+                    "preparation": {
+                        "title": "Préparation",
+                        "desc": "Préparation du tournoi", 
+                        "columns": [
+                            { "type": "typeTournoi", 
+                              "croisement": "1"
+                            },
+                            { "type": "nombreTour", 
+                              "croisement": "1" 
+                            }
+                        ],
+                        "dimension": "horiz",
+                        "persistent": true,
+                        "actions": ["edit", "sensRevert"],
+                        "sens": true, 
+                        "view": {
+                            "display": true,
+                            "layout": "TOFR",
+                            "actions": ["edit", "sensRevert"],
+                            "sens": true
+                        }
+                    }
+                }
+            }
+
+            init("generateurTournoi", "bdTournoi", config); //met en place la structure globale
+            refresh();
+        </script>
 
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>

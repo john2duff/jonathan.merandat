@@ -1,8 +1,8 @@
 .container{
     padding:0px;
+    overflow-x: auto;
 }
-.table{
-    overflow: auto;
+.table tbody{
 }
 .stickyLeft{
     position: sticky;
@@ -12,11 +12,12 @@
     position: sticky;
     top: 0px;
 }
-.allParamItem {
+.allRecordItemForm {
     display: flex;
-    flex-direction: row;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
 }
-.allParamItemInverse {
+.allRecordItemFormInverse {
     flex-direction: column;
     display: flex;
     flex: 1 1 auto;
@@ -33,10 +34,22 @@
 }
 .recordForm {
     display: flex;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
     flex-direction: row;
+    padding: 10px;
+    background-color: white;
+    margin: 10px;
+    box-shadow: 4px 5px 11px 1px #c3c3c3;
 }
+
+.recordFormInverse {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background-color: white;
+    margin: 10px;
+    box-shadow: 4px 5px 11px 1px #c3c3c3;
+}
+
 .recordFormInverse {
     display: flex;
     flex: 1 1 auto;
@@ -88,6 +101,7 @@
     top: 0;
     z-index: 1020;
     left:0px;
+    box-shadow: 4px 5px 11px 1px #c3c3c3;
 }
 .barItemInterface{
     margin: 0px 5px;
