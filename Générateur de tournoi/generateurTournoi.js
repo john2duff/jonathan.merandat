@@ -15,12 +15,7 @@ var config = {
             ],
             "dimension": "verti",
             "persistent": false,
-            "view": {
-                "display": false,
-                "layout": "TOFR",
-                "actions": [],
-                "sens": true
-            }
+            "views": {}
         },
         "niveau": {
             "title": "Niveaux", 
@@ -35,12 +30,7 @@ var config = {
             ],
             "dimension": "verti",
             "persistent": false, 
-            "view": {
-                "display": false,
-                "layout": "TOFR",
-                "actions": [],
-                "sens": true
-            }
+            "views": {}
         },
         "typeTournoi": {
             "title": "Type de tournoi", 
@@ -55,12 +45,7 @@ var config = {
             ],
             "dimension": "verti",
             "persistent": false, 
-            "view": {
-                "display": false,
-                "layout": "TOFR",
-                "actions": [],
-                "sens": true
-            }
+            "views": {}
         },
         "nombreTour": {
             "title": "Nombre de tour", 
@@ -78,12 +63,7 @@ var config = {
             ],
             "dimension": "none",
             "persistent": false,
-            "view": {
-                "display": false,
-                "layout": "TOFR",
-                "actions": [],
-                "sens": true
-            }
+            "views": {}
         },
         "joueurs": {
             "title": "Joueurs",
@@ -108,11 +88,11 @@ var config = {
             ], 
             "dimension": "both",
             "persistent": true,
-            "view": {
-                "display": true,
-                "layout": "TOFR",
-                "actions": ["add", "remove", "edit", "sensRevert"],
-                "sens": true
+            "views": {
+                "joueursPage1": {
+                    "layout": "TOFR",
+                    "actions": ["add", "remove", "edit", "sensRevert"],
+                }
             }
         }, 
         "preparation": {
@@ -131,28 +111,30 @@ var config = {
             "actions": ["edit", "sensRevert"],
             "sens": true, 
             "view": {
-                "display": true,
-                "layout": "TOFR",
-                "actions": ["edit", "sensRevert"],
-                "sens": true
+                "defaultPreparation": {
+                    "layout": "TOFR",
+                    "actions": ["edit", "sensRevert"],
+                }
             }
         }
     },
     "pages": {
-        "home": "page1",
         "page1": {
             "header": buildTitlePage("Générateur de tournoi"), 
-            "models": ["joueurs", "preparation"], 
+            "views": ["joueursPage1", "defaultPreparation"], 
         }
     },
+    "homePage": "page1",
     "dataBaseName": "generateurTournoi",
-    "idButtonImport": "bdTournoi", 
+    "container": null //signifie que cela se construit dans le body
 }
 
-var page = new MTFramework(config); //met en place la structure globale
-
+function loadMTFramework(){
+    new MTFramework(config);
+}
 
 function buildTitlePage(title){
+
     var div = buildElement("div", undefined, undefined, undefined, "display:flex; justify-content:left;align-items:center;");
     var img = buildElement("img", undefined, undefined);
     img.setAttribute("src", "./logoBadLevier.jpg");

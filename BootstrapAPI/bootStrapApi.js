@@ -38,7 +38,7 @@ BSBuilder.dropDown = function(titre, interfaces){
     a.setAttribute("href", "#")
 
     var dropDownMenu = buildElement("div", undefined, undefined, "dropdown-menu");
-    dropDownMenu.setAttribute("aria-labelledb", "navbarDropdownMenuLink");
+    dropDownMenu.setAttribute("aria-labelled", "navbarDropdownMenuLink");
 
     for (var i = 0; i < interfaces.length; i++){
         interfaces[i].classList.add("dropdown-item");
@@ -47,6 +47,6 @@ BSBuilder.dropDown = function(titre, interfaces){
 
     div.appendChild(a);
     div.appendChild(dropDownMenu);
-    return 
+    return div;
 }
 

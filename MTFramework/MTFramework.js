@@ -1,4 +1,6 @@
 
+
+
 var MTFramework = function(config){
     return new MTFrameworkController(config);
 }
@@ -7,11 +9,22 @@ var MTFramework = function(config){
 class MTFrameworkController {
     constructor(config) {
         this.init(config);
+        this.refresh();
     }
 
     init(config) {
         this.model = new MTFrameworkModel(config);
-        this.view.init(this.model, idButtonImport);
+        this.view = new MTFrameworkView(this.model, this);
+        //resize
+        window.addEventListener("resize", this.resize.bind(this));
+    }
+
+    resize(){
+        this.refresh(); 
+    }
+
+    refresh(){
+        this.view.refreshPage();
     }
 
     /****  ACTIONS ******/
@@ -52,6 +65,26 @@ class MTFrameworkController {
         }
     }
 
+    exportBD() {
+        var data = localStorage.getItem(this.model.dataBaseName);
+        var name = "export - " + new Date().getDate();
+        var type = "application/json";
+        var anchor = document.createElement("a");
+        anchor.href = window.URL.createObjectURL(new Blob([data], {type}));
+        anchor.download = name;
+        anchor.click();
+    }
+
+    importBD() {   
+        var fichier = new FileReader(); 
+        fichier.onload = function() { 
+            var json = JSON.parse(fichier.result);
+            this.model.saveBD(json);
+            this.view.refresh();
+        }   
+        fichier.readAsText(this.files[0]); 
+    }
+
 }
 
 /****  MODEL ******/ 
@@ -63,10 +96,7 @@ class MTFrameworkModel {
     init(config) {
         this.mainConfig = config; 
         this.dbName = config["dataBaseName"]; 
-        this.db = null;
-        if (dbName != undefined){
-            db = JSON.parse(localStorage.getItem(dbName));
-        }
+        this.db = JSON.parse(localStorage.getItem(this.dbName));
     }
 
     inverseSens(){
@@ -115,7 +145,7 @@ class MTFrameworkModel {
     }
 
     getHomePage() {
-        return this.getPages()["Home"];
+        return this.mainConfig["homePage"];
     }
 
     saveBDItem(itemName, item, root) {
@@ -146,28 +176,21 @@ class MTFrameworkModel {
         return null;
     }
 
-    exportBD() {
-        var data = localStorage.getItem(this.dataBaseName);
-        var name = "export - " + new Date().getDate();
-        var type = "application/json";
-        var anchor = document.createElement("a");
-        anchor.href = window.URL.createObjectURL(new Blob([data], {type}));
-        anchor.download = name;
-        anchor.click();
-    }
-
 }
 
 /****  VIEW ******/
 class MTFrameworkView {
-    constructor(model, idButtonImport) {
-        this.init(model, idButtonImport);
+    constructor(model, ctrl) {
+        this.init(model, ctrl);
     }
 
     currentPage = null;
+    TABLEAU = "Tableau";
+    FORMULAIRE = "Formulaire";
 
-    init(model, idButtonImport){
+    init(model, ctrl){
         this.model = model;
+        this.ctrl = ctrl;
         //création des éléments structurant
         this.headerPage = buildElement("div", undefined, "headerPage", "container");
         document.body.appendChild(this.headerPage);
@@ -177,63 +200,63 @@ class MTFrameworkView {
         document.body.appendChild(this.popupMask);
         this.popupDiv = buildElement("div", undefined, "popupView", "popupView");
         popupMask.appendChild(this.popupDiv);
-        //resize
-        window.addEventListener("resize", function(){
-            this.refresh();
-        });
-        //import
-        if (idButtonImport != undefined){
-            document.getElementById(idButtonImport).addEventListener('change', function() {   
-                var fichier = new FileReader(); 
-                fichier.onload = function() { 
-                    var json = JSON.parse(fichier.result);
-                    saveBD(json);
-                    refresh();
-                }   
-                fichier.readAsText(this.files[0]); 
-            });
-        }
     }
 
     refreshPage(pageName){
-        if (currentPage == null) currentPage = this.model.getHomePage();
-        var pages = this.model["pages"];
+        if (this.currentPage == null) this.currentPage = this.model.getHomePage(); 
+        if (pageName != undefined) this.currentPage = pageName;        
+        
+        var pages = this.model.getPages();
         for (var page in pages){
-            if (pageName != undefined && page == pageName){
+            if (page == this.currentPage){
                 this.refreshHeaderPage(pages[page]);
-                this.refreshViews(pages[page]["modelViews"]);
+                this.refreshViews(pages[page]["views"]);
             }
         }
     }
 
     refreshHeaderPage(page){
-        this.headerPage.innerHTML = page["header"].innerHTML;
+        var buttonImport = buildElement("input", undefined, undefined, "btn-file");
+        buttonImport.value = "Import";
+        buttonImport.addEventListener('change', this.ctrl.importBD.bind(this.ctrl));
+        var buttonExport = buildElement("label");
+        buttonExport.addEventListener("click", this.ctrl.exportBD.bind(this.ctrl));
+        var dropDownImportExport = BSBuilder.dropDown("Import / Export", [buttonImport, buttonExport]);
+        var navBar = BSBuilder.navBar(true, dropDownImportExport);
+        navBar.insertBefore(page["header"], navBar.childNodes[0]);
+        this.headerPage.innerHTML = "";
+        this.headerPage.appendChild(navBar);
     }
 
-    refreshViews(models){
-        this.currentViewMode = window.innerWidth > 500 ? TABLEAU : FORMULAIRE;
-        var model;
-        var modelsInCurrentPage = this.model.getModels();
-        for (var modelView in modelsInCurrentPage){
+    refreshViews(views){
+        this.currentViewMode = window.innerWidth > 500 ? this.TABLEAU : this.FORMULAIRE;
+        var models = this.model.getModels();
+        var viewsInModel;
+        for (var i = 0; i < views.length; i++){
             for (var model in models){
-                if (modelView === model && models[model]["view"]["display"] === true){
-                    this.refreshView(model, modelName, getBDItem(modelName));
+                viewsInModel = models[model]["views"];
+                for (var view in viewsInModel){
+                    if (view === views[i]){
+                        this.refreshView(models[model], model, viewsInModel[view], this.model.getBDItem(model));
+                    }
                 }
             }
         }
+        
     }
 
-    refreshView(model, modelName, datas, root, titre){
-        switch (model["view"]["layout"]){
+    refreshView(model, modelName, view, datas, root, titre){
+        switch (view["layout"]){
             case "TOFR": //tableOrFormResponsive
-                this.refreshViewTOFR(model, modelName, datas, root, titre);
+            case "TOFR-inverse": //tableOrFormResponsive sens inverse
+                this.refreshViewTOFR(model, modelName, view, datas, root, titre);
             break;
         }
     }
 
-    refreshViewTOFR(model, modelName, datas, root, titre){
+    refreshViewTOFR(model, modelName, view, datas, root, titre){
         var domView = this.initView(modelName, root);
-        domView.innerHTML = this.buildView(model, modelName, datas, false, titre).innerHTML;
+        domView.innerHTML = this.buildView(model, modelName, view, datas, false, titre).innerHTML;
     }
 
     initView(modelName, root) {
@@ -247,46 +270,43 @@ class MTFrameworkView {
         return domView;
     } 
 
-    buildView(model, modelName, datas, modeEdition, titre){
+    buildView(model, modelName, view, datas, modeEdition, titre){
         var div = buildElement("div");
-        div.appendChild(this.buildHeaderView(model, modelName, datas, titre));
-        div.appendChild(this.buildBodyView(model, modelName, datas, modeEdition));
-        div.appendChild(this.buildFooterView(model, modelName, datas, titre));
+        div.appendChild(this.buildHeaderView(model, modelName, view, datas, titre));
+        div.appendChild(this.buildBodyView(model, modelName, view, datas, modeEdition));
+        div.appendChild(this.buildFooterView(model, modelName, view, datas, titre));
 
         return div;
     }
 
-    buildHeaderView(model, modelName, titre){
+    buildHeaderView(model, modelName, view, titre){
         if (titre == undefined) titre = model["title"];
         var divTitre = buildElement("div", undefined, undefined, "stickyTop stickyLeft barItem");
         divTitre.setAttribute("title", model["desc"]);
         var titre = buildElement("h4", titre, undefined, "titleBarItem");
         divTitre.appendChild(titre);
         var divInterfaces = buildElement("div");
-        if (model["view"]["actions"].includes("sensRevert")) {
+        if (view["actions"].includes("sensRevert")) {
             divInterfaces.appendChild(this.buildInverse(modelName));
         }
         divTitre.appendChild(divInterfaces);
         return divTitre;
     }
 
-    buildBodyView(model, modelName, datas, modeEdition) {
+    buildBodyView(model, modelName, view, datas, modeEdition) {
         if (currentViewMode == FORMULAIRE || modeEdition) {
-            return this.buildListForm(model, modelName, datas, modeEdition);
+            return this.buildListForm(model, modelName, view, datas, modeEdition);
         }else {
-            return this.buildListTable(model, modelName, datas);
+            return this.buildListTable(model, modelName, view, datas);
         }
     }
 
-    buildHeaderView(model, modelName){
+    buildFooterView(model, modelName){
         var divTitre = buildElement("div", undefined, undefined, "stickyBottom stickyLeft barItem");
         divTitre.setAttribute("title", model["desc"]);
         var titre = buildElement("h4", titre, undefined, "titleBarItem");
         divTitre.appendChild(titre);
         var divInterfaces = buildElement("div");
-        if (model["view"]["actions"].includes("sensRevert")) {
-            divInterfaces.appendChild(this.buildInverse(modelName));
-        }
         divTitre.appendChild(divInterfaces);
         return divTitre;
     }
@@ -305,10 +325,10 @@ class MTFrameworkView {
     
     /****  CREATION TABLE  ******/
 
-    buildListTable(model, modelName, datas, croisement){
+    buildListTable(model, modelName, view, datas, croisement){
         var table = buildElement("table", undefined, modelName, "table");
-        var sens = model["view"]["sens"];
-        var editable = model["view"]["actions"].includes("edit");
+        var sens = view["sens"];
+        var editable = view["actions"].includes("edit");
         var croisement1 = croisement === "1";
 
         //remplissage du header
@@ -446,10 +466,10 @@ class MTFrameworkView {
     }
 
     /****  CREATION FORMULAIRE  ******/
-    buildListForm(model, modelName, datas, modeEdition){
-        var sens = model["view"]["sens"];
+    buildListForm(model, modelName, view, datas, modeEdition){
+        var sens = view["sens"];
         var divRetour = buildElement("div", undefined, modelName);
-        var editable = model["view"]["actions"].includes("edit");
+        var editable = view["actions"].includes("edit");
         var columns = model["columns"];
         
         divRetour = buildElement("div");
@@ -523,8 +543,8 @@ class MTFrameworkView {
         return input;
     }
 
-     /****  ACTIONS ******/
-     buildInverse(modelName){
+    /****  ACTIONS ******/
+    buildInverse(modelName){
         var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-light barItemInterface");
         buttonInverse.setAttribute("onclick", "inverseSens('" + modelName + "');");
         buttonInverse.value = "Inverse";
