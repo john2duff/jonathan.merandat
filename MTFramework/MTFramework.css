@@ -1,6 +1,8 @@
 .container{
     padding:0px;
 }
+
+/*position*/
 .stickyLeft{
     position: sticky;
     left: 0px;
@@ -9,85 +11,9 @@
     position: sticky;
     top: 0px;
 }
-.allRecordItemForm {
-    display: flex;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
-}
-.allRecordItemFormInverse {
-    flex-direction: column;
-    display: flex;
-    flex: 1 1 auto;
-}
-.itemList {
-    display: flex;
-    flex-direction: row;
-    padding: 10px;
-    background-color: white;
-    /* border-radius: 5px; */
-    margin: 10px;
-    flex-wrap: wrap;
-    box-shadow: 4px 5px 11px 1px #c3c3c3;
-}
-.recordForm {
-    display: flex;
-    flex-direction: row;
-    padding: 10px;
-    background-color: white;
-    margin: 10px;
-    box-shadow: 4px 5px 11px 1px #c3c3c3;
-}
 
-.recordFormInverse {
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    background-color: white;
-    margin: 10px;
-    box-shadow: 4px 5px 11px 1px #c3c3c3;
-}
-
-.recordFormInverse {
-    display: flex;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
-    flex-direction: column;
-}
-.recordItemForm {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0px 5px;
-    width: 100px;
-}
-
-.recordItemFormInverse{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    margin: 0px 5px;
-    align-items: center;
-    justify-content: space-between;
-    flex: 1 1 auto;
-}
-
-.labelParamItem{
-    color: gray;
-    font-size: 0.7em;
-    margin: 0px;
-    padding-left: 5px;
-}
-.valueParamItem{
-    color:black;
-    font-size: 1em;
-    padding:5px;
-}
-
-#logoBadLevier{
-    max-height: 50px;
-}
-
-.barItem{
+/*NavBarView*/
+.navBarView{
     background-color: #e3e3e3;
     padding: 10px;
     display:flex;
@@ -100,17 +26,84 @@
     left:0px;
     box-shadow: 4px 5px 11px 1px #c3c3c3;
 }
-.barItemInterface{
+
+/*Table*/
+
+
+
+/*Formulaire*/
+.allRecordItemForm {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+}
+.allRecordItemFormInverse {
+    flex-direction: column;
+    display: flex;
+    flex: 1 1 auto;
+}
+.recordForm {
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    background-color: white;
+    margin: 10px;
+    box-shadow: 4px 5px 11px 1px #c3c3c3;
+}
+.recordFormInverse {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    padding: 10px;
+    background-color: white;
+    margin: 10px;
+    box-shadow: 4px 5px 11px 1px #c3c3c3;
+}
+.recordItemForm {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     margin: 0px 5px;
+    width: 100px;
 }
-.titleBarItem{
-    margin-left: 10px;
-    margin-bottom: 0px;
+.recordItemFormInverse{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 0px 5px;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1 1 auto;
 }
+.labelRecordItemForm{
+    color: gray;
+    font-size: 0.7em;
+    margin: 0px;
+    padding-left: 5px;
+}
+.valueRecordItemForm{
+    color:black;
+    font-size: 1em;
+    padding:5px;
+}
+
+.itemList {
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    background-color: white;
+    margin: 10px;
+    flex-wrap: wrap;
+    box-shadow: 4px 5px 11px 1px #c3c3c3;
+}
+
+
+
+/*Popup*/
 .popup {
     display: flex;
     flex-direction: column;
-
 }
 .bodyPopup{
     flex: 1 1 auto;

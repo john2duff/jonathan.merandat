@@ -1,19 +1,19 @@
 
 
 
-var MTFramework = function(config){
-    return new MTFrameworkController(config);
+var MTFramework = function(container, config){
+    return new MTFrameworkController(container, config);
 }
 
 /****  CONTROLLER ******/ 
 class MTFrameworkController {
-    constructor(config) {
-        this.init(config);
+    constructor(container, config) {
+        this.init(container, config);
         this.refresh();
     }
 
-    init(config) {
-        this.model = new MTFrameworkModel(config);
+    init(container, config) {
+        this.model = new MTFrameworkModel(container, config);
         this.view = new MTFrameworkView(this.model, this);
         //resize
         window.addEventListener("resize", this.resize.bind(this));
@@ -28,11 +28,26 @@ class MTFrameworkController {
     }
 
     /****  ACTIONS ******/
-    inverseSens(modelName){
-        this.model.inverseSens();
-        refresh();
+    inverseSens(modelName, viewName){
+        var layout = this.model.getModel(modelName)["views"][viewName]["layout"];
+        var newLayout;
+        if (layout == "TOFR"){
+            newLayout = "TOFR-inverse";
+        }else if (layout == "TOFR-inverse"){
+            newLayout = "TOFR";
+        }else if (layout == "TR-inverse"){
+            newLayout = "TR";
+        }else if (layout == "TR"){
+            newLayout = "TR-inverse";
+        }else if (layout == "FR"){
+            newLayout = "FR-inverse";
+        }else if (layout == "FR-inverse"){
+            newLayout = "FR";
+        }
+        this.model.getModel(modelName)["views"][viewName]["layout"] = newLayout;
+        this.refresh();
     }
-    edit(model, modelName, modelLink, datas){
+    edit(model, modelName, idEdition){
         this.view.showPopup("Modification - " + modelName, model, modelName, modelLink, datas, true);
     }
 
@@ -66,7 +81,7 @@ class MTFrameworkController {
     }
 
     exportBD() {
-        var data = localStorage.getItem(this.model.dataBaseName);
+        var data = this.model.getDatas(true);
         var name = "export - " + new Date().getDate();
         var type = "application/json";
         var anchor = document.createElement("a");
@@ -75,12 +90,12 @@ class MTFrameworkController {
         anchor.click();
     }
 
-    importBD() {   
+    importBD(ctrl) {   
         var fichier = new FileReader(); 
         fichier.onload = function() { 
             var json = JSON.parse(fichier.result);
-            this.model.saveBD(json);
-            this.view.refresh();
+            ctrl.model.saveBD(json);
+            ctrl.refresh();
         }   
         fichier.readAsText(this.files[0]); 
     }
@@ -89,51 +104,83 @@ class MTFrameworkController {
 
 /****  MODEL ******/ 
 class MTFrameworkModel {
-    constructor(config) {
-        this.init(config);
+    constructor(container, config) {
+        this.init(container, config);
     }
 
-    init(config) {
+    init(container, config) {
         this.mainConfig = config; 
+        this.mainConfig["container"] = container;
         this.dbName = config["dataBaseName"]; 
-        this.db = JSON.parse(localStorage.getItem(this.dbName));
+        this.loadDatas(JSON.parse(localStorage.getItem(this.dbName)), false);
     }
 
-    inverseSens(){
-        this.mainConfig["models"][modelName]["view"]["sens"] = !this.mainConfig["models"][modelName]["view"]["sens"];  
-    }
-
-    getColumn(column, first){
-        var retour = [];
-        if (this.getNativeTypes().includes(column["type"])){
-            retour.push(column);
-            return first ? column : retour;
-        }else {
-            var model = this.getModel(column["type"]);
-            if (model == null){
-                console.error("Ce type : " + column["type"] + " n'est pas défini dans les modèles");
-            }else{
-                for (var i = 0; i < model["columns"].length; i++){
-                    retour.push(this.getColumn(model["columns"][i], first));
+    loadDatas(source, reset){
+        var models = this.mainConfig["models"];
+        for (var key in source){
+            for (var key2 in models){
+                if (key === key2){
+                    if (reset || models[key2]["datas"] == undefined) models[key2]["datas"] = [];
+                    for (var i = 0; i < models[key2]["columns"].length; i++){
+                        if (i < source[key].length){
+                            models[key2]["datas"].push(source[key][i]);
+                        }else{
+                            models[key2]["datas"].push("");
+                        }
+                    }
                 }
-                return first ? model["columns"][0] : retour;
             }
         }
-    
+    }
+
+    getAllDatas(onlyPersistent){
+        var datas = {};
+        if (onlyPersistent){
+            var persistentModels = this.mainConfig["persistentModels"];
+            for (var i = 0; i < persistentModels.length; i++){
+                datas[persistentModels[i]] = this.getModelDatas(persistentModels[i]);
+            }
+        }else{
+            var models = this.mainConfig["models"];
+            for (var model in models){
+                datas[model] = this.getModelDatas(model);
+            }
+        }
+        return datas;
+    }
+
+    getModelDatas(modelName){
+        return this.getModel(modelName)["datas"];
     }
 
     getNativeTypes(){
         return this.mainConfig["nativeTypes"];
     }
 
-    getModels = function(){
+    getModels(){
         return this.mainConfig["models"];
     }
 
-    getModel = function(item) {
-        var retour = this.mainConfig["models"][item];
-        if (retour == undefined) console.error("Model inconnu : " + item);
+    getModel(modelName) {
+        var retour = this.mainConfig["models"][modelName];
+        if (retour == undefined) console.error("Model inconnu : " + modelName);
         return retour;
+    }
+
+    getColumnTitle(column){
+        if (this.isNativeType(column)){
+            return column["title"];
+        }else{
+            return this.getModel(column["type"])["title"];
+        }
+    }
+
+    getColumnDesc(column){
+        if (this.isNativeType(column)){
+            return column["desc"];
+        }else{
+            return this.getModel(column["type"])["desc"];
+        }
     }
 
     isNativeType(column){
@@ -148,34 +195,13 @@ class MTFrameworkModel {
         return this.mainConfig["homePage"];
     }
 
-    saveBDItem(itemName, item, root) {
-        if (root == undefined) root = this.db;
-        for (var i in root) {
-            if (i == itemName){
-                root[i] = item;
-                saveBD();
-                return;
-            }else if (typeof(root[i]) == "object"){
-                saveItem(itemName, item, root[i]);
-            }
-        }
-        console.error("Item pour enregistrement non trouvé");
-        return null;
+    getContainer() {
+        return this.mainConfig["container"];
     }
 
-    getBDItem(key, root){
-        if (root == undefined) root = this.db;
-        for (var i in root) {
-            if (i == key){
-                return root[i];
-            }else if (typeof(root[i]) == "object"){
-                var retour = getBDItem(key, root[i]);
-                if (retour != null) return retour;
-            }
-        }
-        return null;
+    saveBD(){
+        localStorage.setItem(this.dbName, JSON.stringify(this.getAllDatas(true)));
     }
-
 }
 
 /****  VIEW ******/
@@ -187,17 +213,19 @@ class MTFrameworkView {
     currentPage = null;
     TABLEAU = "Tableau";
     FORMULAIRE = "Formulaire";
+    currentIdEdition = null;
 
     init(model, ctrl){
         this.model = model;
         this.ctrl = ctrl;
+        var container = this.model.getContainer();
         //création des éléments structurant
         this.headerPage = buildElement("div", undefined, "headerPage", "container");
-        document.body.appendChild(this.headerPage);
+        container.appendChild(this.headerPage);
         this.globalView = buildElement("div", undefined, "globalView", "container");
-        document.body.appendChild(this.globalView);
+        container.appendChild(this.globalView);
         this.popupMask = buildElement("div", undefined, "popupMask", "popupMask");
-        document.body.appendChild(this.popupMask);
+        container.appendChild(this.popupMask);
         this.popupDiv = buildElement("div", undefined, "popupView", "popupView");
         popupMask.appendChild(this.popupDiv);
     }
@@ -216,20 +244,23 @@ class MTFrameworkView {
     }
 
     refreshHeaderPage(page){
-        var buttonImport = buildElement("input", undefined, undefined, "btn-file");
-        buttonImport.value = "Import";
-        buttonImport.addEventListener('change', this.ctrl.importBD.bind(this.ctrl));
-        var buttonExport = buildElement("label");
+        var buttonImport = buildElement("label", "Import", undefined, "btn-file");
+        var input = buildElement("input", undefined, "buttonImport");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", ".json");
+        input.style = "display:none;";
+        buttonImport.appendChild(input);
+        var buttonExport = buildElement("label",  "Export");
         buttonExport.addEventListener("click", this.ctrl.exportBD.bind(this.ctrl));
         var dropDownImportExport = BSBuilder.dropDown("Import / Export", [buttonImport, buttonExport]);
-        var navBar = BSBuilder.navBar(true, dropDownImportExport);
+        var navBar = BSBuilder.navBar(true, [dropDownImportExport]);
         navBar.insertBefore(page["header"], navBar.childNodes[0]);
         this.headerPage.innerHTML = "";
         this.headerPage.appendChild(navBar);
+        document.getElementById("buttonImport").addEventListener("change", this.ctrl.importBD.bind(document.getElementById("buttonImport"), this.ctrl));
     }
 
     refreshViews(views){
-        this.currentViewMode = window.innerWidth > 500 ? this.TABLEAU : this.FORMULAIRE;
         var models = this.model.getModels();
         var viewsInModel;
         for (var i = 0; i < views.length; i++){
@@ -237,7 +268,7 @@ class MTFrameworkView {
                 viewsInModel = models[model]["views"];
                 for (var view in viewsInModel){
                     if (view === views[i]){
-                        this.refreshView(models[model], model, viewsInModel[view], this.model.getBDItem(model));
+                        this.refreshView(models[model], model, viewsInModel[view], view);
                     }
                 }
             }
@@ -245,59 +276,64 @@ class MTFrameworkView {
         
     }
 
-    refreshView(model, modelName, view, datas, root, titre){
-        switch (view["layout"]){
-            case "TOFR": //tableOrFormResponsive
-            case "TOFR-inverse": //tableOrFormResponsive sens inverse
-                this.refreshViewTOFR(model, modelName, view, datas, root, titre);
-            break;
-        }
+    refreshView(model, modelName, view, viewName){
+        var domView = this.initView(modelName);
+        domView.innerHTML = this.buildView(model, modelName, view, viewName).innerHTML;
     }
 
-    refreshViewTOFR(model, modelName, view, datas, root, titre){
-        var domView = this.initView(modelName, root);
-        domView.innerHTML = this.buildView(model, modelName, view, datas, false, titre).innerHTML;
-    }
-
-    initView(modelName, root) {
-        if (root == undefined) root = globalDiv;
+    initView(modelName) {
         var domView = document.getElementById(modelName); 
         if (domView == null){
             domView = buildElement("div", undefined, modelName, "container");
-            root.appendChild(domView);
+            this.model.getContainer().appendChild(domView);
         }
         domView.innerHTML = "";
         return domView;
     } 
 
-    buildView(model, modelName, view, datas, modeEdition, titre){
+    buildView(model, modelName, view, viewName){
         var div = buildElement("div");
-        div.appendChild(this.buildHeaderView(model, modelName, view, datas, titre));
-        div.appendChild(this.buildBodyView(model, modelName, view, datas, modeEdition));
-        div.appendChild(this.buildFooterView(model, modelName, view, datas, titre));
-
+        div.appendChild(this.buildHeaderView(model, modelName, view, viewName));
+        div.appendChild(this.buildBodyView(model, modelName, view));
+        div.appendChild(this.buildFooterView(model, modelName, view));
         return div;
     }
 
-    buildHeaderView(model, modelName, view, titre){
-        if (titre == undefined) titre = model["title"];
-        var divTitre = buildElement("div", undefined, undefined, "stickyTop stickyLeft barItem");
+    buildHeaderView(model, modelName, view, viewName){
+        var divTitre = buildElement("div", undefined, undefined, "stickyTop stickyLeft navBarView");
         divTitre.setAttribute("title", model["desc"]);
-        var titre = buildElement("h4", titre, undefined, "titleBarItem");
-        divTitre.appendChild(titre);
+        divTitre.appendChild(view["header"]); //custom header
         var divInterfaces = buildElement("div");
-        if (view["actions"].includes("sensRevert")) {
-            divInterfaces.appendChild(this.buildInverse(modelName));
-        }
+        this.addActionView(modelName, viewName, view["actions"], divInterfaces);     
         divTitre.appendChild(divInterfaces);
         return divTitre;
     }
 
-    buildBodyView(model, modelName, view, datas, modeEdition) {
-        if (currentViewMode == FORMULAIRE || modeEdition) {
-            return this.buildListForm(model, modelName, view, datas, modeEdition);
-        }else {
-            return this.buildListTable(model, modelName, view, datas);
+    addActionView(modelName, viewName, actions, divInterfaces){
+        if (actions.includes("sensRevert")) divInterfaces.appendChild(this.buildInverse(modelName, viewName));
+        //TODO
+        //if (actions.includes("add")) divInterfaces.appendChild(this.buildAdd(modelName));
+    }
+
+    buildBodyView(model, modelName, view) {
+        var layout = view["layout"];
+        switch (layout){
+            case "TOFR": //tableOrFormResponsive
+            case "TOFR-inverse": //tableOrFormResponsive sens inverse
+                this.currentViewMode = window.innerWidth > 500 ? this.TABLEAU : this.FORMULAIRE;
+                if (this.currentViewMode == this.FORMULAIRE) {
+                    return this.buildListForm(model, modelName, view, layout != "TOFR");
+                }else {
+                    return this.buildListTable(model, modelName, view, layout != "TOFR-inverse");
+                }
+            case "TR": //tableResponsive
+                return this.buildListTable(model, modelName, view, true);
+            case "TR-inverse": //tableResponsive sens inverse
+                return this.buildListTable(model, modelName, view, false);
+            case "FR": //formResponsive sens inverse
+                return this.buildListForm(model, modelName, view, true);
+            case "FR-inverse": //formResponsive sens inverse
+                return this.buildListForm(model, modelName, view, false);
         }
     }
 
@@ -325,14 +361,12 @@ class MTFrameworkView {
     
     /****  CREATION TABLE  ******/
 
-    buildListTable(model, modelName, view, datas, croisement){
+    buildListTable(model, modelName, view, sens, croisement){
         var table = buildElement("table", undefined, modelName, "table");
-        var sens = view["sens"];
         var editable = view["actions"].includes("edit");
-        var croisement1 = croisement === "1";
 
         //remplissage du header
-        if (sens && !croisement1){
+        if (sens){
             var thead = this.buildHeaderTable(model, editable, sens); 
             table.appendChild(thead);
         }
@@ -340,9 +374,9 @@ class MTFrameworkView {
         //remplissage du body
         var tbody;
         if (sens){
-            tbody = this.buildBodyTable(model, modelName, datas, editable, croisement);
+            tbody = this.buildBodyTable(model, modelName, editable, croisement);
         }else{
-            tbody = this.buildBodyTableSensInverse(model, modelName, datas, editable);
+            tbody = this.buildBodyTableSensInverse(model, modelName, editable);
         }
 
         table.appendChild(tbody);
@@ -355,10 +389,12 @@ class MTFrameworkView {
         var dimensionBoth = model["dimension"] === "both";
         var columns = model["columns"];
 
-        var column;
+        var title;
+        var desc;
         for (var i = 0; i < columns.length; i++){
-            column = getColumn(columns[i], true);
-            currentTr.appendChild(this.buildHeaderCell(column["title"], column["type"], column["desc"]));
+            title = this.model.getColumnTitle(columns[i]);
+            desc = this.model.getColumnDesc(columns[i]);
+            currentTr.appendChild(this.buildHeaderCell(title, columns[i]["type"], desc));
         }
 
         if (editable && dimensionBoth) currentTr.appendChild(buildElement("th"));
@@ -366,12 +402,12 @@ class MTFrameworkView {
         return thead;
     }
 
-    buildBodyTable(model, modelName, datas, editable) {
+    buildBodyTable(model, modelName, editable) {
         var columns = model["columns"];
+        var datas = model["datas"];
         var dimensionBoth = model["dimension"] === "both";
         var tbody = buildElement("tbody", undefined, undefined, "bodyTable");
         var currentTr;
-        if (typeof(datas) != "object") datas = [datas];
 
         for (var i = 0; i < datas.length; i++){
             currentTr = buildElement("tr", undefined, i);
@@ -388,31 +424,24 @@ class MTFrameworkView {
 
     buildRecordTable(columns, datas, id, currentTr){
         for (var i = 0; i < columns.length; i++){
-            if (this.isNativeType(columns[i])){
-                currentTr.appendChild(this.buildBodyCell(datas[i], id));
-            }else{
-                var croisement = columns[i]["croisement"];
-                if (croisement === "1"){
-                    currentTr.appendChild(this.buildBodyCell(datas[i], id));
-                }else{
-                    var model = getModel(columns[i]["type"]);
-                    currentTr.appendChild(this.buildListTable(model, columns[i]["type"], datas[i], croisement));
-                }
-            }
+            currentTr.appendChild(this.buildBodyCell(datas[i], id));
         }
     }
 
-    buildBodyTableSensInverse(model, modelName, datas, editable) {
+    buildBodyTableSensInverse(model, modelName, editable) {
         var columns = model["columns"];
+        var datas = model["datas"];
         var dimensionBoth = model["dimension"] === "both";
         var tbody = buildElement("tbody", undefined, undefined, "bodyTable");
         var currentTr;
         var datasCustom;
-        var column;
+        var title;
+        var desc;
         for (var i = 0; i < columns.length; i++){
             currentTr = buildElement("tr");
-            column = this.model.getColumn(columns[i], true);
-            currentTr.appendChild(this.buildHeaderCell(column["title"], column["type"], column["desc"]));
+            title = this.model.getColumnTitle(columns[i]);
+            desc = this.model.getColumnDesc(columns[i]);
+            currentTr.appendChild(this.buildHeaderCell(title, columns[i]["type"], desc));
             datasCustom = [];
             for (var j = 0; j < datas.length; j++){
                 datasCustom.push(datas[j][i]);
@@ -432,19 +461,9 @@ class MTFrameworkView {
         return tbody;
     }
 
-    buildRecordTableInverse(column, datas, id, currentTr){
+    buildRecordTableInverse(datas, id, currentTr){
         for (var i = 0; i < datas.length; i++){
-            if (this.isNativeType(column)){
-                currentTr.appendChild(this.buildBodyCell(datas[i], id));
-            }else{
-                var croisement = column["croisement"];
-                if (croisement === "1"){
-                    currentTr.appendChild(this.buildBodyCell(datas[i], id));
-                }else{
-                    var model = this.model.getModel(column["type"]);
-                    currentTr.appendChild(this.buildListTable(model, column["type"], datas[i], croisement));
-                }
-            }
+            currentTr.appendChild(this.buildBodyCell(datas[i], id));
         }
     }
 
@@ -466,17 +485,16 @@ class MTFrameworkView {
     }
 
     /****  CREATION FORMULAIRE  ******/
-    buildListForm(model, modelName, view, datas, modeEdition){
-        var sens = view["sens"];
+    buildListForm(model, modelName, view, modeEdition, sens){
+        var columns = model["columns"];
+        var datas = model["datas"];
         var divRetour = buildElement("div", undefined, modelName);
         var editable = view["actions"].includes("edit");
-        var columns = model["columns"];
         
         divRetour = buildElement("div");
 
         var divAllParams;
         var div;
-        if (typeof(datas) != "object") datas = [datas];
 
         for (var i = 0; i < datas.length; i++){
             div = buildElement("div", undefined, undefined, "recordForm" + (sens ? "" : "Inverse "));
@@ -494,31 +512,19 @@ class MTFrameworkView {
 
     buildRecordForm(columns, datas, sens, modeEdition, div){
         for (var i = 0; i < columns.length; i++){
-            if (this.isNativeType(columns[i])){
-                div.appendChild(this.buildItemForm(columns[i], datas[i], sens, i, modeEdition));
-            }else{
-                var croisement = columns[i]["croisement"];
-                if (croisement === "1"){
-                    var column = getColumn(columns[i], true);
-                    div.appendChild(this.buildItemForm(column, datas[i], sens, i, modeEdition));
-                }else{
-                    var model = getModel(columns[i]["type"]);
-                    currentTr.appendChild(this.buildListForm(model, columns[i]["type"], datas[i], modeEdition));
-                }
-            }
-
+            div.appendChild(this.buildItemForm(columns[i], datas[i], sens, i, modeEdition));
         }
     }
 
     buildItemForm(column, datas, sens, id, modeEdition) {
         var divParam = buildElement("div", "", undefined, "recordItemForm" + (sens ? "" : "Inverse "));
-        var label = buildElement("label", column["title"], undefined, "labelParamItem");
+        var label = buildElement("label", column["title"], undefined, "labelRecordItemForm");
         label.setAttribute("type", column["type"]);
         divParam.appendChild(label);
         if (modeEdition){
             divParam.appendChild(this.buildItemEdition(column, datas)); 
         }else {
-            divParam.appendChild(buildElement("span", datas, undefined, "valueParamItem"));                    
+            divParam.appendChild(buildElement("span", datas, undefined, "valueRecordItemForm"));                    
         }
         return divParam;
     }
@@ -544,16 +550,16 @@ class MTFrameworkView {
     }
 
     /****  ACTIONS ******/
-    buildInverse(modelName){
+    buildInverse(modelName, viewName){
         var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-light barItemInterface");
-        buttonInverse.setAttribute("onclick", "inverseSens('" + modelName + "');");
+        buttonInverse.addEventListener("click", this.ctrl.inverseSens.bind(this.ctrl, modelName, viewName));
         buttonInverse.value = "Inverse";
         return buttonInverse;
     }
 
     buildEdit(model, modelName, columns, datas){
         var buttonEdition = buildElement("button", "Editer", undefined, "btn btn-light barItemInterface");
-        buttonEdition.onclick = edit.bind(this, model, modelName, columns, datas);
+        buttonEdition.onclick = this.ctrl.edit.bind(this, model, modelName, columns, datas);
         buttonEdition.value = "Editer";
         return buttonEdition;
     }
@@ -573,9 +579,14 @@ class MTFrameworkView {
     }
 
     /****  POPUP ******/
-    refreshPopup(actionName, model, modelName, modelLink, datas, modeEdition){
-        popupDiv.innerHTML = "";
-        popupDiv.innerHTML = buildPopup(actionName, model, modelName, modelLink, datas, modeEdition).innerHTML;
+    refreshPopup(popupName){
+        var popups = this.model.getPopups();
+        for (var popup in popups){
+            if (popup == popupName){
+                this.refreshHeaderPopup(popups[popup]);
+                this.refreshViews(popups[popup]["views"]);
+            }
+        }
     }
 
     buildPopup(titre, model, modelName, modelLink, datas, modeEdition) {

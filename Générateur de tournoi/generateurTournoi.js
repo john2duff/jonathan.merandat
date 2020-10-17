@@ -14,7 +14,6 @@ var config = {
                 }
             ],
             "dimension": "verti",
-            "persistent": false,
             "views": {}
         },
         "niveau": {
@@ -29,7 +28,6 @@ var config = {
                 }
             ],
             "dimension": "verti",
-            "persistent": false, 
             "views": {}
         },
         "typeTournoi": {
@@ -44,7 +42,6 @@ var config = {
                 }
             ],
             "dimension": "verti",
-            "persistent": false, 
             "views": {}
         },
         "nombreTour": {
@@ -62,7 +59,6 @@ var config = {
                 }
             ],
             "dimension": "none",
-            "persistent": false,
             "views": {}
         },
         "joueurs": {
@@ -80,16 +76,16 @@ var config = {
                     "defaultValue": "",
                 }, 
                 {   "type": "genre", 
-                    "croisement": "1"    
+                    "selection": "simple"    
                 },
                 {   "type": "niveau", 
-                    "croisement": "1"   
+                    "selection": "simple"   
                 }
             ], 
             "dimension": "both",
-            "persistent": true,
             "views": {
                 "joueursPage1": {
+                    "header": buildHeaderJoueursPage1(),
                     "layout": "TOFR",
                     "actions": ["add", "remove", "edit", "sensRevert"],
                 }
@@ -107,11 +103,10 @@ var config = {
                 }
             ],
             "dimension": "horiz",
-            "persistent": true,
             "actions": ["edit", "sensRevert"],
-            "sens": true, 
             "view": {
                 "defaultPreparation": {
+                    "header": buildHeaderDefaultPreparation(),
                     "layout": "TOFR",
                     "actions": ["edit", "sensRevert"],
                 }
@@ -124,25 +119,44 @@ var config = {
             "views": ["joueursPage1", "defaultPreparation"], 
         }
     },
+    "popups":{
+        "modificationJoueur": {
+            "header": buildTitlePopup("Modification d'un joueur"), 
+            "views": ["joueursPage1"]
+        }
+    },
+    "persistentModels": ["joueurs", "preparation"],
     "homePage": "page1",
     "dataBaseName": "generateurTournoi",
-    "container": null //signifie que cela se construit dans le body
+    "container": null
 }
 
 function loadMTFramework(){
-    new MTFramework(config);
+    new MTFramework(document.body, config);
 }
 
 function buildTitlePage(title){
-
     var div = buildElement("div", undefined, undefined, undefined, "display:flex; justify-content:left;align-items:center;");
-    var img = buildElement("img", undefined, undefined);
+    var img = buildElement("img", undefined, "logoBadLevier");
     img.setAttribute("src", "./logoBadLevier.jpg");
-    var span = buildElement("img", title, undefined, undefined, "line-height:1.2rem;font-weight:700;font-size:1rem;text-align:center;width:100px;padding:10px;color:lightgray;");
+    var span = buildElement("span", title, undefined, undefined, "line-height:1.2rem;font-weight:700;font-size:1rem;text-align:center;width:100px;padding:10px;color:lightgray;");
     div.appendChild(img);
     div.appendChild(span);
     return div;
 }
+
+function buildTitlePopup(title){
+    return buildElement("h4", title);
+}
+
+function buildHeaderDefaultPreparation(){
+    return buildElement("h4", "Préparation");
+}
+
+function buildHeaderJoueursPage1(){
+    return buildElement("h4", "Joueurs");
+}
+
 
 function buildButtonLancerTournoi() {
     var buttonInverse = buildElement("button", "Inverser", undefined, "btn btn-primary");

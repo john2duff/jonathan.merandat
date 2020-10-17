@@ -1,6 +1,6 @@
 var BSBuilder = {};
 
-BSBuilder.navBar = function(autoCollapse, interfaces){
+BSBuilder.navBar = function(autoCollapse, interfacesTab){
     var nav = buildElement("nav", undefined, undefined, "navbar navbar-expand-lg navbar-dark bg-dark");
     if (autoCollapse !== false){
         var buttonCollapse = buildElement("button", undefined, undefined, "navbar-toggler");
@@ -17,12 +17,13 @@ BSBuilder.navBar = function(autoCollapse, interfaces){
     }
 
     var divInterfaces = buildElement("div", undefined, "navbarSupportedContent", "collapse navbar-collapse");
-    var ul = buildElement("ul", undefined, "navbarSupportedContent", "navbar-nav mr-auto");
-    var li;
-    for (var i = 0; i < interfaces.length; i++){
-        li = buildElement("li", undefined, undefined, "nav-item dropdown");
-        li.appendChild(interfaces[i]);
+    var ul = buildElement("ul", undefined, undefined, "navbar-nav mr-auto");
+    var li = buildElement("li", "", undefined, "nav-item dropdown");
+
+    for (var i = 0; i < interfacesTab.length; i++){
+        li.innerHTML += interfacesTab[i].innerHTML;
     }
+    ul.appendChild(li);
     divInterfaces.appendChild(ul);
     nav.appendChild(divInterfaces);
     return nav;
@@ -32,13 +33,14 @@ BSBuilder.navBar = function(autoCollapse, interfaces){
 BSBuilder.dropDown = function(titre, interfaces){
     var div = buildElement("div");
     var a = buildElement("a", titre, "navbarDropdownMenuLink", "nav-link dropdown-toggle");
-    a.setAttribute("data-toggle", "collapse");
+    a.setAttribute("data-toggle", "dropdown");
     a.setAttribute("aria-haspopup", "true");
     a.setAttribute("aria-expanded", "false");
     a.setAttribute("href", "#")
 
     var dropDownMenu = buildElement("div", undefined, undefined, "dropdown-menu");
-    dropDownMenu.setAttribute("aria-labelled", "navbarDropdownMenuLink");
+    dropDownMenu.style = "z-index:1030;";
+    dropDownMenu.setAttribute("aria-labelledby", "navbarDropdownMenuLink");
 
     for (var i = 0; i < interfaces.length; i++){
         interfaces[i].classList.add("dropdown-item");
