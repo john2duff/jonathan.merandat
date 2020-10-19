@@ -16,17 +16,18 @@ var config = {
             "dimension": "verti",
             "views": {
                 "genreBasic": {
+                    "showHeader": false,
                     "layout": "TOFR",
                     "actions": [],
                 }
             }
         },
         "niveau": {
-            "title": "Niveaux", 
+            "title": "Niveau", 
             "desc": "Les niveaux existants", 
             "columns": [
                 {   "title": "Niveau",
-                    "desc": "Le genre", 
+                    "desc": "Le niveau", 
                     "type": "string",
                     "defaultValue": "P12"
                 }
@@ -35,6 +36,7 @@ var config = {
             "dimension": "verti",
             "views": {
                 "niveauBasic": {
+                    "showHeader": false,
                     "layout": "TOFR",
                     "actions": [],
                 }
@@ -54,6 +56,7 @@ var config = {
             "dimension": "verti",
             "views": {
                 "typeTournoiBasic": {
+                    "showHeader": false,
                     "layout": "TOFR",
                     "actions": [],
                 }
@@ -76,6 +79,7 @@ var config = {
             "dimension": "none",
             "views": {
                 "nombreTourBasic": {
+                    "showHeader": false,
                     "layout": "TOFR",
                     "actions": [],
                 }
@@ -108,6 +112,7 @@ var config = {
             "dimension": "both",
             "views": {
                 "joueursPage1": {
+                    "showHeader": true,
                     "layout": "TOFR",
                     "actions": ["add", "remove", "edit", "sensRevert"],
                 }
@@ -117,17 +122,20 @@ var config = {
             "title": buildHeaderDefaultPreparation(),
             "desc": "Préparation du tournoi", 
             "columns": [
-                { "type": "typeTournoi", 
-                  "croisement": "1"
+                {   "type": "typeTournoi", 
+                    "selection": "none",
+                    "view": "typeTournoiBasic"  
                 },
-                { "type": "nombreTour", 
-                  "croisement": "1" 
+                {   "type": "nombreTour", 
+                    "selection": "none",
+                    "view": "nombreTourBasic" 
                 }
             ],
             "dimension": "horiz",
             "actions": ["edit", "sensRevert"],
             "view": {
                 "defaultPreparation": {
+                    "showHeader": true,
                     "layout": "TOFR",
                     "actions": ["edit", "sensRevert"],
                 }
@@ -137,13 +145,7 @@ var config = {
     "pages": {
         "page1": {
             "header": buildTitlePage("Générateur de tournoi"), 
-            "views": ["joueursPage1", "defaultPreparation"], 
-        }
-    },
-    "popups":{
-        "modificationJoueur": {
-            "header": buildTitlePopup("Modification d'un joueur"), 
-            "views": ["joueursPage1"]
+            "views": ["joueursPage1", "defaultPreparation"]
         }
     },
     "persistentModels": ["joueurs", "preparation"],
