@@ -9,12 +9,17 @@ var config = {
                 {   "title": "Genre",
                     "desc": "Le genre", 
                     "type": "string",
-                    "datas": ["Homme", "Femme"], 
                     "defaultValue": "Homme"
                 }
             ],
+            "datas": [["Homme"], ["Femme"]],
             "dimension": "verti",
-            "views": {}
+            "views": {
+                "genreBasic": {
+                    "layout": "TOFR",
+                    "actions": [],
+                }
+            }
         },
         "niveau": {
             "title": "Niveaux", 
@@ -23,12 +28,17 @@ var config = {
                 {   "title": "Niveau",
                     "desc": "Le genre", 
                     "type": "string",
-                    "datas": ["P12", "P11", "P10"],
                     "defaultValue": "P12"
                 }
             ],
+            "datas": [["P12"], ["P11"], ["P10"]],
             "dimension": "verti",
-            "views": {}
+            "views": {
+                "niveauBasic": {
+                    "layout": "TOFR",
+                    "actions": [],
+                }
+            }
         },
         "typeTournoi": {
             "title": "Type de tournoi", 
@@ -37,12 +47,17 @@ var config = {
                 {   "title": "Type de tournoi",
                     "desc": "Le type de tournoi", 
                     "type": "string",
-                    "datas": ["Simple", "Double"],
                     "defaultValue": "Simple"
                 }
             ],
+            "datas": [["Simple"], ["Double"]],
             "dimension": "verti",
-            "views": {}
+            "views": {
+                "typeTournoiBasic": {
+                    "layout": "TOFR",
+                    "actions": [],
+                }
+            }
         },
         "nombreTour": {
             "title": "Nombre de tour", 
@@ -59,10 +74,15 @@ var config = {
                 }
             ],
             "dimension": "none",
-            "views": {}
+            "views": {
+                "nombreTourBasic": {
+                    "layout": "TOFR",
+                    "actions": [],
+                }
+            }
         },
         "joueurs": {
-            "title": "Joueurs",
+            "title": buildHeaderJoueursPage1(),
             "desc": "C'est ici que vous pouvez renseigner la liste des joueurs. \n Cochez ceux qui participent au tournoi.",
             "columns": [
                 {   "title": "Nom", 
@@ -76,23 +96,25 @@ var config = {
                     "defaultValue": "",
                 }, 
                 {   "type": "genre", 
-                    "selection": "simple"    
+                    "selection": "simple",
+                    "view": "genreBasic"  
                 },
                 {   "type": "niveau", 
-                    "selection": "simple"   
+                    "selection": "simple",
+                    "view": "niveauBasic"  
+
                 }
             ], 
             "dimension": "both",
             "views": {
                 "joueursPage1": {
-                    "header": buildHeaderJoueursPage1(),
                     "layout": "TOFR",
                     "actions": ["add", "remove", "edit", "sensRevert"],
                 }
             }
         }, 
         "preparation": {
-            "title": "Préparation",
+            "title": buildHeaderDefaultPreparation(),
             "desc": "Préparation du tournoi", 
             "columns": [
                 { "type": "typeTournoi", 
@@ -106,7 +128,6 @@ var config = {
             "actions": ["edit", "sensRevert"],
             "view": {
                 "defaultPreparation": {
-                    "header": buildHeaderDefaultPreparation(),
                     "layout": "TOFR",
                     "actions": ["edit", "sensRevert"],
                 }
