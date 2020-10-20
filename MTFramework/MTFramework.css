@@ -41,7 +41,7 @@
     display: flex;
     flex: 1 1 auto;
 }
-.recordForm, .recordFormSelection {
+.recordForm {
     display: flex;
     flex-direction: row;
     padding: 10px;
@@ -53,9 +53,11 @@
 .recordFormSelection {
     display: flex;
     flex-direction: row;
-    padding: 5px;
+    padding: 0px;
     margin: 0px;
     align-items: center;
+    border-bottom: solid lightgray 1px;
+
     cursor: pointer;
 }
 .recordFormInverse {
@@ -74,6 +76,8 @@
     justify-content: center;
     margin: 0px 5px;
     flex: 1 1 auto;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
 }
 .recordItemFormInverse{
     display: flex;
@@ -83,6 +87,7 @@
     align-items: center;
     justify-content: space-between;
     flex: 1 1 auto;
+    flex-wrap: wrap;
 }
 
 .labelRecordItemForm{
@@ -169,6 +174,15 @@
     border: solid gray 1px;
     height: 15px;
     width: 15px;
+    pointer-events: none;
+}
+
+.checkButton{
+    appearance: none;
+    border: solid gray 1px;
+    height: 15px;
+    width: 15px;
+    pointer-events: none;
 }
 
 .optionButton:checked:after {
@@ -182,3 +196,6 @@
     content: "●";
 }
 
+.listComboBox{
+    display: none;
+}

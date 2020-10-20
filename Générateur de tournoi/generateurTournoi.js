@@ -108,7 +108,6 @@ var config = {
                     "selection": "simple",
                     "comboBox": true,
                     "view": "niveauBasic"  
-
                 }
             ], 
             "dimension": "both",
