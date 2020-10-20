@@ -41,13 +41,22 @@
     display: flex;
     flex: 1 1 auto;
 }
-.recordForm {
+.recordForm, .recordFormSelection {
     display: flex;
     flex-direction: row;
     padding: 10px;
     background-color: white;
     margin: 10px;
     box-shadow: 4px 5px 11px 1px #c3c3c3;
+    align-items: center;
+}
+.recordFormSelection {
+    display: flex;
+    flex-direction: row;
+    padding: 5px;
+    margin: 0px;
+    align-items: center;
+    cursor: pointer;
 }
 .recordFormInverse {
     display: flex;
@@ -59,7 +68,7 @@
     margin: 10px;
     box-shadow: 4px 5px 11px 1px #c3c3c3;
 }
-.recordItemForm {
+.recordItemForm{
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -75,16 +84,25 @@
     justify-content: space-between;
     flex: 1 1 auto;
 }
+
 .labelRecordItemForm{
     color: gray;
     font-size: 0.7em;
     margin: 0px;
     padding-left: 5px;
+    width: 100px;
 }
 .valueRecordItemForm{
     color:black;
     font-size: 1em;
     padding:5px;
+    flex: 1 1 auto;
+}
+
+.valueParamItem{
+    width: 100%;
+    padding-left: 5px;
+}
 }
 
 .itemList {
@@ -151,5 +169,16 @@
     border: solid gray 1px;
     height: 15px;
     width: 15px;
+}
+
+.optionButton:checked:after {
+    font-size: 14px;
+    font-weight: bold;
+    position: relative;
+    top: -8px;
+    left: 2.2px;
+    text-shadow: none;
+    color: #4a4a4a;
+    content: "●";
 }
 

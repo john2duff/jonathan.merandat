@@ -101,10 +101,12 @@ var config = {
                 }, 
                 {   "type": "genre", 
                     "selection": "simple",
+                    "comboBox": false,
                     "view": "genreBasic"  
                 },
                 {   "type": "niveau", 
                     "selection": "simple",
+                    "comboBox": true,
                     "view": "niveauBasic"  
 
                 }

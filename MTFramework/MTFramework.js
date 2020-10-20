@@ -410,25 +410,25 @@ class MTFrameworkView {
         //if (actions.includes("add")) divInterfaces.appendChild(this.buildAdd(modelName));
     }
 
-    buildBodyView(model, modelName, view, viewName, selection) {
+    buildBodyView(model, modelName, view, viewName, selection, dataSelected, comboBox) {
         var layout = view["layout"];
         switch (layout){
             case "TOFR": //tableOrFormResponsive
             case "TOFR-inverse": //tableOrFormResponsive sens inverse
                 this.currentViewMode = this.model.getContainer().offsetWidth > 500 ? this.TABLEAU : this.FORMULAIRE;
                 if (this.currentViewMode == this.FORMULAIRE) {
-                    return this.buildListForm(model, modelName, view, viewName, layout != "TOFR", selection);
+                    return this.buildListForm(model, modelName, view, viewName, layout != "TOFR-inverse", selection, dataSelected, comboBox);
                 }else {
-                    return this.buildListTable(model, modelName, view, viewName, layout != "TOFR-inverse", selection);
+                    return this.buildListTable(model, modelName, view, viewName, layout != "TOFR-inverse", selection, dataSelected, comboBox);
                 }
             case "TR": //tableResponsive
-                return this.buildListTable(model, modelName, view, viewName, true, selection);
+                return this.buildListTable(model, modelName, view, viewName, true, selection, dataSelected, comboBox);
             case "TR-inverse": //tableResponsive sens inverse
-                return this.buildListTable(model, modelName, view, viewName, false, selection);
+                return this.buildListTable(model, modelName, view, viewName, false, selection, dataSelected, comboBox);
             case "FR": //formResponsive sens inverse
-                return this.buildListForm(model, modelName, view, viewName, true, selection);
+                return this.buildListForm(model, modelName, view, viewName, true, selection, dataSelected, comboBox);
             case "FR-inverse": //formResponsive sens inverse
-                return this.buildListForm(model, modelName, view, viewName, false, selection);
+                return this.buildListForm(model, modelName, view, viewName, false, selection, dataSelected, comboBox);
         }
     }
 
@@ -444,8 +444,8 @@ class MTFrameworkView {
         return divTitre;
     }
 
-    buildContent(column, data){
-        if (this.modeEdition != null){
+    buildContent(column, data, isSelection){
+        if (this.modeEdition != null && !isSelection){
             return this.buildNativeEditor(column, data);
         }else{
             return this.buildNativeViewer(column, data);
@@ -468,9 +468,9 @@ class MTFrameworkView {
         switch(column["type"]){
             case "string":
                 input = buildElement("input", undefined, undefined, "valueParamItem");
-                input.type = "text";
-                input.value = data;
-                input.placeholder = column["desc"];
+                input.setAttribute("type", "text");
+                input.setAttribute("value", data);
+                input.setAttribute("placeholder", column["desc"]);
                 return input;
             case "integer":
                 input = buildElement("input", undefined, undefined, "valueParamItem");
@@ -486,7 +486,7 @@ class MTFrameworkView {
         var model = this.model.getModel(modelName);
         var viewName = column["view"];
         var view = this.model.getView(viewName);
-        return this.buildBodyView(model, modelName, view, viewName, column["selection"]);
+        return this.buildBodyView(model, modelName, view, viewName, column["selection"], data, column["comboBox"]);
     }
 
     getInputValues(){
@@ -499,12 +499,15 @@ class MTFrameworkView {
     
     /****  CREATION TABLE  ******/
 
-    buildListTable(model, modelName, view, viewName, sens, selection){
+    buildListTable(model, modelName, view, viewName, sens, selection, dataSelected, comboBox){
         var table = buildElement("table", undefined, modelName, "table");
         var editable = view["actions"].includes("edit") && this.modeEdition == null;
+        var selectionSimple = selection == "simple";
+        var selectionMultiple = selection == "multiple";
+        var isSelection = selectionSimple || selectionMultiple;
 
         //remplissage du header
-        if (sens){
+        if (sens && !isSelection){
             var thead = this.buildHeaderTable(model, editable, sens, selection); 
             table.appendChild(thead);
         }
@@ -512,13 +515,26 @@ class MTFrameworkView {
         //remplissage du body
         var tbody;
         if (sens){
-            tbody = this.buildBodyTable(model, viewName, editable, selection);
+            tbody = this.buildBodyTable(model, viewName, editable, selection, dataSelected);
         }else{
-            tbody = this.buildBodyTableSensInverse(model, viewName, editable, selection);
+            tbody = this.buildBodyTableSensInverse(model, viewName, editable, selection, dataSelected);
         }
 
         table.appendChild(tbody);
-        return table;
+
+        if (comboBox){
+            var divList = buildElement("div");
+            var input = buildElement("input");
+            input.setAttribute("type", "text");
+            var list = buildElement("div");
+            list.appendChild(table);
+            divList.appendChild(input);
+            divList.appendChild(list);
+            return divList;
+        }else {
+            return table;
+        }
+
     }
 
     buildHeaderTable(model, editable, selection){
@@ -526,8 +542,9 @@ class MTFrameworkView {
         var currentTr = buildElement("tr");
         var dimensionBoth = model["dimension"] === "both";
         var columns = model["columns"];
+        var selectionMultiple = selection == "multiple";
 
-        if (selection == "simple" || selection == "multiple"){
+        if (selectionMultiple){
             var thSelection = buildElement("th");
             var check = buildElement("input");
             check.setAttribute("type", "checkbox");
@@ -548,18 +565,21 @@ class MTFrameworkView {
         return thead;
     }
 
-    buildBodyTable(model, viewName, editable) {
+    buildBodyTable(model, viewName, editable, selection) {
         var columns = model["columns"];
         var datas = model["datas"];
         if (datas == undefined) datas = [[""]];
         var dimensionBoth = model["dimension"] === "both";
         var tbody = buildElement("tbody", undefined, undefined, "bodyTable");
         var currentTr;
+        var selectionSimple = selection == "simple";
+        var selectionMultiple = selection == "multiple";
+        var isSelection = selectionSimple || selectionMultiple;
 
         for (var i = 0; i < datas.length; i++){
-            if (this.modeEdition == null || i == this.idElement){
+            if (this.modeEdition == null || i == this.idElement || isSelection){
                 currentTr = buildElement("tr", undefined, i);
-                this.buildRecordTable(columns, datas[i], i, currentTr);
+                this.buildRecordTable(columns, datas[i], i, currentTr, isSelection);
                 if (editable && dimensionBoth){
                     currentTr.appendChild(this.buildBodyEditRecord(viewName, i)); 
                 }
@@ -570,13 +590,23 @@ class MTFrameworkView {
         return tbody;
     }
 
-    buildRecordTable(columns, datas, id, currentTr){
+    buildRecordTable(columns, datas, id, currentTr, isSelection, dataSelected){
+        if (isSelection){
+            var thSelection = buildElement("th");
+            var check = buildElement("input");
+            check.setAttribute("type", "checkbox");
+            thSelection.appendChild(check);
+            currentTr.appendChild(thSelection);
+        }
         for (var i = 0; i < columns.length; i++){
-            currentTr.appendChild(this.buildBodyCell(columns[i], datas[i], id));
+            if (datas[i] == dataSelected){
+                check.setAttribute("checked", "");
+            }
+            currentTr.appendChild(this.buildBodyCell(columns[i], datas[i], id, isSelection));
         }
     }
 
-    buildBodyTableSensInverse(model, viewName, editable, selection) {
+    buildBodyTableSensInverse(model, viewName, editable, selection, dataSelected) {
         var columns = model["columns"];
         var datas = model["datas"];
         var dimensionBoth = model["dimension"] === "both";
@@ -585,16 +615,21 @@ class MTFrameworkView {
         var datasCustom;
         var title;
         var desc;
+        var selectionSimple = selection == "simple";
+        var selectionMultiple = selection == "multiple";
+        var isSelection = selectionSimple || selectionMultiple;
 
         if (editable && dimensionBoth){
             currentTr = buildElement("tr");
             currentTr.appendChild(buildElement("th"));
-            if (selection == "simple" || selection == "multiple"){
-                var thSelection = buildElement("th");
-                var check = buildElement("input");
-                check.setAttribute("type", "checkbox");
-                thSelection.appendChild(check);
-                currentTr.appendChild(thSelection);
+            if (isSelection){
+                for (var i = 0; i < datas.length; i++){
+                    var thSelection = buildElement("th");
+                    var check = buildElement("input");
+                    check.setAttribute("type", "checkbox");
+                    thSelection.appendChild(check);
+                    currentTr.appendChild(thSelection);
+                }
             }
             for (var i = 0; i < datas.length; i++){
                 currentTr.appendChild(this.buildBodyEditRecord(viewName, i)); 
@@ -609,11 +644,11 @@ class MTFrameworkView {
             currentTr.appendChild(this.buildHeaderCell(title, columns[i]["type"], desc));
             datasCustom = [];
             for (var j = 0; j < datas.length; j++){
-                if (this.modeEdition == null || j == this.idElement){
+                if (this.modeEdition == null || j == this.idElement || isSelection){
                     datasCustom.push(datas[j][i]);
                 }
             }
-            this.buildRecordTableInverse(columns[i], datasCustom, i, currentTr);
+            this.buildRecordTableInverse(columns[i], datasCustom, i, currentTr, isSelection);
             tbody.appendChild(currentTr);
         }
         
@@ -621,9 +656,9 @@ class MTFrameworkView {
         return tbody;
     }
 
-    buildRecordTableInverse(column, datas, id, currentTr){
+    buildRecordTableInverse(column, datas, id, currentTr, isSelection){
         for (var i = 0; i < datas.length; i++){
-            currentTr.appendChild(this.buildBodyCell(column, datas[i], id));
+            currentTr.appendChild(this.buildBodyCell(column, datas[i], id, isSelection));
         }
     }
 
@@ -640,43 +675,58 @@ class MTFrameworkView {
         return td;
     }
 
-    buildBodyCell(column, data, id) {
-        var content = this.buildContent(column, data);
+    buildBodyCell(column, data, id, isSelection) {
+        var content = this.buildContent(column, data, isSelection);
         var td = buildElement("td", undefined, id);
         td.appendChild(content);
         return td;
     }
 
     /****  CREATION FORMULAIRE  ******/
-    buildListForm(model, modelName, view, viewName, sens, selection){
+    buildListForm(model, modelName, view, viewName, sens, selection, dataSelected, comboBox){
         var columns = model["columns"];
         var datas = model["datas"];
         var divRetour = buildElement("div", undefined, modelName);
         var editable = view["actions"].includes("edit") && this.modeEdition == null;
-        
+        var selectionSimple = selection == "simple";
+        var selectionMultiple = selection == "multiple";
+        var isSelection = selectionSimple || selectionMultiple;
         divRetour = buildElement("div");
 
         var divAllParams;
         var div;
 
         for (var i = 0; i < datas.length; i++){
-            if (this.modeEdition == null || i == this.idElement){
-                
-                div = buildElement("div", undefined, undefined, "recordForm" + (sens ? "" : "Inverse "));
+            if (this.modeEdition == null || i == this.idElement || isSelection){
+
+                var classDiv;
+                if (isSelection){
+                    classDiv = "recordFormSelection";
+                }else{
+                    classDiv = "recordForm" + (sens ? "" : "Inverse ");
+                }
+
+                div = buildElement("div", undefined, undefined, classDiv);
                
-                if (selection == "simple"){
-                    var option = buildElement("input", undefined, undefined, "optionButton");
-                    option.setAttribute("type", "checkbox");
-                    div.appendChild(option);
-                }else if (selection == "multiple"){
-                    var check = buildElement("input");
-                    check.setAttribute("type", "checkbox");
-                    div.appendChild(check);
+                if (comboBox){
+
+                }else{
+                    if (selectionSimple){
+                        var option = buildElement("input", undefined, undefined, "optionButton");
+                        if (dataSelected == datas[i]) option.setAttribute("checked", "");
+                        option.setAttribute("type", "checkbox");
+                        div.appendChild(option);
+                    }else if (selectionMultiple){
+                        var check = buildElement("input");
+                        if (datas[i].includes(dataSelected)) option.setAttribute("checked", "");
+                        check.setAttribute("type", "checkbox");
+                        div.appendChild(check);
+                    }
                 }
 
                 divAllParams = buildElement("div", "", "allRecordItemForm" + i, "allRecordItemForm" + (sens ? "" : "Inverse "));
 
-                this.buildRecordForm(columns, datas[i], sens, i, divAllParams);
+                this.buildRecordForm(columns, datas[i], sens, i, divAllParams, isSelection);
                 div.appendChild(divAllParams);
                 if (editable){
                     div.appendChild(this.buildEditRecord(viewName, i));
@@ -685,25 +735,41 @@ class MTFrameworkView {
             }
         }
         
-        return divRetour;
+        if (comboBox){
+            var divList = buildElement("div");
+            var input = buildElement("input");
+            input.setAttribute("type", "text");
+            var list = buildElement("div");
+            list.appendChild(divRetour);
+            divList.appendChild(input);
+            divList.appendChild(list);
+            return divList;
+        }else {
+            return divRetour;
+        }
+
     }
 
-    buildRecordForm(columns, datas, sens, id, div){
+    buildRecordForm(columns, datas, sens, id, div, isSelection){
         for (var i = 0; i < columns.length; i++){
-            div.appendChild(this.buildItemForm(columns[i], datas[i], sens, id));
+            div.appendChild(this.buildItemForm(columns[i], datas[i], sens, id, isSelection));
         }
     }
 
-    buildItemForm(column, datas, sens, id) {
+    buildItemForm(column, datas, sens, id, isSelection) {         
         var divParam = buildElement("div", "", undefined, "recordItemForm" + (sens ? "" : "Inverse "));
-        var label = buildElement("label", this.model.getColumnTitle(column), undefined, "labelRecordItemForm");
-        label.setAttribute("type", column["type"]);
-        label.setAttribute("title", this.model.getColumnDesc(column));
-        divParam.appendChild(label);
+        if (!isSelection){
+            var label = buildElement("label", this.model.getColumnTitle(column), undefined, "labelRecordItemForm");
+            label.setAttribute("type", column["type"]);
+            label.setAttribute("title", this.model.getColumnDesc(column));
+            divParam.appendChild(label);
+        }
         var valueDiv = buildElement("div", undefined, undefined, "valueRecordItemForm");
-        valueDiv.appendChild(this.buildContent(column, datas, id));
+        valueDiv.appendChild(this.buildContent(column, datas, isSelection));
         divParam.appendChild(valueDiv);                    
         return divParam;
+
+        
     }
 
     /****  ACTIONS ******/
