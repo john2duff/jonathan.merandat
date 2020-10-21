@@ -22,6 +22,7 @@ class MTFrameworkController {
     }
 
     resize(){
+        if (this.view.popupVisible) return;
         this.refresh(); 
     }
 
@@ -57,11 +58,13 @@ class MTFrameworkController {
         this.refresh();
     }
 
-    valid(model, modelName){
-        this.view.saveInputValues(model, modelName);
+    valid(viewName, model){
+        this.view.saveInputValues(viewName, model, this.view.currentEditionIndexRow);
         this.view.hidePopup();
         this.view.modeEdition = null;
         this.view.modeSelection = null;
+        this.model.saveBD();
+        this.refresh();
     }
     cancel(){
         this.view.hidePopup();
@@ -191,7 +194,7 @@ class MTFrameworkModel {
             views = models[model]["views"];
             for (var view in views){
                 if (view == viewName){
-                    model["datas"][indexRow][indexColumn] = value;
+                    models[model]["datas"][indexRow][indexColumn] = value;
                     return true;
                 }
             }
@@ -297,6 +300,8 @@ class MTFrameworkView {
         this.init(model, ctrl);
     }
 
+    context = [];
+
     currentViewName = null;
     currentPageName = null;
     currentModelName = null;
@@ -311,6 +316,8 @@ class MTFrameworkView {
     currentModel = null;
     currentSens = null;
     currentEditionIndexRow = null;
+
+    popupVisible = false;
 
     idCompt = 0;
     pageQueue = [];
@@ -361,6 +368,7 @@ class MTFrameworkView {
     }
 
     refreshPage(pageName){
+
         if (this.modeEdition != null){
             this.refreshViews([this.modeEdition]);
             var root = this.model.mainConfig["container"][0];
@@ -372,6 +380,8 @@ class MTFrameworkView {
                 this.getContainer().style["height"] = "";
             }
         }else{
+            this.idCompt = 0;
+
             if (this.pageQueue.length == 0) this.pageQueue.push(this.model.getHomePage()); 
             if (pageName != undefined) this.currentPage = pageName;        
             
@@ -409,27 +419,35 @@ class MTFrameworkView {
         });
     }
 
-    
-
     saveInputValues(viewName, model, indexRow){
-        var viewName = viewName + "editor";
         var debut = "dataEditor-" + viewName;
         var columns = model["columns"];
         var column;
         var domElement;
+        var type;
         for (var indexColumn = 0; indexColumn < columns.length; indexColumn++){
-            column = columns[i];
-            domElement = record.querySelector(debut + "-" + indexRow + "-" + indexColumn);
+            column = columns[indexColumn];
+            domElement = document.querySelector("*[datamodel='" + debut + "-" + indexRow + "-" + indexColumn + "']");
             type = column["type"];
             switch (column["type"]){
                 case "string":
                 case "integer":
                     this.model.setDataModel(viewName, indexColumn, indexRow, domElement.value);
+                    break;
                 default: 
-                    this.model.setDataModel(viewName, indexColumn, indexRow, getValueSelection(domElement));
+                    this.model.setDataModel(viewName, indexColumn, indexRow, this.getValueSelection(domElement));
                     break;
             }
         }
+    }
+
+    getValueSelection(domElement){
+        var retour = "";
+        var all = domElement.querySelectorAll("input[checked]");
+        for (var i = 0; i < all.length; i++){
+            retour += all[i].parentElement.querySelector("span.viewer").innerHTML;
+        }
+        return retour;
     }
 
     refreshHeaderPage(page){
@@ -580,7 +598,10 @@ class MTFrameworkView {
             case "string":
             case "integer":
             default:
-            return buildElement("span", data, "dataViewer-" + this.currentViewName + "-" + this.currentIndexColumn + "-" + this.currentIndexRow, "viewer")
+                var newId = this.getNewId();
+                var retour =  buildElement("span", data, newId, "viewer");
+                retour.setAttribute("dataModel", "dataViewer-" + this.currentViewName + "-" + this.currentIndexRow + "-" + this.currentIndexColumn);
+                return retour;
         }
     }
 
@@ -589,18 +610,21 @@ class MTFrameworkView {
         var column = this.currentColumn;
         var data = this.model.getDataModel(this.currentViewName, this.currentIndexColumn, this.currentIndexRow);
         if (data == null) data = column["defaultValue"];
-        var idData = "dataEditor-" + this.currentViewName + "-" + this.currentIndexColumn + "-" + this.currentIndexRow;
+        var dataModel = "dataEditor-" + this.currentViewName + "-" + this.currentIndexRow + "-" + this.currentIndexColumn;
 
+        var newId = this.getNewId();
 
         switch(column["type"]){
             case "string":
-                input = buildElement("input", undefined, idData, "valueParamItem");
+                input = buildElement("input", undefined, newId, "valueParamItem");
+                input.setAttribute("dataModel", dataModel);
                 input.setAttribute("type", "text");
                 input.setAttribute("value", data);
                 input.setAttribute("placeholder", column["desc"]);
                 return input;
             case "integer":
-                input = buildElement("input", undefined, idData, "valueParamItem");
+                input = buildElement("input", undefined, newId, "valueParamItem");
+                input.setAttribute("dataModel", dataModel);
                 input.type = "number";
                 input.value = data;
                 input.placeholder = column["desc"];
@@ -609,13 +633,61 @@ class MTFrameworkView {
                 return input;
         }
 
+        this.saveContext();
+
         var modelName = column["type"];
         var model = this.model.getModel(modelName);
         var viewName = column["view"];
         var view = this.model.getView(viewName);
         var data = this.buildBodyView(model, modelName, view, viewName, column["selection"], data, column["comboBox"]);
-        data.setAttribute("id", idData);
+        data.setAttribute("dataModel", dataModel);
+        this.loadLastContext();
+
         return data;
+    }
+
+    saveContext(){
+        this.context.push(
+            {
+                "currentPageName": this.currentPageName,
+                "currentModel": this.currentModel,
+                "currentModelName": this.currentModelName,
+                "currentView": this.currentView,
+                "currentViewName": this.currentViewName,
+                "currentColumn": this.currentColumn,
+                "currentIndexColumn": this.currentIndexColumn,
+                "currentRow": this.currentRow,
+                "currentIndexRow": this.currentIndexRow,
+                "currentSelection": this.currentSelection,
+                "currentDataSelected": this.currentDataSelected,
+                "currentComboBox": this.currentComboBox,
+                "currentSens": this.currentSens, 
+                "currentEditionIndexRow": this.currentEditionIndexRow
+            }
+        );
+    }
+
+    loadLastContext(){
+        if (this.context.length > 0){
+            var lastContext = this.context[this.context.length - 1];
+            this.currentPageName = lastContext["currentPageName"];
+            this.currentModel = lastContext["currentModel"];
+            this.currentModelName = lastContext["currentModelName"];
+            this.currentView = lastContext["currentView"];
+            this.currentViewName = lastContext["currentViewName"];
+            this.currentColumn = lastContext["currentColumn"];
+            this.currentIndexColumn = lastContext["currentIndexColumn"];
+            this.currentRow = lastContext["currentRow"];
+            this.currentIndexRow = lastContext["currentIndexRow"];
+            this.currentSelection = lastContext["currentSelection"];
+            this.currentDataSelected = lastContext["currentDataSelected"];
+            this.currentComboBox = lastContext["currentComboBox"];
+            this.currentSens = lastContext["currentSens"]; 
+            this.currentEditionIndexRow = lastContext[ "currentEditionIndexRow"];    
+        }else{
+            console.error("problème de context");
+        }
+        this.context.splice(this.context.length - 1, 1);
     }
 
     getInputValues(){
@@ -867,7 +939,7 @@ class MTFrameworkView {
                 div = buildElement("div", undefined, newId2, classDiv);
 
                 if (isSelection){
-                    this.addNewEvent(newId1, "click", this.ctrl.select.bind(this.ctrl, newId1, newId2));
+                    this.addNewEvent(newId2, "click", this.ctrl.select.bind(this.ctrl, newId1, newId2));
                 }
 
                 if (selectionSimple){
@@ -965,7 +1037,7 @@ class MTFrameworkView {
     buildValid(){
         var newId = this.getNewId();
         var buttonValid = buildElement("button", "Valider", newId, "btn btn-primary buttonValidEdit");
-        this.addNewEvent(newId, "click", this.ctrl.valid.bind(this.ctrl, this.currentViewName, this.currentIndexRow));
+        this.addNewEvent(newId, "click", this.ctrl.valid.bind(this.ctrl, this.currentViewName, this.currentModel));
         buttonValid.value = "Editer";
         return buttonValid;
     }
@@ -986,12 +1058,9 @@ class MTFrameworkView {
     }
 
     /****  POPUP ******/
-    popupIsVisible(){
-        return popupMask.style["display"] != "none";
-    }
-
     showPopup(){
-        this.popupMask.style["display"] = "flex";
+        this.popupMask.style["opacity"] = "1";
+        this.popupVisible = true;
     }
 
     createPopup() {
@@ -1006,6 +1075,7 @@ class MTFrameworkView {
     hidePopup(){
         this.model.mainConfig["container"].splice(this.model.mainConfig["container"].length - 1, 1);
         this.popupMask.parentElement.removeChild(this.popupMask);
+        this.popupVisible = false;
     }
 
 }

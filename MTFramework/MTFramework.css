@@ -155,8 +155,9 @@
     left: 0px;
     z-index: 1031;
     justify-content: center;
+    opacity: 0;
     align-items: center;
-    display: none;
+    transition: opacity 0.5s;
 }
 .popupView{
     width: 80%;
@@ -199,3 +200,4 @@
 .listComboBox{
     display: none;
 }
+
