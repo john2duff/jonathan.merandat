@@ -75,13 +75,15 @@ class MTFrameworkController {
         this.view.hidePopup();
         this.view.modeEdition = null;
         this.view.modeSelection = null;
+        this.view.currentEditionIndexRow = null;
         this.model.saveBD();
         this.refresh();
     }
     cancel(){
         this.view.hidePopup();
         this.view.modeEdition = null;
-        this.view.modeSelection = null; 
+        this.view.modeSelection = null;
+        this.view.currentEditionIndexRow = null;
     }
 
     select(idRecord){
@@ -662,7 +664,12 @@ class MTFrameworkView {
     
     buildNativeViewer(){
         var column = this.currentColumn;
-        var data = this.model.getDataModel(this.currentViewName, this.currentIndexColumn, this.currentIndexRow);
+        var data;
+        if (this.currentEditionIndexRow == -1){
+            data = column["defaultValue"];
+        }else{
+            var data = this.model.getDataModel(this.currentViewName, this.currentIndexColumn, this.currentIndexRow);
+        }
         switch(column["type"]){
             case "string":
             case "integer":
@@ -707,11 +714,11 @@ class MTFrameworkView {
 
         this.saveContext();
 
-        var modelName = column["type"];
-        var model = this.model.getModel(modelName);
-        var viewName = column["view"];
-        var view = this.model.getView(viewName);
-        var newData = this.buildBodyView(model, modelName, view, viewName, column["selection"], data, column["comboBox"]);
+        this.currentModelName = column["type"];
+        this.currentModel = this.model.getModel(this.currentModelName);
+        this.currentViewName = column["view"];
+        this.currentView = this.model.getView(this.currentViewName);
+        var newData = this.buildBodyView(column["selection"], data, column["comboBox"]);
         newData.setAttribute("dataModel", dataModel);
         this.loadLastContext();
 
@@ -980,13 +987,13 @@ class MTFrameworkView {
 
     /****  CREATION FORMULAIRE  ******/
     buildListForm(){
-        var model = this.currentModel;
-        var datas = model["datas"];
         var divRetour = buildElement("div");
         var selection = this.currentSelection;
         var selectionSimple = selection == "simple";
         var selectionMultiple = selection == "multiple";
         var isSelection = selectionSimple || selectionMultiple;
+        var model = this.currentModel;
+        var datas = model["datas"];
 
         divRetour = buildElement("div", undefined, undefined, "listComboBox " + selectionSimple ? "selectionSimple" : "" );
 
@@ -997,7 +1004,7 @@ class MTFrameworkView {
                 this.currentRow = datas[indexRow];
                 this.currentIndexRow = indexRow;
                 if (this.modeEdition == null || indexRow == this.currentEditionIndexRow || isSelection){
-                    this.buildRecordFormSquelette(divRetour);
+                    this.buildRecordFormSquelette(datas[indexRow], divRetour);
                 }
             }
         }
@@ -1010,7 +1017,7 @@ class MTFrameworkView {
 
     }
 
-    buildRecordFormSquelette(divRetour){
+    buildRecordFormSquelette(datas, divRetour){
         var editable = this.currentView["actions"].includes("edit") && this.modeEdition == null;
         var selection = this.currentSelection;
         var selectionSimple = selection == "simple";
@@ -1040,7 +1047,7 @@ class MTFrameworkView {
 
         if (selectionSimple){
             var option = buildElement("input", undefined, undefined, "optionButton");
-            if (this.currentDataSelected == datas[indexRow]) option.setAttribute("checked", "");
+            if (this.currentDataSelected == datas) option.setAttribute("checked", "");
             option.setAttribute("type", "checkbox");
             div.appendChild(option);
         }else if (selectionMultiple){
