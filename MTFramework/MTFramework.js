@@ -84,7 +84,7 @@ class MTFrameworkController {
     }
 
     remove(viewName, indexRow){
-        this.view.removeRecord(viewName, indexRow);
+        this.model.removeRecord(viewName, indexRow);
         this.view.modeEdition = null;
         this.view.currentEditionIndexRow = null;
         this.view.hidePopup();
@@ -139,6 +139,7 @@ class MTFrameworkController {
         var fichier = new FileReader(); 
         fichier.onload = function() { 
             var json = JSON.parse(fichier.result);
+            ctrl.model.loadDatas(json, true);
             ctrl.model.saveBD(json);
             ctrl.refresh();
         }   
@@ -1033,8 +1034,6 @@ class MTFrameworkView {
             }
             var removeable = this.currentView["actions"].includes("remove") && this.modeEdition != null;
             if (removeable){
-                //var divInterfaceBas = buildElement("div", undefined, undefined, "interfaceBasPopup");
-                //divInterfaceBas.appendChild(this.buildRemove());
                 divRetour.appendChild(this.buildRemove());
             }
         }
@@ -1191,7 +1190,7 @@ class MTFrameworkView {
     buildRemove(){
         var newId = this.getNewId();
         var buttonSupprimer = buildElement("button", "Supprimer", newId, "btn btn-danger buttonSupprimerEdit");
-        this.addNewEvent(newId, "click", this.ctrl.valid.bind(this.ctrl, this.currentViewName, this.currentEditionIndexRow));
+        this.addNewEvent(newId, "click", this.ctrl.remove.bind(this.ctrl, this.currentViewName, this.currentEditionIndexRow));
         buttonSupprimer.value = "Supprimer";
         return buttonSupprimer;
     }

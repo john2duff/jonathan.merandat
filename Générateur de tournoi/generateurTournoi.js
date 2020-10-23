@@ -134,7 +134,7 @@ var config = {
             ],
             "dimension": "horiz",
             "actions": ["edit", "sensRevert"],
-            "view": {
+            "views": {
                 "defaultPreparation": {
                     "showHeader": true,
                     "layout": "TOFR",
