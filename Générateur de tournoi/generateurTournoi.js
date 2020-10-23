@@ -124,7 +124,7 @@ var config = {
             "desc": "Préparation du tournoi", 
             "columns": [
                 {   "type": "typeTournoi", 
-                    "selection": "none",
+                    "selection": "simple",
                     "view": "typeTournoiBasic"  
                 },
                 {   "type": "nombreTour", 

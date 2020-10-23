@@ -26,6 +26,11 @@
     box-shadow: 4px 5px 11px 1px #c3c3c3;
 }
 
+.navBarPopup{
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
 .barItemInterface{
     margin: 0px 5px;
 }
@@ -159,6 +164,11 @@
     justify-content: space-between;
     padding: 10px;
 }
+
+.footerPopup{
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
 .popupMask {
     background-color: rgb(0 0 0 / 60%);
     position: fixed;
@@ -171,6 +181,8 @@
     opacity: 0;
     align-items: center;
     transition: opacity 0.5s;
+    pointer-events: none;
+    display:flex;
 }
 .popupView{
     width: 80%;
