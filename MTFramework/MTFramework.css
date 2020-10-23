@@ -134,12 +134,21 @@
 .bodyPopup{
     flex: 1 1 auto;
     overflow: auto;
+    display: flex;
+    flex-direction: column;
 }
 .headerPopup{
     background-color: gray;
     padding: 10px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+}
+.interfaceBasPopup{
+    padding: 10px;
+    display: flex;
+}
+.buttonSupprimerEdit{
+    margin: 10px;
 }
 .titleHeaderPopup{
     margin-bottom: 0px;
