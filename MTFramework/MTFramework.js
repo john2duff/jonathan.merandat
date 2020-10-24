@@ -103,17 +103,26 @@ class MTFrameworkController {
                 checkbox.removeAttribute("checked");
             }
         }
-
         var checkbox = record.querySelector("input");
-        checkbox.setAttribute("checked", "");
+        if (checkbox.getAttribute("checked") == "true"){
+            checkbox.removeAttribute("checked");
+            if (list.classList.contains("selectionMultiple")){
+                checkbox.parentElement.classList.remove("recordFormSelected");
+            }
+        }else{
+            checkbox.setAttribute("checked", "true");
+            if (list.classList.contains("selectionMultiple")){
+                checkbox.parentElement.classList.add("recordFormSelected");
+            }
+        }
     }
 
     showListComboBox(idInputComboBox){
         var inputComboBox = document.querySelector("#" + idInputComboBox);
-        if (inputComboBox.nextElementSibling.style["display"] == "block"){
-            this.hideListComboBox(inputComboBox.nextElementSibling);
+        if (inputComboBox.nextSibling.style["display"] == "block"){
+            this.hideListComboBox(inputComboBox.nextSibling);
         }else{
-            inputComboBox.nextElementSibling.style["display"] = "block";
+            inputComboBox.nextSibling.style["display"] = "block";
         }
     }
     hideListComboBox(list){
@@ -624,10 +633,11 @@ class MTFrameworkView {
         if (view["showHeader"] == true){
             div.appendChild(this.buildHeaderView());
         }
-        var divBody = buildElement("div", undefined, undefined, this.modeEdition == null ? "" : "bodyPopup");
         this.currentSelection = view["selection"];
         this.currentDataSelected = undefined;
         this.currentComboBox = view["comboBox"];
+
+        var divBody = buildElement("div", undefined, undefined, this.modeEdition == null ? "" : "bodyPopup");
         divBody.appendChild(this.buildBodyView());
         div.appendChild(divBody);
         return div;
@@ -666,16 +676,12 @@ class MTFrameworkView {
                 }
             case "TR": //tableResponsive
             case "TR-inverse": //tableResponsive sens inverse
-            this.currentSens = true;
                 return this.buildListTable();
             case "FR": //formResponsive sens inverse
             case "FR-inverse": //formResponsive sens inverse
-            this.currentSens = true;
                 return this.buildListForm();
         }
     }
-
-    
 
     buildContent(isSelection){
         var selection = this.currentSelection;
@@ -1039,12 +1045,15 @@ class MTFrameworkView {
         var model = this.currentModel;
         var datas = model["datas"];
 
-        divRetour = buildElement("div", undefined, undefined, (comboBox ? "listComboBox " : "") + (selectionSimple ? "selectionSimple" : ""));
+        var classDiv = (selectionSimple ? "selectionSimple " : " ") +  (selectionMultiple ? "selectionMultiple " : " ") + (comboBox ? "listComboBox " : " ");
+
+        divRetour = buildElement("div", undefined, undefined, classDiv);
 
         if (this.currentEditionIndexRow == -1){
             this.currentIndexRow = model["datas"].length;
             this.buildRecordFormSquelette(divRetour);
         }else if (selectionNone){
+            this.currentIndexRow = 0;
             this.buildRecordFormSquelette(divRetour);
         }else{
             for (var indexRow = 0; indexRow < datas.length; indexRow++){
@@ -1080,15 +1089,14 @@ class MTFrameworkView {
 
         var divAllParams;
         var div;
-        var classDiv;
+        var classDiv = "recordForm" + (sens ? " " : "Inverse ") ;
         if (selectionNone){
-            classDiv = "";
-        }else if (isSelection){
-            classDiv = "recordFormSelection";
-        }else{
-            classDiv = "recordForm" + (sens ? "" : "Inverse ");
+            classDiv += "";
+        }else if (selectionSimple){
+            classDiv += "recordFormSelectionSimple";
+        }else if (selectionMultiple){
+            classDiv += "recordFormSelectionMultiple";
         }
-
         if (isSelection){
             var newId = this.getNewId();
             if (comboBox){
@@ -1104,13 +1112,17 @@ class MTFrameworkView {
         if (isSelection){
             var data = this.currentModel["datas"][this.currentIndexRow];
             if (selectionSimple){
-                var option = buildElement("input", undefined, undefined, "optionButton");
-                if (this.currentDataSelected == data) option.setAttribute("checked", "");
+                var option = buildElement("input", undefined, undefined, "inputSelection optionButton");
+                if (this.currentDataSelected != undefined && this.currentDataSelected == data) {
+                    option.setAttribute("checked", "");
+                }
                 option.setAttribute("type", "checkbox");
                 div.appendChild(option);
             }else if (selectionMultiple){
-                var check = buildElement("input");
-                if (datas[i].includes(data)) option.setAttribute("checked", "");
+                var check = buildElement("input", undefined, undefined, "inputSelection");
+                if (this.currentDataSelected != undefined && this.currentDataSelected == data){
+                    check.setAttribute("checked", ""); 
+                }
                 check.setAttribute("type", "checkbox");
                 div.appendChild(check);
             }

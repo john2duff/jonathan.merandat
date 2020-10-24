@@ -116,6 +116,7 @@ var config = {
                     "showHeader": true,
                     "layout": "TOFR",
                     "actions": ["add", "remove", "edit", "sensRevert"],
+                    "selection": "multiple"
                 }
             }
         }, 
@@ -163,7 +164,7 @@ function buildTitlePage(title){
     var div = buildElement("div", undefined, undefined, undefined, "display:flex; justify-content:left;align-items:center;");
     var img = buildElement("img", undefined, "logoBadLevier");
     img.setAttribute("src", "./logoBadLevier.jpg");
-    var span = buildElement("span", title, undefined, undefined, "line-height:1.2rem;font-weight:700;font-size:1rem;text-align:center;width:100px;padding:10px;color:lightgray;");
+    var span = buildElement("span", title, undefined, undefined, "line-height: 1.2rem;font-weight: 400;font-size: 1em;text-align: center;padding: 10px;font-family: cursive;color: lightgray;");
     div.appendChild(img);
     div.appendChild(span);
     return div;

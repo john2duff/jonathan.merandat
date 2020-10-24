@@ -58,17 +58,32 @@
     margin: 10px;
     box-shadow: 4px 5px 11px 1px #c3c3c3;
     align-items: flex-start;
+    border-radius: 10px;
+    border: outset lightgray 2px;
+    transition: background-color 0.5s;
 }
-.recordFormSelection {
-    display: flex;
-    flex-direction: row;
+.recordFormSelectionSimple {
     padding: 0px;
     margin: 0px;
+    border-radius: 0px;
+    border: none;
     align-items: center;
     border-bottom: solid lightgray 1px;
-
     cursor: pointer;
 }
+.recordFormSelectionMultiple {
+    align-items: center;
+    cursor: pointer;
+}
+input.inputSelection{
+    margin: 0px 10px;
+}
+
+.recordFormSelected{
+    background-color: #d4e7ff;
+    border: outset #689ad6 2px;
+}
+
 .recordFormInverse {
     display: flex;
     flex-direction: column;
@@ -201,6 +216,8 @@
     height: 15px;
     width: 15px;
     pointer-events: none;
+    position: relative;
+
 }
 
 .checkButton{
@@ -211,12 +228,12 @@
     pointer-events: none;
 }
 
-.optionButton:checked:after {
-    font-size: 14px;
+.optionButton:checked::after {
+    font-size: 15px;
     font-weight: bold;
-    position: relative;
-    top: -8px;
-    left: 2.2px;
+    position: absolute;
+    top: -6.5px;
+    left: 2px;
     text-shadow: none;
     color: #4a4a4a;
     content: "●";

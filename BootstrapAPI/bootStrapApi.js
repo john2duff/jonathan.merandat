@@ -1,7 +1,7 @@
 var BSBuilder = {};
 
 BSBuilder.navBar = function(autoCollapse, interfacesTab){
-    var nav = buildElement("nav", undefined, undefined, "navbar navbar-expand-lg navbar-dark bg-dark");
+    var nav = buildElement("nav", undefined, undefined, "navbar navbar-dark");
     if (autoCollapse !== false){
         var buttonCollapse = buildElement("button", undefined, undefined, "navbar-toggler");
         buttonCollapse.setAttribute("type", "button")
@@ -13,6 +13,7 @@ BSBuilder.navBar = function(autoCollapse, interfacesTab){
         buttonCollapse.setAttribute("aria-label", "Toggle navigation");
         var spanCollapse = buildElement("span", undefined, undefined, "navbar-toggler-icon");
         buttonCollapse.appendChild(spanCollapse);
+        nav.style["background-color"] = "#7f7d7d";
         nav.appendChild(buttonCollapse);
     }
 
