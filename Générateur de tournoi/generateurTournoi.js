@@ -114,6 +114,7 @@ var config = {
             "views": {
                 "joueursPage1": {
                     "showHeader": true,
+                    "showHeaderColumns": false,
                     "layout": "TOFR",
                     "actions": ["add", "remove", "edit", "sensRevert"],
                 }
