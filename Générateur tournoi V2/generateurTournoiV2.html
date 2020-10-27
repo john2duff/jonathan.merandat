@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <meta charset="UTF-8">
+        <title>Générateur de tournoi de Badminton</title>
+        
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+
+        <script src="../MTFramework V2/MTFrameworkV2.js"></script>
+        <link rel="stylesheet" href="../MTFramework V2/MTFrameworkV2.css">
+        <script src="../BootstrapAPI/bootStrapApi.js"></script>
+
+        <style>
+            #logoBadLevier{
+                max-height: 50px;
+                border-radius: 50%;
+                box-shadow: 0px 0px 10px 2px #a9a9a9;
+            }
+        </style>
+    </head>
+    <body onload="loadMTFramework();">
+
+        <script>
+            var mt;
+            var listJoueurs = [
+                {"nomJoueur": "Merandat", "prenomJoueur": "Jonathan", "genre": "Homme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"}
+            ];
+            var prep = [
+                {"typeTournoi": "Simple", "nbTour": 5}
+            ];
+
+            function loadMTFramework(){
+                mt = new MTFramework(document.body);
+                //Models
+                mt.addNewModel("genre", "basicString", ["Homme", "Femme"]);
+                mt.addNewModel("nomJoueur", "basicString");
+                mt.addNewModel("prenomJoueur", "basicString");
+                mt.addNewModel("joueurs", {
+                    "nomJoueur": "nomJoueurBasic",
+                    "prenomJoueur": "prenomJoueurBasic",
+                    "genre": "genreBasic"
+                }, listJoueurs);
+                mt.addNewModel("typeTournoi", "basicString", ["Simple", "Double"]);
+                mt.addNewModel("nbTour", "basicInteger");
+                mt.addNewModel("preparation", {
+                    "typeTournoi": "typeTournoiBasic",
+                    "prenomJoueur": "prenomJoueurBasic",
+                    "genre": "genreBasic"
+                }, prep);
+
+                //Views in models
+                mt.addNewViewInModel("genre", "genreBasic", "Genre");
+                mt.addNewViewInModel("nomJoueur", "nomJoueurBasic", "Nom");
+                mt.addNewViewInModel("prenomJoueur", "prenomJoueurBasic", "Prénom");
+                mt.addNewViewInModel("joueurs", "joueurSelection", "Sélection des joueurs");
+                mt.addNewViewInModel("typeTournoi", "typeTournoiBasic", "Type de tournoi");
+                mt.addNewViewInModel("nbTour", "nbTourBasic", "Nombre de tour");
+                mt.addNewViewInModel("preparation", "preparationView", "Préparation du tournoi");
+
+                //Pages
+                mt.addNewPage("page1", "Générateur de tournoi", true);
+
+                //Views in pages
+                mt.addNewViewInPage("page1", "joueurSelection");
+                mt.addNewViewInPage("page1", "preparation");
+
+                mt.render();
+            }
+
+        </script>
+
+    </body> 
+
+</html>
+
+
