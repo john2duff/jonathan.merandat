@@ -31,9 +31,23 @@
 
         <script>
             var mt;
+            var nomJoueur, prenomJoueur, genre, joueur, typeTournoi, nbTour, preparation;
+            var nomJoueurView, prenomJoueurView, genreView, joueurSelection, typeTournoiView, nbTourView, preparationView;
+            var page1;
+            //jeu d'essai
             var listJoueurs = [
                 {"nomJoueur": "Merandat", "prenomJoueur": "Jonathan", "genre": "Homme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"}
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
+
             ];
             var prep = [
                 {"typeTournoi": "Simple", "nbTour": 5}
@@ -41,40 +55,49 @@
 
             function loadMTFramework(){
                 mt = new MTFramework(document.body);
-                //Models
-                mt.addNewModel("genre", "basicString", ["Homme", "Femme"]);
-                mt.addNewModel("nomJoueur", "basicString");
-                mt.addNewModel("prenomJoueur", "basicString");
-                mt.addNewModel("joueurs", {
-                    "nomJoueur": "nomJoueurBasic",
-                    "prenomJoueur": "prenomJoueurBasic",
-                    "genre": "genreBasic"
+                var typeString = mt.basicString;
+                var typeInteger = mt.basicInteger;
+                //chargement des models
+                nomJoueur = mt.addNewModel("nomJoueur", typeString);
+                prenomJoueur = mt.addNewModel("prenomJoueur", typeString);
+                genre = mt.addNewModel("genre", typeString, ["Homme", "Femme"]);
+                
+                typeTournoi = mt.addNewModel("typeTournoi", typeString, ["Simple", "Double"]);
+                nbTour = mt.addNewModel("nbTour", typeInteger);
+                
+                //chargement des vues
+                nomJoueurView = nomJoueur.addNewView("nomJoueurBasic", "Nom");
+                prenomJoueurView = prenomJoueur.addNewView("prenomJoueurBasic", "Prénom");
+                genreView = genre.addNewView("genreBasic", "Genre");
+                typeTournoiView = typeTournoi.addNewView("typeTournoiBasic", "Type de tournoi");
+                nbTourView = nbTour.addNewView("nbTourBasic", "Nombre de tour");
+
+                joueur = mt.addNewModel("joueur", {
+                    "nomJoueur": nomJoueurView,
+                    "prenomJoueur": prenomJoueurView,
+                    "genre": genreView
                 }, listJoueurs);
-                mt.addNewModel("typeTournoi", "basicString", ["Simple", "Double"]);
-                mt.addNewModel("nbTour", "basicInteger");
-                mt.addNewModel("preparation", {
-                    "typeTournoi": "typeTournoiBasic",
-                    "prenomJoueur": "prenomJoueurBasic",
-                    "genre": "genreBasic"
+                preparation = mt.addNewModel("preparation", {
+                    "typeTournoi": typeTournoiView,
+                    "prenomJoueur": nbTourView,
                 }, prep);
 
-                //Views in models
-                mt.addNewViewInModel("genre", "genreBasic", "Genre");
-                mt.addNewViewInModel("nomJoueur", "nomJoueurBasic", "Nom");
-                mt.addNewViewInModel("prenomJoueur", "prenomJoueurBasic", "Prénom");
-                mt.addNewViewInModel("joueurs", "joueurSelection", "Sélection des joueurs");
-                mt.addNewViewInModel("typeTournoi", "typeTournoiBasic", "Type de tournoi");
-                mt.addNewViewInModel("nbTour", "nbTourBasic", "Nombre de tour");
-                mt.addNewViewInModel("preparation", "preparationView", "Préparation du tournoi");
+                joueurSelection =  joueur.addNewView("joueurSelection", "Sélection des joueurs");
+                preparationView =  preparation.addNewView("preparationView", "Préparation du tournoi");
 
+                var buttonEdit = MH.makeButton({type: "click", func: editJoueurs.bind(this)}, "edit");
+                joueurSelection.addInterfaceHeaderView(buttonEdit);
                 //Pages
-                mt.addNewPage("page1", "Générateur de tournoi", true);
+                page1 = mt.addNewPage("page1", "Générateur de tournoi");
+                page1.addNewView(joueurSelection);
+                page1.addNewView(preparationView);
 
-                //Views in pages
-                mt.addNewViewInPage("page1", "joueurSelection");
-                mt.addNewViewInPage("page1", "preparation");
+                mt.render(page1);
 
-                mt.render();
+                function editJoueurs(){
+                    joueur.setModeEdition(true);
+                    mt.render(page1);
+                }
             }
 
         </script>

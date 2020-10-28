@@ -1,7 +1,6 @@
 .container{
-    padding:0px;
+    padding: 0px;
 }
-
 /*position*/
 .stickyLeft{
     position: sticky;
@@ -13,7 +12,7 @@
 }
 
 /*NavBarView*/
-.navBarView{
+.headerView{
     background-color: #e3e3e3;
     padding: 10px;
     display:flex;
@@ -21,6 +20,7 @@
     justify-content:space-between;
     position: sticky;
     top: 0;
+    align-items: center;
     z-index: 1020;
     left:0px;
     box-shadow: 4px 5px 11px 1px #c3c3c3;
@@ -63,6 +63,15 @@
     transition: background-color 0.5s;
     flex-wrap: wrap;
 }
+.itemForm{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0px 5px;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+}
 .recordFormSelectionSimple {
     padding: 0px;
     margin: 0px;
@@ -95,15 +104,7 @@ input.inputSelection{
     margin: 10px;
     box-shadow: 4px 5px 11px 1px #c3c3c3;
 }
-.recordItemForm{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0px 5px;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
-    margin-bottom: 5px;
-}
+
 .recordItemFormInverse{
     display: flex;
     flex-direction: row;
