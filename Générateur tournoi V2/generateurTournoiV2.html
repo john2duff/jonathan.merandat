@@ -57,11 +57,11 @@
                 mt = new MTFramework(document.body);
                 var typeString = mt.basicString;
                 var typeInteger = mt.basicInteger;
+
                 //chargement des models
                 nomJoueur = mt.addNewModel("nomJoueur", typeString);
                 prenomJoueur = mt.addNewModel("prenomJoueur", typeString);
                 genre = mt.addNewModel("genre", typeString, ["Homme", "Femme"]);
-                
                 typeTournoi = mt.addNewModel("typeTournoi", typeString, ["Simple", "Double"]);
                 nbTour = mt.addNewModel("nbTour", typeInteger);
                 
@@ -82,11 +82,11 @@
                     "prenomJoueur": nbTourView,
                 }, prep);
 
-                joueurSelection =  joueur.addNewView("joueurSelection", "Sélection des joueurs");
-                preparationView =  preparation.addNewView("preparationView", "Préparation du tournoi");
+                joueurSelection =  joueur.addNewView("joueurSelection", "Sélection des joueurs", MTFrameworkView.prototype.headerView);
+                preparationView =  preparation.addNewView("preparationView", "Préparation du tournoi", MTFrameworkView.prototype.headerView);
 
-                var buttonEdit = MH.makeButton({type: "click", func: editJoueurs.bind(this)}, "edit");
-                joueurSelection.addInterfaceHeaderView(buttonEdit);
+                joueurSelection.addAction("editRecord");
+
                 //Pages
                 page1 = mt.addNewPage("page1", "Générateur de tournoi");
                 page1.addNewView(joueurSelection);
