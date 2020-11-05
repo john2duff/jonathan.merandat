@@ -9,6 +9,8 @@ class GlobalDataBase{
     joueurs = [];
     tournoi = new Tournoi();
 
+
+
     getDatas(){
         return {
             "joueurs": this.getJoueurs(), 
@@ -24,7 +26,10 @@ class GlobalDataBase{
         return retour;
     }
     getTournoi(){
-        return {};
+        return {
+            "typeTournoi": this.tournoi.typeTournoi,
+            "nbTour": this.tournoi.nbTour
+        };
     }
 
     export() {
@@ -36,7 +41,7 @@ class GlobalDataBase{
         anchor.click();
     }
 
-    import() {   
+    import(evt) {   
         var fichier = new FileReader(); 
         fichier.onload = function() { 
             var datas = JSON.parse(fichier.result);
@@ -51,8 +56,20 @@ class GlobalDataBase{
     }
 
     load(datas){
-        if (datas["joueurs"] != undefined) this.joueurs = datas["joueurs"];
-        if (datas["tournoi"] != undefined) this.tournoi = datas["tournoi"];
+        if (datas == null) return;
+        this.joueurs = [];
+        for (var i = 0; i < datas["joueurs"].length; i++){
+            this.joueurs.push(new Joueur(
+                datas["joueurs"][i].name,
+                datas["joueurs"][i].genre,
+                datas["joueurs"][i].niveau,
+                datas["joueurs"][i].selected
+                ));
+        }
+        this.tournoi = new Tournoi(
+            datas["tournoi"].typeTournoi,
+            datas["tournoi"].nbTour
+        );
     }
 
     addJoueur(joueur){
@@ -68,11 +85,17 @@ class GlobalDataBase{
                }
            } 
         }
+        this.save();
+    }
+
+    deleteJoueur(index){
+        this.joueurs.splice(index, 1);
+        this.save();
     }
 }
 
 //Listes
-var niveaux = {
+var niveauListe = {
     "P12": {
         "value": "P12", 
         "handicap": 0
@@ -85,8 +108,20 @@ var niveaux = {
         "value": "P10",
         "handicap": 4
     },
+    "D9": {
+        "value": "D9", 
+        "handicap": 8
+    },
+    "D8": {
+        "value": "D8",
+        "handicap": 10
+    },
+    "D7": {
+        "value": "D7",
+        "handicap": 12
+    },
 }
-var genre = {
+var genreListe = {
     "HOMME": {
         "value": "Homme",
         "handicap": 0
@@ -96,22 +131,22 @@ var genre = {
         "handicap": 2
     }
 }
-var typeTournoi = {
+var typeTournoiListe = {
     "SIMPLE": "Simple",
     "DOUBLE": "Double"
 }
 
 //Models
 class Joueur{
-    constructor(pName, genre, niveau, selected){
+    constructor(pName, pGenre, pNiveau, pSelected){
         this.name = pName == undefined ? "Nouveau joueur " + (bd.joueurs.length + 1) : pName;
-        if (genre != undefined) this.genre = genre;
-        if (niveau != undefined) this.niveau = niveau;
-        if (selected != undefined) this.selected = selected;
+        this.genre = pGenre != undefined ? pGenre : genreListe.HOMME;
+        this.niveau = pNiveau != undefined ? pNiveau : niveauListe.P12;
+        this.selected = pSelected != undefined ? pSelected : false;
     }
     name = "";
-    genre = genre.HOMME;
-    niveau = niveaux.P12;
+    genre = genreListe.HOMME;
+    niveau = niveauListe.P12;
     selected = false;
 
     toJson(){
@@ -125,9 +160,11 @@ class Joueur{
 }
 
 class Tournoi{
-    constructor(){
+    constructor(pTypeTournoi, pNbTour){
+        this.typeTournoi = pTypeTournoi != undefined ? pTypeTournoi : typeTournoiListe.SIMPLE;
+        this.nbTour = pNbTour != undefined ? pNbTour : 1;
     }
-    typeTournoi = typeTournoi.SIMPLE;
+    typeTournoi = typeTournoiListe.SIMPLE;
     nbTour = 1;
 }
 
@@ -159,7 +196,7 @@ function resize(){
 
 //on construit tout dans le body
 function buildPage(){
-    var container = document.body;
+    var container = document.getElementById("ssBody");
     container.innerHTML = "";
     var divGlobal = MH.makeDiv("global");
     divGlobal.appendChild(buildHeader());
@@ -174,6 +211,12 @@ function buildHeader(){
         case pages.ACCUEIL:
             header.appendChild(MH.makeSpan("Générateur de tournoi", "headerTitle"));
             header.appendChild(buildButtonsImportExport());
+            var reset = MH.makeButton({
+                type: "click", 
+                func: showModalReset.bind(this)
+            }, "reset");
+            reset.classList.add("btn-danger");
+            header.appendChild(reset);
         break;
         case pages.SELECTION_JOUEUR:
             header.appendChild(MH.makeButton({
@@ -182,10 +225,12 @@ function buildHeader(){
             }, "retour"));
 
             header.appendChild(MH.makeSpan("Sélection des joueurs", "headerTitle"));
-            header.appendChild(MH.makeButton({
+            var add = MH.makeButton({
                 type: "click", 
                 func: addJoueur.bind(this)
-            }, "add"));
+            }, "add");
+            add.classList.add("btn-success");
+            header.appendChild(add);
         break;
         case pages.MODIFICATION_JOUEUR:
             header.appendChild(MH.makeButton({
@@ -197,6 +242,12 @@ function buildHeader(){
                 header.appendChild(MH.makeSpan("Création d'un joueur", "headerTitle"));
             }else{
                 header.appendChild(MH.makeSpan("Modification d'un joueur", "headerTitle"));
+                var del = MH.makeButton({
+                    type: "click", 
+                    func: showModalDeleteJoueur.bind(this)
+                }, "delete");
+                del.classList.add("btn-danger");
+                header.appendChild(del);
             }
         break;
         case pages.MODIFICATION_PREPARATION:
@@ -227,6 +278,7 @@ function buildBody(){
             body.appendChild(buildPreparation());
         break;
     }
+    body.addEventListener("keydown", onKeyDown.bind(this));
     return body;
 }
 
@@ -234,8 +286,18 @@ function buildFooter(){
     var footer = MH.makeDiv("footer", "container");
     switch (currentPage){
         case pages.ACCUEIL:
+            var signature = MH.makeSpan("Développé par Jonathan Merandat", "signature");
+            footer.appendChild(signature);
+            break;
         case pages.SELECTION_JOUEUR:
-        break;
+            var retour = MH.makeButton({
+                type: "click", 
+                func: retourSelectionJoueur.bind(this)
+            });
+            retour.innerHTML = "Retour";
+            footer.appendChild(retour);
+            footer.classList.add("selection");
+            break;
         case pages.MODIFICATION_JOUEUR:
             footer.appendChild(MH.makeButtonCancel({
                 type: "click", 
@@ -247,6 +309,7 @@ function buildFooter(){
             }));
         break;
     }
+    
     return footer;
 }
 
@@ -270,7 +333,7 @@ function buildHeaderPreparation(){
 function buildPreparation(){
     var listPrep = MH.makeDiv("listPreparation");
     listPrep.appendChild(buildHeaderPreparation());
-    var divPrep = MH.makeDiv("divPreparation");
+    var divPrep = MH.makeDiv(null, "divPreparation");
     switch (currentPage){
         case pages.ACCUEIL:
             divPrep.appendChild(buildPropertyViewer("Type de tournoi", bd.tournoi.typeTournoi));
@@ -280,8 +343,8 @@ function buildPreparation(){
             divPrep.appendChild(buildPropertyEditor("Type de tournoi", "radio", {
                 name: "typeTournoi",
                 elements: [
-                    {"id": "typeTournoiSimple", "name": "typeTournoi", "value": typeTournoi.SIMPLE, "checked": bd.tournoi.typeTournoi === typeTournoi.SIMPLE}, 
-                {"id": "typeTournoiDouble", "name": "typeTournoi", "value": typeTournoi.DOUBLE, "checked": bd.tournoi.typeTournoi === typeTournoi.DOUBLE},
+                    {"id": "typeTournoiSimple", "name": "typeTournoi", "value": typeTournoiListe.SIMPLE, "checked": bd.tournoi.typeTournoi === typeTournoiListe.SIMPLE}, 
+                {"id": "typeTournoiDouble", "name": "typeTournoi", "value": typeTournoiListe.DOUBLE, "checked": bd.tournoi.typeTournoi === typeTournoiListe.DOUBLE},
                 ]
             }));
             divPrep.appendChild(buildPropertyEditor("Nombre de tour", "number", {
@@ -315,44 +378,64 @@ function buildHeaderJoueur(){
 
 function buildListJoueur(){
     var listJoueurs = MH.makeDiv("listJoueurs");
-    if (currentPage == pages.ACCUEIL) listJoueurs.appendChild(buildHeaderJoueur());
-    var divJoueur = MH.makeDiv("divJoueur");
+    var divJoueurs = MH.makeDiv(null, "divJoueurs");
+    var divJoueur = MH.makeDiv(null, "divJoueur");
     if (currentPage == pages.MODIFICATION_JOUEUR){
         if (currentEditionId == -1){
             divJoueur.appendChild(buildJoueur(new Joueur(), currentEditionId));
+            divJoueur.classList.add("homme");
         }else{
+            divJoueur.classList.add("modificationJoueur");
+            divJoueur.classList.add(bd.joueurs[currentEditionId].genre.value == genreListe.HOMME.value ? "homme" : "femme");
             divJoueur.appendChild(buildJoueur(bd.joueurs[currentEditionId], currentEditionId));
         }
+        divJoueurs.appendChild(divJoueur);
     }else{
+        if (currentPage == pages.ACCUEIL) {
+            listJoueurs.appendChild(buildHeaderJoueur());
+            divJoueurs.classList.add("accueil");
+        }
         if (bd.joueurs.length == 0){
             divJoueur.appendChild(MH.makeSpan("Aucun joueur", "noData"));
+            divJoueurs.appendChild(divJoueur);
         }else{
             var flag = false;
             for (var i = 0; i < bd.joueurs.length; i++){
                 switch (currentPage){
                     case pages.ACCUEIL:
                         if (bd.joueurs[i].selected){
-                            divJoueur = MH.makeDiv();
+                            divJoueur = MH.makeDiv(null, "divJoueur");
+                            divJoueur.classList.add("accueil");
+                            divJoueur.classList.add(bd.joueurs[i].genre.value == genreListe.HOMME.value ? "homme" : "femme");
                             divJoueur.appendChild(buildJoueur(bd.joueurs[i], i));
+                            divJoueurs.appendChild(divJoueur);
                             flag = true;
                         }
                     break;
                     case pages.SELECTION_JOUEUR:
+                        var newId = MH.getNewId();
+                        divJoueur = MH.makeDiv(newId, "divJoueur");
+                        divJoueurs.classList.add("selection");
+                        divJoueur.classList.add(bd.joueurs[i].genre.value == genreListe.HOMME.value ? "homme" : "femme");
+                        MH.addNewEvent(newId, "click", selectJoueur.bind(this, i));
+                        divJoueur.classList.add("selectionJoueur");
                         divJoueur.appendChild(buildJoueur(bd.joueurs[i], i));
                         divJoueur.appendChild(MH.makeButton({
                             type: "click", 
                             func: editJoueur.bind(this, i)
                         }, "edit"));
+                        divJoueurs.appendChild(divJoueur);
                         flag = true;
                     break;
                 }
             }
             if (!flag){
                 divJoueur.appendChild(MH.makeSpan("Aucun joueur sélectionné", "noData"));
+                divJoueurs.appendChild(divJoueur);
             }
         }
     }
-    listJoueurs.appendChild(divJoueur);
+    listJoueurs.appendChild(divJoueurs);
     return listJoueurs;
 }
 
@@ -360,31 +443,60 @@ function buildJoueur(joueur, i){
     var joueurDom = MH.makeDiv(null, "joueur");
     switch (currentPage){
         case pages.ACCUEIL:
-            joueurDom.appendChild(MH.makeSpan(joueur.name + " - " + joueur.niveau));
+            joueurDom.classList.add("accueil");
+            joueurDom.appendChild(MH.makeSpan(joueur.name, "nomJoueur"));
+            var niveau = MH.makeSpan(joueur.niveau.value);
+            niveau.classList.add("badge");
+            if (joueur.niveau.value[0] == "P"){
+                niveau.classList.add("badge-secondary");
+            }else if (joueur.niveau.value[0] == "D"){
+                niveau.classList.add("badge-warning");
+            }else if (joueur.niveau.value[0] == "R"){
+                niveau.classList.add("badge-danger");
+            }else if (joueur.niveau.value[0] == "N"){
+                niveau.classList.add("badge-dark");
+            }
+
+            joueurDom.appendChild(niveau);
             break;
         case pages.SELECTION_JOUEUR:
             var check = MH.makeInput("checkbox");
             if (joueur.selected === true) check.setAttribute("checked", "true");
-            check.addEventListener("click", selectJoueur.bind(this, i));
             check.setAttribute("id", "joueur" + i);
             joueurDom.appendChild(check);
             joueurDom.appendChild(MH.makeLabel(joueur.name + " - " + joueur.niveau.value, "selectionJoueur", "joueur" + i));
-            break;
+            joueurDom.classList.add("selection");
+                break;
         case pages.MODIFICATION_JOUEUR:
-            joueurDom.classList.add("modificationJoueur")
             joueurDom.appendChild(buildPropertyEditor("Nom", "text", {"id": "nomJoueur", value : joueur.name}));
+            var elementsGenre = [];
+            for (var gen in genreListe){
+                elementsGenre.push({"id": gen, "name": "genre", "value": genreListe[gen].value, "checked": joueur.genre.value === genreListe[gen].value})
+            }
+            
             joueurDom.appendChild(buildPropertyEditor("Genre", "radio", 
-            {name: "genre", elements : [
-                {"id": "HOMME", "name": "genre", "value": genre.HOMME.value, "checked": joueur.genre.value === genre.HOMME.value}, 
-                {"id": "FEMME", "name": "genre", "value": genre.FEMME.value, "checked": joueur.genre.value === genre.FEMME.value}, 
-            ]}));
+            {name: "genre", elements : elementsGenre}));
+            MH.addNewEvent("HOMME", "change", changeGenre.bind(this));
+            MH.addNewEvent("FEMME", "change", changeGenre.bind(this));
+            var elementsNiv = [];
+            for (var niv in niveauListe){
+                elementsNiv.push({"id": niv, "name": "niveau", "value": niveauListe[niv].value, "checked": joueur.niveau.value === niveauListe[niv].value})
+            }
             joueurDom.appendChild(buildPropertyEditor("Niveau", "radio", 
-            {name: "niveau", elements : [
-                {"id": "P12", "name": "niveau", "value": niveaux.P12.value, "checked": joueur.niveau.value === niveaux.P12.value}, 
-                {"id": "P11", "name": "niveau", "value": niveaux.P11.value, "checked": joueur.niveau.value === niveaux.P11.value}, 
-                {"id": "P10", "name": "niveau", "value": niveaux.P10.value, "checked": joueur.niveau.value === niveaux.P10.value},  
-            ]}));
-
+            {name: "niveau", elements : elementsNiv}));
+            for (var niv in niveauListe){
+                var nive = joueurDom.querySelector("#" + niv).nextSibling;
+                nive.classList.add("badge");
+                if (niv[0] == "P"){
+                    nive.classList.add("badge-secondary");
+                }else if (niv[0] == "D"){
+                    nive.classList.add("badge-warning");
+                }else if (niv[0] == "R"){
+                    nive.classList.add("badge-danger");
+                }else if (niv[0] == "N"){
+                    nive.classList.add("badge-dark");
+                }
+            }
         break;
     }
     return joueurDom;
@@ -448,17 +560,23 @@ function buildEditor(type, attributes){
 function buildButtonsImportExport(){
     var retour = MH.makeDiv();
 
-    var imp = MH.makeButton({
-        type: "click", 
-        func: bd.import.bind(bd)
-    }, "import");
-    imp.classList.add("bouton");
-    retour.appendChild(imp);
+    var buttonImport = MH.makeElt("label", null, "btn-file", "margin:0px;");
+    var newId = MH.getNewId();
+    var input = MH.makeInput("file", {"id": newId, "accept": ".json", "style" : "display:none;"});
+    MH.addNewEvent(newId,"change", bd.import.bind(input));
+    buttonImport.setAttribute("title", "Importer un tournoi");
+    buttonImport.classList.add("btn");
+    buttonImport.classList.add("btn-light");
+    buttonImport.appendChild(MH.makeIcon("import"));
+    buttonImport.appendChild(input);
+
+    retour.appendChild(buttonImport);
 
     var exp = MH.makeButton({
         type: "click", 
         func: bd.export.bind(bd)
     }, "export");
+    exp.setAttribute("title", "Exporter un tournoi");
     exp.classList.add("bouton");
     exp.style = "transform:rotate(180deg);";
     retour.appendChild(exp);
@@ -467,6 +585,34 @@ function buildButtonsImportExport(){
 }
 
 //actions
+function onKeyDown(evt){
+    if (evt.code == "Enter"){
+        switch(currentPage){
+            case pages.MODIFICATION_JOUEUR:
+                validModificationJoueur();
+                break;
+        }
+    }else if (evt.code == "Escape"){
+        switch(currentPage){
+            case pages.MODIFICATION_JOUEUR:
+                cancelModificationJoueur();
+                break;
+        }
+    }
+}
+function showModalDeleteJoueur(){
+    $('#modalDeleteJoueur').modal('show');
+}
+function showModalReset(){
+    $('#modalReset').modal('show');
+}
+function reset(){
+    bd.joueurs = [];
+    bd.tournoi = new Tournoi();
+    bd.save();
+    $('#modalReset').modal('toggle');
+    selectPage(pages.ACCUEIL);
+}
 function retourModificationPreparation(){
     selectPage(pages.ACCUEIL);
 }
@@ -476,8 +622,8 @@ function retourModificationJoueur(){
 function retourSelectionJoueur(){
     selectPage(pages.ACCUEIL);
 }
-function addJoueur(){
-    editJoueur(-1);
+function addJoueur(evt){
+    editJoueur(-1, evt);
 }
 function editPreparation(){
     selectPage(pages.MODIFICATION_PREPARATION);
@@ -489,27 +635,46 @@ function validModificationJoueur(){
     if (currentEditionId == -1){
         bd.addJoueur(new Joueur(
             document.getElementById("nomJoueur").value,
-            niveaux[document.body.querySelector("div.radioniveau input[checked]").id],
-            genre[document.body.querySelector("div.radiogenre input[checked]").id],
+            genreListe[document.body.querySelector("div.radiogenre input:checked").id],
+            niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
             false));
     }else{
         bd.updateJoueur(currentEditionId, {
             "name": document.getElementById("nomJoueur").value,
-            "niveau": niveau[document.body.querySelector("div.radioniveau input[checked]").value],
-            "genre": genre[document.body.querySelector("div.radiogenre input[checked]").value],
-        })
+            "niveau": niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
+            "genre": genreListe[document.body.querySelector("div.radiogenre input:checked").id],
+        });
     }
     selectPage(pages.SELECTION_JOUEUR);
 }
 function cancelModificationJoueur(){
     selectPage(pages.SELECTION_JOUEUR);
 }
-function editJoueur(i){
+function editJoueur(i, evt){
+    evt.preventDefault();
+    evt.cancelBubble = true;
     currentEditionId = i;
     selectPage(pages.MODIFICATION_JOUEUR);
 }
+function changeGenre(evt){
+    var divJoueur = evt.currentTarget.closest(".divJoueur");
+    if (evt.currentTarget.id == "HOMME"){
+        divJoueur.classList.remove("femme");
+        divJoueur.classList.add("homme");
+    }else{
+        divJoueur.classList.remove("homme");
+        divJoueur.classList.add("femme");
+    }
+}
+function deleteJoueur(){
+    bd.deleteJoueur(currentEditionId);
+    $('#modalDeleteJoueur').modal('toggle');
+    selectPage(pages.SELECTION_JOUEUR);
+}
 function selectJoueur(i, evt){
-    bd.updateJoueur(i, {"selected": evt.target.checked});
+    var check = evt.currentTarget.querySelector("input");
+    check.checked = !check.checked;
+    bd.updateJoueur(i, {"selected": check.checked});
 }
 function validSelectionJoueur(){
     selectPage(pages.ACCUEIL);
@@ -553,22 +718,26 @@ class MH {
                 src += "arrow-repeat.svg";
                 break;
             case "add":
-                src += "plus-circle.svg";
+                src += "plus.svg";
                 break;
             case "import":
             case "export":
                 src += "box-arrow-down.svg";
                 break;
             case "retour":
-                src += "arrow-left-short.svg";
+                src += "arrow-left.svg";
                 break;  
+            case "delete":
+            case "reset":
+                src += "trash.svg";
+                break; 
             default:
                 src += "question.svg";
                 break;    
         }
         img.setAttribute("src", src);
-        img.setAttribute("width", "16");
-        img.setAttribute("heigth", "16");
+        img.setAttribute("width", "12");
+        img.setAttribute("heigth", "12");
         return img;
     }
     static makeButton(callBack, icon){

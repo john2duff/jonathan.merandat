@@ -19,6 +19,48 @@
 
     </head>
     <body onload="selectPage();">
+        <div id="ssBody"></div>
+        <!-- Modal Reset-->
+        <div class="modal fade" id="modalReset" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Reset</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Voulez-vous vraiment tout réinitialiser ?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary"  data-dismiss="modal">Annuler</button>
+                  <button type="button" onclick="reset();" class="btn btn-danger">Tout supprimer</button>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <!-- Modal Delete Joueur-->
+        <div class="modal fade" id="modalDeleteJoueur" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Suppression d'un joueur</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Voulez-vous vraiment supprimer ce joueur ?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary"  data-dismiss="modal">Annuler</button>
+                  <button type="button" onclick="deleteJoueur();" class="btn btn-danger">Supprimer</button>
+                </div>
+              </div>
+            </div>
+        </div>
 
     </body> 
 

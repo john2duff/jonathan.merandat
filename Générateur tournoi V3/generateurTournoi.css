@@ -1,6 +1,14 @@
 div#global{
     display: flex;
     flex-direction: column;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+button.btn{
+    margin: 5px;
+}
+input[type="text"]{
+    border-radius: 5px;;
 }
 
 div#header {
@@ -23,6 +31,7 @@ div#body {
     background-color: rgb(239, 239, 239);
     align-items: center;
     flex-direction: column;
+    /*background: linear-gradient(white, dimgrey);*/
 }
 
 div#footer {
@@ -34,14 +43,19 @@ div#footer {
     flex-direction: row;
 }
 
+div#footer.selection{
+    justify-content: flex-end;
+}
+
 div#headerJoueur, div#headerPreparation{
     background-color: rgb(180,180,180);
     display: flex;
     justify-content: space-between;
-    padding: 10px;
+    padding: 0px 10px;
     align-items: center;
     text-shadow: 1px 1px 1px white;
-    font-size: 1.5em;
+    font-size: 1.2em;
+    font-weight: bold;
     color: #3f3f3f;
     line-height: 1em;
 }
@@ -50,20 +64,88 @@ div#listJoueurs, div#listPreparation{
     width: 100%;
 }
 
-div#divJoueur, div#divPreparation{
-    margin: 10px;
+div#listJoueurs.accueilJoueur {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+div.divJoueur{
+    display: flex;
+    padding: 5px 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    border-bottom: 2px lightgray ridge;
+} 
+
+div.divPreparation{
+    display: flex;
+    margin: 0px 10px;
+    padding: 5px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-bottom: 2px lightgray ridge;
+} 
+
+div.divJoueur.selectionJoueur{
+    cursor: pointer;
+}
+
+div.divJoueur.selectionJoueur:hover{
+    /*background: linear-gradient(rgba(190, 190, 190, 0.2), rgba(20, 20, 20, 0.3));*/
+}
+
+div.divJoueur.homme{
+    background-color: rgb(168 194 210);
+}
+div.divJoueur.femme{
+    background-color: pink;
+}
+
+div.divJoueur:last-child, div.divPreparation:last-child {
+    border: none;
+}
+
+div.divJoueur.accueil{
+    border: 1px solid gray;
+    margin: 5px;
+    border-radius: 10px;
+}
+
+div.divJoueur.modificationJoueur{
+    flex-direction: column;
+}
+
+div.divJoueurs.accueil {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}    
+
+div.joueur {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-} 
+}
+
+span.nomJoueur{
+    margin: 0px 5px;
+}
+
+div.joueur.selection {
+    pointer-events: none;
+}
 
 div.property{
     display: flex;
     justify-content: flex-start;
     flex-direction: column;
-    margin-bottom: 10px;
+    margin: 10px;
+}
+
+.propertyValue{
+    margin-left: 0px;
 }
 
 button.bouton{
@@ -73,7 +155,6 @@ button.bouton{
 label.propertyKey{
     color: gray;
     font-size: 0.7em;
-    margin: 0px;
     padding-left: 5px;
     width: 100px;
 }
@@ -90,21 +171,14 @@ span.propertyValue{
 }
 
 .labelCkeckbox{
-    margin-left: 10px;
+    margin-left: 5px;
     margin-bottom: 0px;
 }
 
 div.divRadio{
     display: flex;
     align-items: center;
-    margin-left: 10px;
-}
-
-div.joueur{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
+    margin-bottom: 10px;
 }
 
 span.headerTitle{
@@ -117,3 +191,13 @@ label.selectionJoueur{
     cursor: pointer;
     margin-bottom: 0px;
 }
+
+span.signature {
+    color: white;
+    /* font-weight: 600; */
+    font-style: italic;
+    font-size: 0.8em;
+    /* width: 135px; */
+    /* margin: auto;
+}
+
