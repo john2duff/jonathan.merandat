@@ -1,10 +1,11 @@
 
 //Base de données locale
 class GlobalDataBase{
-    constructor(bdName){
-        this.bdName = bdName;
+    constructor(dbName){
+        this.dbName = dbName;
+        this.load(JSON.parse(localStorage.getItem(this.dbName)));
     }
-    bdName = "";
+    dbName = "";
     joueurs = [];
     tournoi = new Tournoi();
 
@@ -52,6 +53,21 @@ class GlobalDataBase{
     load(datas){
         if (datas["joueurs"] != undefined) this.joueurs = datas["joueurs"];
         if (datas["tournoi"] != undefined) this.tournoi = datas["tournoi"];
+    }
+
+    addJoueur(joueur){
+        this.joueurs.push(joueur);
+        this.save();
+    }
+
+    updateJoueur(index, attributes){
+        if (this.joueurs[index] != undefined){
+           for (var att in attributes){
+               if (this.joueurs[index][att] != undefined){
+                    this.joueurs[index][att] = attributes[att];
+               }
+           } 
+        }
     }
 }
 
@@ -137,7 +153,8 @@ function selectPage(page){
 
 window.addEventListener("resize", resize);
 function resize(){
-    document.getElementById("global").style["height"] = window.innerHeight + "px";
+    if (document.getElementById("global") != null)
+        document.getElementById("global").style["height"] = window.innerHeight + "px";
 }
 
 //on construit tout dans le body
@@ -302,9 +319,9 @@ function buildListJoueur(){
     var divJoueur = MH.makeDiv("divJoueur");
     if (currentPage == pages.MODIFICATION_JOUEUR){
         if (currentEditionId == -1){
-            divJoueur.appendChild(buildJoueur(new Joueur()));
+            divJoueur.appendChild(buildJoueur(new Joueur(), currentEditionId));
         }else{
-            divJoueur.appendChild(buildJoueur(bd.joueurs[currentEditionId]));
+            divJoueur.appendChild(buildJoueur(bd.joueurs[currentEditionId], currentEditionId));
         }
     }else{
         if (bd.joueurs.length == 0){
@@ -316,13 +333,12 @@ function buildListJoueur(){
                     case pages.ACCUEIL:
                         if (bd.joueurs[i].selected){
                             divJoueur = MH.makeDiv();
-                            divJoueur.appendChild(buildJoueur(bd.joueurs[i]));
+                            divJoueur.appendChild(buildJoueur(bd.joueurs[i], i));
                             flag = true;
                         }
                     break;
                     case pages.SELECTION_JOUEUR:
-                        divJoueur = MH.makeDiv();
-                        divJoueur.appendChild(buildJoueur(bd.joueurs[i]));
+                        divJoueur.appendChild(buildJoueur(bd.joueurs[i], i));
                         divJoueur.appendChild(MH.makeButton({
                             type: "click", 
                             func: editJoueur.bind(this, i)
@@ -347,12 +363,12 @@ function buildJoueur(joueur, i){
             joueurDom.appendChild(MH.makeSpan(joueur.name + " - " + joueur.niveau));
             break;
         case pages.SELECTION_JOUEUR:
-            joueurDom.classList.add("selectionJoueur");
             var check = MH.makeInput("checkbox");
             if (joueur.selected === true) check.setAttribute("checked", "true");
             check.addEventListener("click", selectJoueur.bind(this, i));
+            check.setAttribute("id", "joueur" + i);
             joueurDom.appendChild(check);
-            joueurDom.appendChild(MH.makeSpan(joueur.name + " - " + joueur.niveau));
+            joueurDom.appendChild(MH.makeLabel(joueur.name + " - " + joueur.niveau.value, "selectionJoueur", "joueur" + i));
             break;
         case pages.MODIFICATION_JOUEUR:
             joueurDom.classList.add("modificationJoueur")
@@ -471,15 +487,17 @@ function editSelectionJoueurs(){
 }
 function validModificationJoueur(){
     if (currentEditionId == -1){
-        bd.joueurs.push(new Joueur(
+        bd.addJoueur(new Joueur(
             document.getElementById("nomJoueur").value,
             niveaux[document.body.querySelector("div.radioniveau input[checked]").id],
             genre[document.body.querySelector("div.radiogenre input[checked]").id],
             false));
     }else{
-        bd.joueurs[i].name = document.getElementById("nomJoueur").value;
-        bd.joueurs[i].niveau = niveau[document.body.querySelector("div.radioniveau input[checked]").value];
-        bd.joueurs[i].genre = genre[document.body.querySelector("div.radiogenre input[checked]").value];
+        bd.updateJoueur(currentEditionId, {
+            "name": document.getElementById("nomJoueur").value,
+            "niveau": niveau[document.body.querySelector("div.radioniveau input[checked]").value],
+            "genre": genre[document.body.querySelector("div.radiogenre input[checked]").value],
+        })
     }
     selectPage(pages.SELECTION_JOUEUR);
 }
@@ -490,8 +508,8 @@ function editJoueur(i){
     currentEditionId = i;
     selectPage(pages.MODIFICATION_JOUEUR);
 }
-function selectJoueur(value, i){
-    bd.joueurs[i].selected = !value;
+function selectJoueur(i, evt){
+    bd.updateJoueur(i, {"selected": evt.target.checked});
 }
 function validSelectionJoueur(){
     selectPage(pages.ACCUEIL);
@@ -514,7 +532,7 @@ class MH {
         return elt;
     } 
     static makeSpan(content, className){var span = this.makeElt("span", undefined, className); span.innerHTML = content; return span;};
-    static makeLabel(content, className){var label = this.makeElt("label", undefined, className); label.innerHTML = content; return label;};
+    static makeLabel(content, className, forr){var label = this.makeElt("label", undefined, className); label.innerHTML = content; label.setAttribute("for", forr); return label;};
     static makeDiv(id, className, style){return this.makeElt("div", id, className, style)}
     static makeInput(type, attributes){ 
         var input = MH.makeElt("input"); 
