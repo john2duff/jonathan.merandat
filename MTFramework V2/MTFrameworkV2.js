@@ -4,7 +4,7 @@ class MTFramework {
         this.init(container);
     }
 
-    container = null;
+    containers = [];
     models = [];
     pages = null;
     currentPage = null;
@@ -18,14 +18,11 @@ class MTFramework {
     }
     
     init(container){
-        this.container = container;
+        this.containers.push(container);
         this.models = {};
         //ajout des types primitifs
-        var modelString = this.addNewModel("string", "string", [], this.default.validators.basicString);
-        var modelInteger = this.addNewModel("integer", "integer", [], this.default.validators.basicInteger);
-        //ajout des vues par défaut
-        this.basicString = modelString.addNewView("basicString");
-        this.basicInteger = modelInteger.addNewView("basicInteger");
+        this.addNewModel("string", undefined, "Type chaine de caractère", [], this.default.validators.basicString, undefined, MTFrameworkView.prototype.basicStringViewer, MTFrameworkView.prototype.basicStringEditor);
+        this.addNewModel("integer", undefined, "Type nombre entier", [], this.default.validators.basicInteger, undefined, MTFrameworkView.prototype.basicIntegerViewer, MTFrameworkView.prototype.basicIntegerEditor);
         //init des pages
         this.pages = {};
     }
@@ -33,11 +30,15 @@ class MTFramework {
     render(page){
         if (page != undefined) this.currentPage = page;
         if (this.currentPage != undefined){
-            this.container.innerHTML = this.currentPage.buildPage().innerHTML;
+            this.getContainer().innerHTML = this.currentPage.buildPage().innerHTML;
         } else{
-            this.container.innerHTML = "Aucune page sélectionné";
+            this.getContainer().innerHTML = "Aucune page sélectionné";
         }
         MH.loadEvents();
+    }
+    
+    getContainer(){
+        return this.containers[this.containers.length - 1];
     }
 
     getModelByViewName(viewName){
@@ -58,16 +59,16 @@ class MTFramework {
         return null;
     }
 
-    addNewModel(name, type, datas, validator){
+    addNewModel(name, type, title, datas, validator, buildHeaderView, buildViewer, buildEditor){
         if (this.models[name] != undefined) console.warn("Le model '" + name + "' existait déjà, il a été écrasé");
-        var retour = new MTFrameworkModel(this, type, datas, validator);
+        var retour = new MTFrameworkModel(this, type, title, datas, validator, buildHeaderView, buildViewer, buildEditor);
         this.models[name] = retour;
         return retour;
     }
 
     addNewPage(name, title, buildHeaderPage){
         if (this.pages[name] != undefined) console.warn("La page '" + name + "' existait déjà, elle a été écrasé");
-        var retour = new MTFrameworkPage(title, buildHeaderPage);
+        var retour = new MTFrameworkPage(this, title, buildHeaderPage);
         this.pages[name] = retour;
         return retour;
     }
@@ -76,19 +77,22 @@ class MTFramework {
 }
 
 class MTFrameworkPage {
-    constructor(title, buildHeaderPage) {
+    constructor(ctrl, title, buildHeaderPage) {
+        this.ctrl = ctrl;        
         if (buildHeaderPage == undefined) buildHeaderPage = this.default.headerPage;
         this.buildHeaderPage = buildHeaderPage.bind(this);
         this.title = title;
     }
+    ctrl = null;
     title = null;
     buildHeaderPage = null;
     views = [];
     default = {      
         "headerPage": this.headerPage,
     }
-    addNewView(view){
-        if (!this.views.includes(view)) this.views.push(view);
+    addView(modelName){
+        var model = this.ctrl.models[modelName];
+        if (!this.views.includes(model.view)) this.views.push(model.view);
     }
     buildPage(){
         var pageRetour = MH.makeDiv();
@@ -103,7 +107,7 @@ class MTFrameworkPage {
 }
 
 class MTFrameworkModel {
-    constructor(ctrl, type, datas, validator) {
+    constructor(ctrl, type, title, datas, validator, buildHeaderView, buildViewer, buildEditor) {
         this.ctrl = ctrl;
         if (validator == undefined) validator = function(){return true;};
         var dataInter = [];
@@ -116,21 +120,16 @@ class MTFrameworkModel {
         this.type = type;
         this.datas = dataInter;
         this.validator = validator.bind(this);
+        this.view = new MTFrameworkView(this, title, buildHeaderView, buildViewer, buildEditor);
     }
     type = null;
     datas = [];
     validator = null;
     modeEdition = false;
     modeSelection = false;
-    views = {};
+    view = null;
+
     default = {
-    }
-    
-    addNewView(viewName, title, buildHeaderView, buildViewer, buildEditor, ){
-        if (this.views[viewName] != undefined) console.warn("Le vue '" + viewName + "' existait déjà, elle a été écrasée");
-        var retour = new MTFrameworkView(this, title, buildViewer, buildEditor, buildHeaderView);
-        this.views[viewName] = retour;
-        return retour;
     }
 
     setModeEdition(pBool){
@@ -142,21 +141,34 @@ class MTFrameworkModel {
 }
 
 class MTFrameworkView {
-    constructor(model, title, buildViewer, buildEditor, buildHeaderView) {
-        if (buildHeaderView === undefined) buildHeaderView = null;
-        if (buildViewer === undefined) {
-            if (model.type === "string") buildViewer = this.default.basicString.viewer;
-            else if (model.type === "integer") buildViewer = this.default.basicInteger.viewer;
-            else if (typeof(model.type) === "object") buildViewer = this.default.basicForm.viewer;
+    constructor(model, title, buildHeaderView, buildViewer, buildEditor) {
+        if (buildHeaderView === undefined){
+            if (model.view === null){
+                this.buildHeaderView = undefined;
+            }else{
+                this.buildHeaderView = model.view.buildHeaderView;
+            }
+        }else{
+            this.buildHeaderView = buildHeaderView.bind(this);
         }
-        if (buildEditor === undefined) {
-            if (model.type === "string") buildEditor = this.default.basicString.editor;
-            else if (model.type === "integer") buildEditor = this.default.basicInteger.editor;
-            else if (typeof(model.type) === "object") buildEditor = this.default.basicForm.editor;
+        if (buildViewer === undefined){
+            if (model.view === null){
+                this.buildViewer = undefined;
+            }else{
+                this.buildViewer = model.view.buildViewer;
+            }
+        }else{
+            this.buildViewer = buildViewer.bind(this);
         }
-        this.buildHeaderView = buildHeaderView === null ? undefined : buildHeaderView.bind(this);
-        this.buildViewer = buildViewer === null ? undefined : buildViewer.bind(this);
-        this.buildEditor = buildEditor === null ? undefined : buildEditor.bind(this);
+        if (buildEditor === undefined){
+            if (model.view === null){
+                this.buildEditor = undefined;
+            }else{
+                this.buildEditor = model.view.buildEditor;
+            }
+        }else{
+            this.buildEditor = buildEditor.bind(this);
+        }
         this.title = title;
         this.model = model;
     }
@@ -168,8 +180,9 @@ class MTFrameworkView {
     interfaceEditor = [];
     buildViewer = null;
     buildEditor = false;
+    modalPopup = true;
     actions = [];
-    default = {
+    default = {    
         "basicString": {
             "viewer": this.basicStringViewer,
             "editor": this.basicStringEditor,
@@ -189,17 +202,37 @@ class MTFrameworkView {
 
     //***** BUILD */
     buildView(dataSelected) {
-        var viewRetour = MH.makeDiv(undefined, "container");
-        if (this.buildHeaderView != null){
+        var viewRetour = MH.makeDiv(undefined, "container view");
+        if (this.buildHeaderView !== undefined){
             viewRetour.appendChild(this.buildHeaderView());
         }
         if (this.model.modeEdition){
-            if (this.buildEditor != null){
-                viewRetour.appendChild(this.buildEditor(dataSelected));
-            }            
+            if (this.buildEditor !== null){
+                if (this.buildEditor === undefined){
+                    var view = this.model.view;
+                    //while (view.buildEditor === undefined){
+                        view = view.model.view;
+                    //}
+                    viewRetour.appendChild(view.buildEditor(dataSelected));
+                } else {
+                    viewRetour.appendChild(this.buildEditor(dataSelected));
+                }
+            }else{
+                viewRetour.appendChild(MH.makeSpan("Aucune vue n'a été créé"));
+            }
         }else{
-            if (this.buildViewer != null){
-                viewRetour.appendChild(this.buildViewer(dataSelected));
+            if (this.buildViewer !== null){
+                if (this.buildViewer === undefined){
+                    var view = this.model.view;
+                    //while (view.buildViewer === undefined) {
+                        view = view.model.view;
+                    //} 
+                    viewRetour.appendChild(view.buildViewer());
+                } else {
+                    viewRetour.appendChild(this.buildViewer(dataSelected));
+                }
+            }else{
+                viewRetour.appendChild(MH.makeSpan("Aucune vue n'a été créé"));
             }
         }
         return viewRetour;
@@ -217,18 +250,18 @@ class MTFrameworkView {
 
     //basicString
     basicStringViewer(data){ return MH.makeSpan(data); }
-    basicStringEditor(data){return MH.makeInputText(data);}
+    basicStringEditor(data){return MH.makeInput("text", {"value": data});}
         
     //basicString
     basicIntegerViewer(data){ return MH.makeSpan(data); }
-    basicIntegerEditor(data){return MH.makeInputNumber(data);}
+    basicIntegerEditor(data){return makeInput("number", {"value": data});}
 
     //Header
     headerView() { 
         var div = MH.makeDiv(undefined, "stickyTop stickyLeft headerView"); 
         div.innerHTML = this.title; 
         if (this.actions.includes("editView")){
-            div.appendChild(MH.makeButton({type: "click", func: this.editView.bind(this)}, "edit"));
+            div.appendChild(MH.makeButton({type: "click", func: this.editView.bind(this, this.model["datas"])}, "edit"));
         }
         return div; 
     }
@@ -239,41 +272,59 @@ class MTFrameworkView {
         var record;
         var listInterface;
         var entry;
-        if (dataSelected == undefined){
+        var modeEdition = this.model.modeEdition;
+        if (this.model["datas"].length > 0){
             for (var i = 0; i < this.model["datas"].length; i++){
                 entry = MH.makeDiv();
-                listInterface = MH.makeDiv();
                 record = MH.makeDiv(undefined, "recordForm");
+                listInterface = MH.makeDiv();
+                if (modeEdition){
+                    record.appendChild(MH.makeInput("checkbox", dataSelected.includes(this.model["datas"][i]) ? {"checked": true} : undefined));
+                }
                 if (typeof(this.model["type"]) == "object") {
                     for (var attribut in this.model["type"]){
-                        record.appendChild(this.model["type"][attribut].buildView(this.model["datas"][i][attribut]));
+                        record.appendChild(this.buildItemForm(this.model["type"][attribut], this.model["datas"][i][attribut]));
                     }
                 } else {
-                    record.appendChild(this.buildItemForm(dataSelected));
+                    record.appendChild(this.model["type"], this.buildItemForm(dataSelected));
                 }
                 if (this.actions.includes("editRecord")){
-                    listInterface.appendChild(MH.makeButton({type: "click", func: this.editView.bind(this)}, "edit"));
+                    listInterface.appendChild(MH.makeButton({type: "click", func: this.editView.bind(this, this.model["datas"][i])}, "edit"));
                 }
-                record.appendChild(listInterface);
-                listForm.appendChild(record);
+                entry.appendChild(record);
+                entry.appendChild(listInterface);
+                listForm.appendChild(entry);
             }
-        }else{
-            listForm.appendChild(this.buildItemForm(dataSelected));
+        } else{
+            record = MH.makeSpan("Aucune donnée");
+            listForm.appendChild(record);
         }
+        
         return listForm;
     }
 
-    buildItemForm(dataSelected){
+    buildItemForm(type, dataSelected){
         var div = MH.makeDiv(undefined, "itemForm");
         div.appendChild(MH.makeSpan(this.title, "labelRecordItemForm"));
-        div.appendChild(this.model["type"].buildView(dataSelected));
+        var view = this.model.ctrl.getViewByViewName(type);
+        div.appendChild(view.buildView(dataSelected));
         return div;
     }
 
     //actions
-    editView(){
+    editView(dataSelected){
+        var modalPopup = this.buildModalPopup();
         this.model.modeEdition = true;
-        this.model.ctrl.render();
+        modalPopup.appendChild(this.buildView(dataSelected));
+    }
+
+    //popup
+    buildModalPopup() {
+        var popupMask = MH.makeDiv(undefined, "popupMask");
+        var popupDiv = MH.makeDiv(undefined, "popupView");
+        popupMask.appendChild(popupDiv);
+        this.model.ctrl.getContainer().appendChild(popupMask);
+        return popupDiv;
     }
 
 }
@@ -296,7 +347,6 @@ class MH {
     } 
     static makeSpan(content, className){var span = this.makeElt("span", undefined, className); span.innerHTML = content; return span;};
     static makeDiv(id, className, style){return this.makeElt("div", id, className, style)}
-    static makeButton(id, className, style){ return this.makeElt("button", id, className, style);}
     static makeInput(type, attributes){ 
         var input = MH.makeElt("input"); 
         input.setAttribute("type", type); 
@@ -305,7 +355,6 @@ class MH {
         }
         return input;
     }
-    static makeButton(id, className, style){ return this.makeElt("button", id, className, style);}
     static makeIcon(type){
         var img = MH.makeElt("img");
         var src = "../bootstrap-icons-1.0.0/";

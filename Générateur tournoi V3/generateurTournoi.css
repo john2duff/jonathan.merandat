@@ -1,0 +1,110 @@
+div#global{
+    display: flex;
+    flex-direction: column;
+}
+
+div#header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #8b8b8b;
+    align-items: center;
+    font-size: 1.5em;
+    color: white;
+    text-shadow: 2px 2px 1px #676565;
+    line-height: 1em;
+}
+
+div#body {
+    display: flex;
+    justify-content: flex-start;
+    flex: 1 1 auto;
+    padding: 0px;
+    background-color: rgb(239, 239, 239);
+    align-items: center;
+    flex-direction: column;
+}
+
+div#footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #8b8b8b;
+    align-items: center;
+    flex-direction: row;
+}
+
+div#headerJoueur, div#headerPreparation{
+    background-color: rgb(180,180,180);
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    align-items: center;
+    text-shadow: 1px 1px 1px white;
+    font-size: 1.5em;
+    color: #3f3f3f;
+    line-height: 1em;
+}
+
+div#listJoueurs, div#listPreparation{
+    width: 100%;
+}
+
+div#divJoueur, div#divPreparation{
+    margin: 10px;
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+} 
+
+div.property{
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+button.bouton{
+    margin: 5px;
+}
+
+label.propertyKey{
+    color: gray;
+    font-size: 0.7em;
+    margin: 0px;
+    padding-left: 5px;
+    width: 100px;
+}
+
+span.propertyValue{
+    color: black;
+    font-size: 1em;
+    padding: 5px;
+    flex: 1 1 auto;
+}
+
+.noData{
+    font-style: italic;
+}
+
+.labelCkeckbox{
+    margin-left: 10px;
+    margin-bottom: 0px;
+}
+
+div.divRadio{
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+div.joueur{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+span.headerTitle{
+    flex: 1 1 auto;
+    margin-left: 10px;
+}

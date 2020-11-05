@@ -32,22 +32,12 @@
         <script>
             var mt;
             var nomJoueur, prenomJoueur, genre, joueur, typeTournoi, nbTour, preparation;
-            var nomJoueurView, prenomJoueurView, genreView, joueurSelection, typeTournoiView, nbTourView, preparationView;
+            var nomJoueurView, prenomJoueurView, genreView, joueurView, joueurSelectionView, typeTournoiView, nbTourView, preparationView;
             var page1;
             //jeu d'essai
             var listJoueurs = [
                 {"nomJoueur": "Merandat", "prenomJoueur": "Jonathan", "genre": "Homme"},
                 {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-                {"nomJoueur": "Jobard", "prenomJoueur": "Céline", "genre": "Femme"},
-
             ];
             var prep = [
                 {"typeTournoi": "Simple", "nbTour": 5}
@@ -55,42 +45,36 @@
 
             function loadMTFramework(){
                 mt = new MTFramework(document.body);
-                var typeString = mt.basicString;
-                var typeInteger = mt.basicInteger;
 
                 //chargement des models
-                nomJoueur = mt.addNewModel("nomJoueur", typeString);
-                prenomJoueur = mt.addNewModel("prenomJoueur", typeString);
-                genre = mt.addNewModel("genre", typeString, ["Homme", "Femme"]);
-                typeTournoi = mt.addNewModel("typeTournoi", typeString, ["Simple", "Double"]);
-                nbTour = mt.addNewModel("nbTour", typeInteger);
-                
-                //chargement des vues
-                nomJoueurView = nomJoueur.addNewView("nomJoueurBasic", "Nom");
-                prenomJoueurView = prenomJoueur.addNewView("prenomJoueurBasic", "Prénom");
-                genreView = genre.addNewView("genreBasic", "Genre");
-                typeTournoiView = typeTournoi.addNewView("typeTournoiBasic", "Type de tournoi");
-                nbTourView = nbTour.addNewView("nbTourBasic", "Nombre de tour");
-
+                genre = mt.addNewModel("genre", "string", "Genre", ["Homme", "Femme"]);
+                typeTournoi = mt.addNewModel("typeTournoi", "string", "Type de tournoi", ["Simple", "Double"]);
+                nbTour = mt.addNewModel("nbTour", "integer", "Nombre de tour");
+                nomJoueur = mt.addNewModel("nomJoueur", "string", "Nom");
+                prenomJoueur = mt.addNewModel("prenomJoueur", "string", "Prénom");
                 joueur = mt.addNewModel("joueur", {
-                    "nomJoueur": nomJoueurView,
-                    "prenomJoueur": prenomJoueurView,
-                    "genre": genreView
-                }, listJoueurs);
+                    "nom": "nomJoueur",
+                    "prenom": "prenomJoueur",
+                    "genre": "genre"
+                }, "Liste des joueurs", listJoueurs);
+                joueurSelection = mt.addNewModel("joueurSelection", "joueur", "Sélection des joueurs");
                 preparation = mt.addNewModel("preparation", {
-                    "typeTournoi": typeTournoiView,
-                    "prenomJoueur": nbTourView,
+                    "typeTournoi": "typeTournoi",
+                    "nbTour": "nbTour",
                 }, prep);
 
-                joueurSelection =  joueur.addNewView("joueurSelection", "Sélection des joueurs", MTFrameworkView.prototype.headerView);
-                preparationView =  preparation.addNewView("preparationView", "Préparation du tournoi", MTFrameworkView.prototype.headerView);
+                joueurSelection.view.addAction("editView");
 
-                joueurSelection.addAction("editRecord");
+                //affichage en formulaire
+                joueurSelection.view.buildHeaderView = MTFrameworkView.prototype.headerView;
+                joueurSelection.view.buildViewer = MTFrameworkView.prototype.buildListForm;
+                preparation.view.buildViewer = MTFrameworkView.prototype.buildListForm;
+                preparation.view.buildHeaderView = MTFrameworkView.prototype.headerView;
 
                 //Pages
                 page1 = mt.addNewPage("page1", "Générateur de tournoi");
-                page1.addNewView(joueurSelection);
-                page1.addNewView(preparationView);
+                page1.addView("joueurSelection");
+                page1.addView("preparation");
 
                 mt.render(page1);
 
