@@ -9,7 +9,13 @@ class GlobalDataBase{
     joueurs = [];
     tournoi = new Tournoi();
 
-
+    getNbJoueurSelected(){
+        var compt = 0;
+        for (var i = 0; i < this.joueurs.length; i++){
+            if (this.joueurs[i].selected) compt++;
+        }
+        return compt;
+    }
 
     getDatas(){
         return {
@@ -210,13 +216,7 @@ function buildHeader(){
     switch (currentPage){
         case pages.ACCUEIL:
             header.appendChild(MH.makeSpan("Générateur de tournoi", "headerTitle"));
-            header.appendChild(buildButtonsImportExport());
-            var reset = MH.makeButton({
-                type: "click", 
-                func: showModalReset.bind(this)
-            }, "reset");
-            reset.classList.add("btn-danger");
-            header.appendChild(reset);
+            header.appendChild(buildInterfaceHeaderAccueil());
         break;
         case pages.SELECTION_JOUEUR:
             header.appendChild(MH.makeButton({
@@ -228,7 +228,8 @@ function buildHeader(){
             var add = MH.makeButton({
                 type: "click", 
                 func: addJoueur.bind(this)
-            }, "add");
+            }/*, "add"*/);
+            add.innerHTML = "Ajouter";
             add.classList.add("btn-success");
             header.appendChild(add);
         break;
@@ -286,8 +287,15 @@ function buildFooter(){
     var footer = MH.makeDiv("footer", "container");
     switch (currentPage){
         case pages.ACCUEIL:
-            var signature = MH.makeSpan("Développé par Jonathan Merandat", "signature");
+            var signature = MH.makeSpan("Développé par <br> <b>Jonathan Merandat<b>", "signature");
             footer.appendChild(signature);
+            var buttonLancerTournoi = MH.makeButton({
+                type: "click", 
+                func: cancelModificationJoueur.bind(this)
+            });
+            buttonLancerTournoi.innerHTML = "Lancer le tournoi";
+            buttonLancerTournoi.classList.add("btn-success");
+            footer.appendChild(buttonLancerTournoi);
             break;
         case pages.SELECTION_JOUEUR:
             var retour = MH.makeButton({
@@ -360,10 +368,10 @@ function buildPreparation(){
 }
 
 function buildHeaderJoueur(){
-    var header = MH.makeDiv("headerJoueur", "container");
+    var header = MH.makeDiv("headerJoueur", "container sticky-top");
     switch (currentPage){
         case pages.ACCUEIL:
-            header.appendChild(MH.makeSpan("Liste des joueurs"));
+            header.appendChild(MH.makeSpan("Liste des joueurs - " + bd.getNbJoueurSelected() + "/" + bd.joueurs.length));
             header.appendChild(MH.makeButton({
                 type: "click", 
                 func: editSelectionJoueurs.bind(this)
@@ -557,8 +565,11 @@ function buildEditor(type, attributes){
 }
 
 //interfaces
-function buildButtonsImportExport(){
-    var retour = MH.makeDiv();
+function buildInterfaceHeaderAccueil(){
+
+    var listIcon = MH.makeIcon("gear");
+
+    var interfaces = [];
 
     var buttonImport = MH.makeElt("label", null, "btn-file", "margin:0px;");
     var newId = MH.getNewId();
@@ -567,21 +578,30 @@ function buildButtonsImportExport(){
     buttonImport.setAttribute("title", "Importer un tournoi");
     buttonImport.classList.add("btn");
     buttonImport.classList.add("btn-light");
-    buttonImport.appendChild(MH.makeIcon("import"));
+    buttonImport.appendChild(MH.makeSpan("Importer")/*MH.makeIcon("import")*/);
     buttonImport.appendChild(input);
-
-    retour.appendChild(buttonImport);
+    interfaces.push(buttonImport);
 
     var exp = MH.makeButton({
         type: "click", 
         func: bd.export.bind(bd)
-    }, "export");
+    }/*, "export"*/);
+    exp.innerHTML = "Exporter";
     exp.setAttribute("title", "Exporter un tournoi");
     exp.classList.add("bouton");
-    exp.style = "transform:rotate(180deg);";
-    retour.appendChild(exp);
-    
-    return retour;
+    exp.style = "margin:0px;";
+    interfaces.push(exp);
+
+    var reset = MH.makeButton({
+        type: "click", 
+        func: showModalReset.bind(this)
+    }/*, "reset"*/);
+    reset.innerHTML = "Reset";
+    reset.classList.add("btn-danger");
+    reset.style = "margin:0px;";
+    interfaces.push(reset);
+
+    return MH.makeDropDown(listIcon.outerHTML, interfaces);
 }
 
 //actions
@@ -731,6 +751,12 @@ class MH {
             case "reset":
                 src += "trash.svg";
                 break; 
+            case "list":
+                src += "list.svg";
+                break; 
+            case "gear":
+                src += "gear-fill.svg";
+                break; 
             default:
                 src += "question.svg";
                 break;    
@@ -787,6 +813,29 @@ class MH {
         }
         this.listEvents = [];
         this.idCompt = 0;
+    }
+
+    static makeDropDown = function(titre, interfaces){
+        var div = MH.makeElt("div");
+        var a = MH.makeElt("a", "navbarDropdownMenuLink", " btn-light nav-link dropdown-toggle");
+        a.innerHTML = titre;
+        a.setAttribute("data-toggle", "dropdown");
+        a.setAttribute("aria-haspopup", "true");
+        a.setAttribute("aria-expanded", "false");
+        a.setAttribute("href", "#")
+    
+        var dropDownMenu = MH.makeElt("div", undefined, "dropdown-menu");
+        dropDownMenu.style = "z-index:1030;";
+        dropDownMenu.setAttribute("aria-labelledby", "navbarDropdownMenuLink");
+    
+        for (var i = 0; i < interfaces.length; i++){
+            interfaces[i].classList.add("dropdown-item");
+            dropDownMenu.appendChild(interfaces[i]);
+        }
+    
+        div.appendChild(a);
+        div.appendChild(dropDownMenu);
+        return div;
     }
 
 }

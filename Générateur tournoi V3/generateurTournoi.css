@@ -17,10 +17,6 @@ div#header {
     padding: 10px;
     background-color: #8b8b8b;
     align-items: center;
-    font-size: 1.5em;
-    color: white;
-    text-shadow: 2px 2px 1px #676565;
-    line-height: 1em;
 }
 
 div#body {
@@ -31,6 +27,7 @@ div#body {
     background-color: rgb(239, 239, 239);
     align-items: center;
     flex-direction: column;
+    overflow: auto;
     /*background: linear-gradient(white, dimgrey);*/
 }
 
@@ -41,10 +38,12 @@ div#footer {
     background-color: #8b8b8b;
     align-items: center;
     flex-direction: row;
+    box-shadow: 0px -5px 9px 2px #b7b7b7;
+    z-index: 10;
 }
 
 div#footer.selection{
-    justify-content: flex-end;
+    justify-content: space-between;
 }
 
 div#headerJoueur, div#headerPreparation{
@@ -57,6 +56,14 @@ div#headerJoueur, div#headerPreparation{
     font-size: 1.2em;
     font-weight: bold;
     color: #3f3f3f;
+    line-height: 1em;
+    box-shadow: 1px 3px 8px 3px #9a9a9a;
+}
+
+.headerTitle{
+    font-size: 1.5em;
+    color: white;
+    text-shadow: 2px 2px 1px #676565;
     line-height: 1em;
 }
 
@@ -120,6 +127,7 @@ div.divJoueurs.accueil {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    padding: 10px;
 }    
 
 div.joueur {
@@ -199,4 +207,8 @@ span.signature {
     font-size: 0.8em;
     /* width: 135px; */
     /* margin: auto; */
+}
+
+#navbarDropdownMenuLink{
+    border-radius: 5px;
 }
