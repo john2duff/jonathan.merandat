@@ -98,61 +98,35 @@ class GlobalDataBase{
         this.joueurs.splice(index, 1);
         this.save();
     }
+
+    updateTournoi(attributes){
+        for (var att in attributes){
+            if (this.tournoi[att] != undefined){
+                this.tournoi[att] = attributes[att];
+            }
+        } 
+        this.save();
+    }
 }
 
 //Listes
-var niveauListe = {
-    "P12": {
-        "value": "P12", 
-        "handicap": 0
-    },
-    "P11": {
-        "value": "P11",
-        "handicap": 2
-    },
-    "P10": {
-        "value": "P10",
-        "handicap": 4
-    },
-    "D9": {
-        "value": "D9", 
-        "handicap": 8
-    },
-    "D8": {
-        "value": "D8",
-        "handicap": 10
-    },
-    "D7": {
-        "value": "D7",
-        "handicap": 12
-    },
-}
-var genreListe = {
-    "HOMME": {
-        "value": "Homme",
-        "handicap": 0
-    },
-    "FEMME": {
-        "value": "Femme",
-        "handicap": 2
-    }
-}
 var typeTournoiListe = {
     "SIMPLE": "Simple",
     "DOUBLE": "Double"
 }
+var departMatchNegatifListe = {"OUI": "Oui", "NON": "Non"};
 
 //Models
 class Joueur{
     constructor(pName, pGenre, pNiveau, pSelected){
         this.name = pName == undefined ? "Nouveau joueur " + (bd.joueurs.length + 1) : pName;
-        this.genre = pGenre != undefined ? pGenre : genreListe.HOMME;
-        this.niveau = pNiveau != undefined ? pNiveau : niveauListe.P12;
+        this.genre = pGenre != undefined ? pGenre : bd.tournoi.genreListe.HOMME;
+        this.niveau = pNiveau != undefined ? pNiveau : bd.tournoi.niveauListe.P12;
         this.selected = pSelected != undefined ? pSelected : false;
     }
-    name = "";
-    genre = genreListe.HOMME;
-    niveau = niveauListe.P12;
+    name = null;
+    genre = null;
+    niveau = null;
     selected = false;
 
     toJson(){
@@ -166,24 +140,88 @@ class Joueur{
 }
 
 class Tournoi{
-    constructor(pTypeTournoi, pNbTour){
+    constructor(pTypeTournoi, pNbTour, pNbTerrain, pDepartMatchNegatif){
         this.typeTournoi = pTypeTournoi != undefined ? pTypeTournoi : typeTournoiListe.SIMPLE;
         this.nbTour = pNbTour != undefined ? pNbTour : 1;
+        this.nbTerrain = pNbTerrain != undefined ? pNbTerrain : 5;
+        this.departMatchNegatif = pDepartMatchNegatif != undefined ? pDepartMatchNegatif : departMatchNegatifListe.NON;
     }
-    typeTournoi = typeTournoiListe.SIMPLE;
-    nbTour = 1;
+    typeTournoi = null;
+    nbTour = null;
+    nbTerrain = null;
+    departMatchNegatif = null;
+    niveauListe = {
+        "P12": {
+            "value": "P12", 
+            "handicap": 0
+        },
+        "P11": {
+            "value": "P11",
+            "handicap": 2
+        },
+        "P10": {
+            "value": "P10",
+            "handicap": 4
+        },
+        "D9": {
+            "value": "D9", 
+            "handicap": 8
+        },
+        "D8": {
+            "value": "D8",
+            "handicap": 10
+        },
+        "D7": {
+            "value": "D7",
+            "handicap": 12
+        },
+        "R6": {
+            "value": "R6", 
+            "handicap": 13
+        },
+        "R5": {
+            "value": "R5",
+            "handicap": 14
+        },
+        "R4": {
+            "value": "R4",
+            "handicap": 15
+        },
+        "N3": {
+            "value": "N3", 
+            "handicap": 16
+        },
+        "N2": {
+            "value": "N2",
+            "handicap": 17
+        },
+        "N1": {
+            "value": "N1",
+            "handicap": 18
+        }
+    }
+    genreListe = {
+        "HOMME": {
+            "value": "Homme",
+            "handicap": 0
+        },
+        "FEMME": {
+            "value": "Femme",
+            "handicap": 2
+        }
+    }
 }
 
 var DB_NAME = "tournoiBad";
 var bd = new GlobalDataBase(DB_NAME);
-
 
 //Pages
 var pages = {
     "ACCUEIL": "Accueil", 
     "SELECTION_JOUEUR": "Sélection des joueurs",
     "MODIFICATION_JOUEUR": "Modification d'un joueur", 
-    "MODIFICATION_PREPARATION": "Modification de la préparation"
+    "MODIFICATION_PREPARATION": "Modification de la préparation",
+    "MODIFICATION_HANDICAPS": "Handicaps"
 }
 var currentPage = pages.ACCUEIL;
 
@@ -256,7 +294,14 @@ function buildHeader(){
                 type: "click", 
                 func: retourModificationPreparation.bind(this)
             }, "retour"));
-            header.appendChild(MH.makeSpan("Modification de la préparation", "headerTitle"));
+            header.appendChild(MH.makeSpan("Préparation du tournoi", "headerTitle"));
+        break;
+        case pages.MODIFICATION_HANDICAPS:
+            header.appendChild(MH.makeButton({
+                type: "click", 
+                func: retourModificationHandicaps.bind(this)
+            }, "retour"));
+            header.appendChild(MH.makeSpan("Handicaps et avantages", "headerTitle"));
         break;
     }
     return header;
@@ -275,8 +320,11 @@ function buildBody(){
         case pages.MODIFICATION_JOUEUR:
             body.appendChild(buildListJoueur());
         break;
-        case pages.MODIFICATION_JOUEUR:
+        case pages.MODIFICATION_PREPARATION:
             body.appendChild(buildPreparation());
+        break;
+        case pages.MODIFICATION_HANDICAPS:
+            body.appendChild(buildHandicaps());
         break;
     }
     body.addEventListener("keydown", onKeyDown.bind(this));
@@ -316,6 +364,26 @@ function buildFooter(){
                 func: validModificationJoueur.bind(this)
             }));
         break;
+        case pages.MODIFICATION_PREPARATION:
+            footer.appendChild(MH.makeButtonCancel({
+                type: "click", 
+                func: cancelModificationPreparation.bind(this)
+            }));
+            footer.appendChild(MH.makeButtonValid({
+                type: "click", 
+                func: validModificationPreparation.bind(this)
+            }));
+        break;
+        case pages.MODIFICATION_HANDICAPS:
+            footer.appendChild(MH.makeButtonCancel({
+                type: "click", 
+                func: cancelModificationHandicaps.bind(this)
+            }));
+            footer.appendChild(MH.makeButtonValid({
+                type: "click", 
+                func: validModificationHandicaps.bind(this)
+            }));
+        break;
     }
     
     return footer;
@@ -346,25 +414,82 @@ function buildPreparation(){
         case pages.ACCUEIL:
             divPrep.appendChild(buildPropertyViewer("Type de tournoi", bd.tournoi.typeTournoi));
             divPrep.appendChild(buildPropertyViewer("Nombre de tour", bd.tournoi.nbTour));
+            divPrep.appendChild(buildPropertyViewer("Nombre de terrain", bd.tournoi.nbTerrain));
         break;
         case pages.MODIFICATION_PREPARATION:
-            divPrep.appendChild(buildPropertyEditor("Type de tournoi", "radio", {
-                name: "typeTournoi",
-                elements: [
-                    {"id": "typeTournoiSimple", "name": "typeTournoi", "value": typeTournoiListe.SIMPLE, "checked": bd.tournoi.typeTournoi === typeTournoiListe.SIMPLE}, 
-                {"id": "typeTournoiDouble", "name": "typeTournoi", "value": typeTournoiListe.DOUBLE, "checked": bd.tournoi.typeTournoi === typeTournoiListe.DOUBLE},
-                ]
-            }));
-            divPrep.appendChild(buildPropertyEditor("Nombre de tour", "number", {
+            var elementsTypeTournoi = [];
+            for (var t in typeTournoiListe){
+                elementsTypeTournoi.push({"id": t, "name": "typeTournoi", "value": typeTournoiListe[t], "checked": bd.tournoi.typeTournoi ===  typeTournoiListe[t]});
+            }
+            divPrep.appendChild(buildPropertyEditor("Type de tournoi", "radio", 
+            {name: "typeTournoi", elements : elementsTypeTournoi}));
+
+            divPrep.appendChild(buildPropertyEditor("Nombre de tour", "numberSpinner", {
                 "min": 1, 
                 "max": 10, 
-                "value": bd.tournoi.nbTour
+                "value": bd.tournoi.nbTour, 
+                "id": "nbTour"
             }));
+            divPrep.appendChild(buildPropertyEditor("Nombre de terrain", "numberSpinner", {
+                "min": 1, 
+                "max": 20, 
+                "value": bd.tournoi.nbTerrain,
+                "id": "nbTerrain"
+            }));
+            var handicaps = MH.makeButton({
+                type: "click", 
+                func: editHandicaps.bind(this)
+            });
+            handicaps.classList.add("btn-secondary");
+            handicaps.innerHTML = "Handicaps et avantages";
+            divPrep.appendChild(handicaps);
         break;
     }
     listPrep.appendChild(divPrep);
 
     return listPrep;
+}
+
+function buildHandicaps(){
+
+    var all = MH.makeDiv(null, "container handicaps");
+
+    var elements = [];
+    for (var t in departMatchNegatifListe){
+        elements.push({"id": t, "name": "departMatchNegatif", "value": departMatchNegatifListe[t], "checked": bd.tournoi.departMatchNegatif ===  departMatchNegatifListe[t]});
+    }
+    var scoreNeg = buildPropertyEditor("Début de match avec un score négatif ?", "radio", 
+    {name: "debutMatchNegatif", elements : elements});
+    scoreNeg.classList.add("container");
+    all.appendChild(scoreNeg);
+    
+    var divHandicap;
+
+    for (var gen in bd.tournoi.genreListe){
+        divHandicap = MH.makeDiv(null, "handicapGenre");
+        divHandicap.appendChild(MH.makeSpan(bd.tournoi.genreListe[gen].value));
+        divHandicap.appendChild(buildPropertyEditor(undefined, "numberSpinner", {
+            "min": -20, 
+            "max": 20, 
+            "value": bd.tournoi.genreListe[gen].handicap, 
+            "id": gen
+        }));
+        all.appendChild(divHandicap);
+    }
+
+    for (var niv in bd.tournoi.niveauListe){
+        divHandicap = MH.makeDiv(null, "handicapNiveau");
+        divHandicap.appendChild(MH.makeSpan(bd.tournoi.niveauListe[niv].value));
+        divHandicap.appendChild(buildPropertyEditor(undefined, "numberSpinner", {
+            "min": -20, 
+            "max": 20, 
+            "value": bd.tournoi.niveauListe[niv].handicap, 
+            "id": niv
+        }));
+        all.appendChild(divHandicap);
+    }
+
+    return all;
 }
 
 function buildHeaderJoueur(){
@@ -394,7 +519,7 @@ function buildListJoueur(){
             divJoueur.classList.add("homme");
         }else{
             divJoueur.classList.add("modificationJoueur");
-            divJoueur.classList.add(bd.joueurs[currentEditionId].genre.value == genreListe.HOMME.value ? "homme" : "femme");
+            divJoueur.classList.add(bd.joueurs[currentEditionId].genre.value == bd.tournoi.genreListe.HOMME.value ? "homme" : "femme");
             divJoueur.appendChild(buildJoueur(bd.joueurs[currentEditionId], currentEditionId));
         }
         divJoueurs.appendChild(divJoueur);
@@ -414,7 +539,7 @@ function buildListJoueur(){
                         if (bd.joueurs[i].selected){
                             divJoueur = MH.makeDiv(null, "divJoueur");
                             divJoueur.classList.add("accueil");
-                            divJoueur.classList.add(bd.joueurs[i].genre.value == genreListe.HOMME.value ? "homme" : "femme");
+                            divJoueur.classList.add(bd.joueurs[i].genre.value == bd.tournoi.genreListe.HOMME.value ? "homme" : "femme");
                             divJoueur.appendChild(buildJoueur(bd.joueurs[i], i));
                             divJoueurs.appendChild(divJoueur);
                             flag = true;
@@ -424,7 +549,7 @@ function buildListJoueur(){
                         var newId = MH.getNewId();
                         divJoueur = MH.makeDiv(newId, "divJoueur");
                         divJoueurs.classList.add("selection");
-                        divJoueur.classList.add(bd.joueurs[i].genre.value == genreListe.HOMME.value ? "homme" : "femme");
+                        divJoueur.classList.add(bd.joueurs[i].genre.value == bd.tournoi.genreListe.HOMME.value ? "homme" : "femme");
                         MH.addNewEvent(newId, "click", selectJoueur.bind(this, i));
                         divJoueur.classList.add("selectionJoueur");
                         divJoueur.appendChild(buildJoueur(bd.joueurs[i], i));
@@ -478,8 +603,8 @@ function buildJoueur(joueur, i){
         case pages.MODIFICATION_JOUEUR:
             joueurDom.appendChild(buildPropertyEditor("Nom", "text", {"id": "nomJoueur", value : joueur.name}));
             var elementsGenre = [];
-            for (var gen in genreListe){
-                elementsGenre.push({"id": gen, "name": "genre", "value": genreListe[gen].value, "checked": joueur.genre.value === genreListe[gen].value})
+            for (var gen in bd.tournoi.genreListe){
+                elementsGenre.push({"id": gen, "name": "genre", "value": bd.tournoi.genreListe[gen].value, "checked": joueur.genre.value === bd.tournoi.genreListe[gen].value})
             }
             
             joueurDom.appendChild(buildPropertyEditor("Genre", "radio", 
@@ -487,12 +612,12 @@ function buildJoueur(joueur, i){
             MH.addNewEvent("HOMME", "change", changeGenre.bind(this));
             MH.addNewEvent("FEMME", "change", changeGenre.bind(this));
             var elementsNiv = [];
-            for (var niv in niveauListe){
-                elementsNiv.push({"id": niv, "name": "niveau", "value": niveauListe[niv].value, "checked": joueur.niveau.value === niveauListe[niv].value})
+            for (var niv in bd.tournoi.niveauListe){
+                elementsNiv.push({"id": niv, "name": "niveau", "value": bd.tournoi.niveauListe[niv].value, "checked": joueur.niveau.value === bd.tournoi.niveauListe[niv].value})
             }
             joueurDom.appendChild(buildPropertyEditor("Niveau", "radio", 
             {name: "niveau", elements : elementsNiv}));
-            for (var niv in niveauListe){
+            for (var niv in bd.tournoi.niveauListe){
                 var nive = joueurDom.querySelector("#" + niv).nextSibling;
                 nive.classList.add("badge");
                 if (niv[0] == "P"){
@@ -527,7 +652,7 @@ function buildPropertyEditor(pKey, type, attributes){
     key.classList.add("propertyKey");
     var value = this.buildEditor(type, attributes);
     value.classList.add("propertyValue");
-    property.appendChild(key);  
+    if (pKey != undefined) property.appendChild(key);  
     property.appendChild(value);
     return property;
 }
@@ -558,7 +683,35 @@ function buildEditor(type, attributes){
             input.setAttribute("min", attributes["min"]);
             input.setAttribute("max", attributes["max"]);
             input.setAttribute("value", attributes["value"]);
+            input.setAttribute("id", attributes["id"]);
             return input;
+        case "numberSpinner":
+            var divInputNumber = MH.makeDiv(attributes["id"], "numberSpinner");
+            divInputNumber.setAttribute("min", attributes["min"]);
+            divInputNumber.setAttribute("max", attributes["max"]);
+            divInputNumber.setAttribute("value", attributes["value"]);
+            divInputNumber.setAttribute("id", attributes["id"]);
+            var buttonMoins = MH.makeButton({
+                type: "click", 
+                func: numberPlusOuMoins.bind(this, false)
+            });
+            buttonMoins.innerHTML = "-";
+            buttonMoins.classList.add("btn-secondary");
+            buttonMoins.classList.add("numberSpinnerPlusMoins");
+            buttonMoins.classList.add("numberSpinnerMoins");
+            var buttonPlus = MH.makeButton({
+                type: "click", 
+                func: numberPlusOuMoins.bind(this, true)
+            });
+            buttonPlus.innerHTML = "+";
+            buttonPlus.classList.add("btn-secondary");
+            buttonPlus.classList.add("numberSpinnerPlusMoins");
+            buttonPlus.classList.add("numberSpinnerPlus");
+            var spanNumber = MH.makeSpan(attributes["value"], "numberSpinnerValue");
+            divInputNumber.appendChild(buttonMoins);
+            divInputNumber.appendChild(spanNumber);
+            divInputNumber.appendChild(buttonPlus);
+            return divInputNumber;
         default:
             return MH.makeInput(type, attributes);
     }
@@ -634,10 +787,14 @@ function reset(){
     selectPage(pages.ACCUEIL);
 }
 function retourModificationPreparation(){
-    selectPage(pages.ACCUEIL);
+    validModificationPreparation();
 }
+function retourModificationHandicaps(){
+    validModificationHandicaps();
+}
+
 function retourModificationJoueur(){
-    selectPage(pages.SELECTION_JOUEUR);
+    validModificationJoueur();
 }
 function retourSelectionJoueur(){
     selectPage(pages.ACCUEIL);
@@ -655,20 +812,62 @@ function validModificationJoueur(){
     if (currentEditionId == -1){
         bd.addJoueur(new Joueur(
             document.getElementById("nomJoueur").value,
-            genreListe[document.body.querySelector("div.radiogenre input:checked").id],
-            niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
+            bd.tournoi.genreListe[document.body.querySelector("div.radiogenre input:checked").id],
+            bd.tournoi.niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
             false));
     }else{
         bd.updateJoueur(currentEditionId, {
             "name": document.getElementById("nomJoueur").value,
-            "niveau": niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
-            "genre": genreListe[document.body.querySelector("div.radiogenre input:checked").id],
+            "niveau": bd.tournoi.niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
+            "genre": bd.tournoi.genreListe[document.body.querySelector("div.radiogenre input:checked").id],
         });
     }
     selectPage(pages.SELECTION_JOUEUR);
 }
 function cancelModificationJoueur(){
     selectPage(pages.SELECTION_JOUEUR);
+}
+function validModificationHandicaps(){
+    var genreListe = {};
+    var handicapGenre = document.body.querySelectorAll(".handicapGenre");
+    var inter;
+    for (var i = 0; i< handicapGenre.length; i++){
+        inter = handicapGenre[i].querySelector(".propertyValue");
+        genreListe[inter.id] = {
+            "value": handicapGenre[i].children[0].innerHTML, 
+            "handicap": parseInt(handicapGenre[i].querySelector(".numberSpinnerValue").innerHTML)
+        };
+    }
+
+    var niveauListe = {};
+    var handicapNiveau = document.body.querySelectorAll(".handicapNiveau");
+    for (var i = 0; i< handicapNiveau.length; i++){
+        inter = handicapNiveau[i].querySelector(".propertyValue");
+        niveauListe[inter.id] = {
+            "value": handicapNiveau[i].children[0].innerHTML, 
+            "handicap": parseInt(handicapNiveau[i].querySelector(".numberSpinnerValue").innerHTML)
+        };
+    }
+
+    bd.updateTournoi({
+        "niveauListe": niveauListe, 
+        "genreListe": genreListe
+    });
+    selectPage(pages.MODIFICATION_PREPARATION);
+}
+function cancelModificationHandicaps(){
+    selectPage(pages.MODIFICATION_PREPARATION);
+}
+function validModificationPreparation(){
+    bd.updateTournoi({
+        "typeTournoi": typeTournoiListe[document.body.querySelector("div.radiotypeTournoi input:checked").id],
+        "nbTour": parseInt(document.body.querySelector("#nbTour .numberSpinnerValue").innerHTML),
+        "nbTerrain": parseInt(document.body.querySelector("#nbTerrain .numberSpinnerValue").innerHTML)
+    });
+    selectPage(pages.ACCUEIL);
+}
+function cancelModificationPreparation(){
+    selectPage(pages.ACCUEIL);
 }
 function editJoueur(i, evt){
     evt.preventDefault();
@@ -699,6 +898,20 @@ function selectJoueur(i, evt){
 function validSelectionJoueur(){
     selectPage(pages.ACCUEIL);
 }
+function numberPlusOuMoins(sens, evt){
+    if (sens){
+        var value =  parseInt(evt.currentTarget.previousSibling.innerHTML);
+        var max = parseInt(evt.currentTarget.parentElement.getAttribute("max"));
+        if (value < max) evt.currentTarget.previousSibling.innerHTML = value + 1;
+    } else{
+        var value =  parseInt(evt.currentTarget.nextSibling.innerHTML);
+        var min = parseInt(evt.currentTarget.parentElement.getAttribute("min"));
+        if (value > min) evt.currentTarget.nextSibling.innerHTML = value - 1;
+    }
+}
+function editHandicaps(){
+    selectPage(pages.MODIFICATION_HANDICAPS);
+}
 
 //***** MAKER HTML */
 class MH {
@@ -717,7 +930,7 @@ class MH {
         return elt;
     } 
     static makeSpan(content, className){var span = this.makeElt("span", undefined, className); span.innerHTML = content; return span;};
-    static makeLabel(content, className, forr){var label = this.makeElt("label", undefined, className); label.innerHTML = content; label.setAttribute("for", forr); return label;};
+    static makeLabel(content, className, forr){var label = this.makeElt("label", undefined, className); label.innerHTML = content; if (forr != undefined) label.setAttribute("for", forr); return label;};
     static makeDiv(id, className, style){return this.makeElt("div", id, className, style)}
     static makeInput(type, attributes){ 
         var input = MH.makeElt("input"); 
