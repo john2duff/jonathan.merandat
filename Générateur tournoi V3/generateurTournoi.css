@@ -6,6 +6,7 @@ div#global{
 
 button.btn{
     margin: 5px;
+    max-height: 50px;
 }
 input[type="text"]{
     border-radius: 5px;;
@@ -46,7 +47,7 @@ div#footer.selection{
     justify-content: space-between;
 }
 
-div#headerJoueur, div#headerPreparation{
+div#headerJoueur, div#headerPreparation, div#headerContrainte{
     background-color: rgb(180,180,180);
     display: flex;
     justify-content: space-between;
@@ -67,7 +68,7 @@ div#headerJoueur, div#headerPreparation{
     line-height: 1em;
 }
 
-div#listJoueurs, div#listPreparation{
+div#listJoueurs, div#listPreparation, div#listContraintes{
     width: 100%;
 }
 
@@ -91,7 +92,7 @@ div.divPreparation{
     padding: 5px;
     flex-direction: row;
     flex-wrap: wrap;
-    border-bottom: 2px lightgray ridge;
+    align-items: center;
 } 
 
 div.divJoueur.selectionJoueur{
@@ -106,7 +107,7 @@ div.divJoueur.homme{
     background-color: rgb(168 194 210);
 }
 div.divJoueur.femme{
-    background-color: pink;
+    background-color: #feb494;
 }
 
 div.divJoueur:last-child, div.divPreparation:last-child {
@@ -150,6 +151,10 @@ div.property{
     justify-content: flex-start;
     flex-direction: column;
     margin: 10px;
+}
+
+div.propertyRow{
+    flex-direction: row-reverse;
 }
 
 .propertyValue{
@@ -248,3 +253,37 @@ span.signature {
     flex-wrap: wrap;
 }
 
+.contrainteTitle{
+    font-size: 1em;
+    font-weight: bold;
+}
+.contrainteDesc{
+    font-size: 0.7em;
+    color: gray;
+}
+
+.contrainte{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.ssContrainte{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    margin-left: 10px;
+    cursor: pointer;
+}
+div.divContrainte{
+    display: flex;
+    padding: 5px 10px;
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom: 2px lightgray ridge;
+    margin: 10px 0px;   
+    align-items: center;
+} 
+
+span.numContrainte {
+    margin-left: 10px;
+}
