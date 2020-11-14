@@ -557,7 +557,7 @@ function buildHandicaps(){
     var all = MH.makeDiv(null, "container handicaps");
 
     var scoreNeg = buildPropertyEditor("Début de match avec un score négatif ?", "checkbox", 
-    {id: "debutMatchNegatif", value : bd.tournoi.departMatchNegatif});
+    {id: "departMatchNegatif", value : bd.tournoi.departMatchNegatif});
     scoreNeg.classList.add("container");
     all.appendChild(scoreNeg);
     
@@ -837,6 +837,7 @@ function buildPropertyEditor(pKey, type, attributes){
     if (type == "checkbox") property.classList.add("propertyRow");
     var key = MH.makeLabel(pKey);
     key.classList.add("propertyKey");
+    key.setAttribute("for", attributes["id"]);
     var value = this.buildEditor(type, attributes);
     value.classList.add("propertyValue");
     if (pKey != undefined) property.appendChild(key);  
@@ -1000,7 +1001,7 @@ function retourModificationHandicaps(){
     validModificationHandicaps();
 }
 function retourModificationContraintes(){
-    validModificationContraintes();
+    selectPage(pages.MODIFICATION_PREPARATION);
 }
 
 function retourModificationJoueur(){
