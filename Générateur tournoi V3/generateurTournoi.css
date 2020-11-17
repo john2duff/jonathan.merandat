@@ -47,7 +47,7 @@ div#footer.selection{
     justify-content: space-between;
 }
 
-div#headerJoueur, div#headerPreparation, div#headerContrainte{
+div#headerJoueur, div#headerPreparation, div#headerContrainte, div#headerTour{
     background-color: rgb(180,180,180);
     display: flex;
     justify-content: space-between;
@@ -77,13 +77,14 @@ div#listJoueurs.accueilJoueur {
     flex-wrap: wrap;
 }
 
-div.divJoueur{
+div.joueur{
     display: flex;
     padding: 5px 10px;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
     border-bottom: 2px lightgray ridge;
+    align-items: center;
 } 
 
 div.divPreparation{
@@ -103,24 +104,24 @@ div.divJoueur.selectionJoueur:hover{
     /*background: linear-gradient(rgba(190, 190, 190, 0.2), rgba(20, 20, 20, 0.3));*/
 }
 
-div.divJoueur.homme{
+div.joueur.homme{
     background-color: rgb(168 194 210);
 }
-div.divJoueur.femme{
+div.joueur.femme{
     background-color: #feb494;
 }
 
-div.divJoueur:last-child, div.divPreparation:last-child {
+div.joueur:last-child, div.divPreparation:last-child {
     border: none;
 }
 
-div.divJoueur.accueil{
+div.joueur.accueil{
     border: 1px solid gray;
     margin: 5px;
     border-radius: 10px;
 }
 
-div.divJoueur.modificationJoueur{
+div.joueur.modificationJoueur{
     flex-direction: column;
 }
 
@@ -286,4 +287,39 @@ div.divContrainte{
 
 span.numContrainte {
     margin-left: 10px;
+}
+
+.divSsTitle{
+    align-items: center;
+    margin: 10px 0px;
+}
+.ssTitle{
+    margin-right: 10px;
+}
+.nbSsTitle{
+    font-size: 0.7em;
+    text-shadow: none;
+    color:  gray;
+}
+
+.match{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid gray;
+    margin: 0px;
+    border-radius: 10px;
+    background-color: lightgray;
+    padding: 5px;
+}
+
+.matchs{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.divMatch{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
 }
