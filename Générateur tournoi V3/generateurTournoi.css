@@ -85,7 +85,14 @@ div.joueur{
     justify-content: space-between;
     border-bottom: 2px lightgray ridge;
     align-items: center;
+    justify-content: flex-start;
 } 
+
+div.joueur.selection{
+    flex: 1 1 auto;
+    justify-content: space-between;
+    border: none;
+}
 
 div.divPreparation{
     display: flex;
@@ -104,10 +111,10 @@ div.divJoueur.selectionJoueur:hover{
     /*background: linear-gradient(rgba(190, 190, 190, 0.2), rgba(20, 20, 20, 0.3));*/
 }
 
-div.joueur.homme{
+div.joueur.homme, div.joueurSelection.homme{
     background-color: rgb(168 194 210);
 }
-div.joueur.femme{
+div.joueur.femme, div.joueurSelection.femme{
     background-color: #feb494;
 }
 
@@ -119,10 +126,6 @@ div.joueur.accueil{
     border: 1px solid gray;
     margin: 5px;
     border-radius: 10px;
-}
-
-div.joueur.modificationJoueur{
-    flex-direction: column;
 }
 
 div.divJoueurs.accueil {
@@ -139,12 +142,16 @@ div.joueur {
     align-items: center;
 }
 
-span.nomJoueur{
-    margin: 0px 5px;
+div.joueur.selection{
+    flex: 1 1 auto;
 }
 
-div.joueur.selection {
-    pointer-events: none;
+div.joueurSelection{
+    display: flex;
+}
+
+span.nomJoueur{
+    margin: 0px 5px;
 }
 
 div.property{
