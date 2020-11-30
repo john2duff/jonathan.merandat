@@ -155,6 +155,13 @@ var contrainteListe = [
         "disabled": false, 
     },
     {
+        "name": "ATTENTE",
+        "title": "Attente minimum", 
+        "desc": "On essaye de faire joueur un maximum tout le monde.",
+        "actif": true, 
+        "disabled": false, 
+    },
+    {
         "name": "ISOSEXE",
         "title": "Egalité des sexes", 
         "desc": "On ne permet que des match où il y a autant d'homme que de femme dans chaque équipe.",
@@ -165,13 +172,6 @@ var contrainteListe = [
         "name": "LIMITPOINT",
         "title": "Ecart de point limité", 
         "desc": "On limite l'écart des points entre les deux équipes au début du match. Limite : ",
-        "actif": true, 
-        "disabled": false, 
-    },
-    {
-        "name": "ATTENTE",
-        "title": "Attente minimum", 
-        "desc": "On essaye de faire joueur un maximum tout le monde.",
         "actif": true, 
         "disabled": false, 
     }
@@ -1186,7 +1186,10 @@ function validTour(){
         bd.tournoi.currentTour++;
         bd.save();
         selectPage(pages.EXECUTION_TOURNOI);
-        window.location.href = "#headerTour" + bd.tournoi.currentTour;
+        document.body.querySelector("#headerTour" + bd.tournoi.currentTour).scrollIntoView({
+            behavior: 'smooth'
+        });
+        //window.location.href = "#headerTour" + bd.tournoi.currentTour;
     }else{
         finTournoi();
     }
@@ -1622,14 +1625,14 @@ function testContraintes(match){
                 var j;
                 for (var m = 0; m < match["equipeA"].length; m++){
                     j = match["equipeA"][m];
-                    if (attentes.filter(joueur => joueur.name == j.name).length > 0){
-                        match.pointContrainte += (facteur * attentes[0]["nb"]); 
+                    if (joueurAttente.filter(joueur => joueur.name == j.name).length > 0){
+                        match.pointContrainte -= (facteur * joueurAttente[0]["nb"]); 
                     }
                 }
                 for (var m = 0; m < match["equipeB"].length; m++){
                     j = match["equipeB"][m];
-                    if (attentes.filter(joueur => joueur.name == j.name).length > 0){
-                        match.pointContrainte += (facteur * attentes[0]["nb"]); 
+                    if (joueurAttente.filter(joueur => joueur.name == j.name).length > 0){
+                        match.pointContrainte -= (facteur * joueurAttente[0]["nb"]); 
                     }
                 }
             }
@@ -1731,20 +1734,21 @@ function genereTournoi(){
                 if (currentIndexOf != -1) sac.splice(currentIndexOf, 1);
             }
 
-            //on ajoute dans joueur attente les joueurs restant dans le sac
-            var flag;
-            for (var k = 0; k < sac.length; k++){
-                flag = false;
-                for (var m = 0; m < joueurAttente.length; m++) {
-                    if (joueurAttente[m].name == sac[k].name){
-                        joueurAttente[m]["nb"]++;
-                        flag = true;
-                    }
-                }
-                if (!flag) joueurAttente.push({"name": sac[k].name, "nb": 1});
-            }
-
         }
+
+         //on ajoute dans joueur attente les joueurs restant dans le sac
+         var flag;
+         for (var k = 0; k < sac.length; k++){
+             flag = false;
+             for (var m = 0; m < joueurAttente.length; m++) {
+                 if (joueurAttente[m].name == sac[k].name){
+                     joueurAttente[m]["nb"]++;
+                     flag = true;
+                 }
+             }
+             if (!flag) joueurAttente.push({"name": sac[k].name, "nb": 1});
+         }
+
         bd.tournoi.tours.push({"matchs": matchs, "joueurAttente": sac});
     }
 

@@ -1,9 +1,13 @@
-h1 { font-family: Inconsolata; font-size: 24px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px; } h3 { font-family: Inconsolata; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px; } p { font-family: Inconsolata; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px; } blockquote { font-family: Inconsolata; font-size: 21px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 30px; } pre { font-family: Inconsolata; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5714px; }
+body{
+    font-family: 'Handlee', cursive;
+font-family: 'Inconsolata', monospace;
+font-family: 'Indie Flower', cursive;
+font-family: 'Marvel', sans-serif;
+}
 
 div#global{
     display: flex;
     flex-direction: column;
-    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 
 button.btn{
