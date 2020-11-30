@@ -1,3 +1,5 @@
+h1 { font-family: Inconsolata; font-size: 24px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px; } h3 { font-family: Inconsolata; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px; } p { font-family: Inconsolata; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px; } blockquote { font-family: Inconsolata; font-size: 21px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 30px; } pre { font-family: Inconsolata; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5714px; }
+
 div#global{
     display: flex;
     flex-direction: column;
@@ -179,6 +181,10 @@ label.propertyKey{
     font-size: 0.7em;
     padding-left: 5px;
 }
+label.propertyKey.columnReverse{
+    margin-bottom:0px;
+    margin-top:0.5rem;
+}
 
 span.propertyValue{
     color: black;
@@ -189,6 +195,7 @@ span.propertyValue{
 
 .noData{
     font-style: italic;
+    margin: 10px;
 }
 
 .labelCkeckbox{
@@ -322,6 +329,8 @@ span.numContrainte {
 .matchs{
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
 }
 
 .divMatch{
@@ -336,7 +345,6 @@ span.numContrainte {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    background-color: lightgray;
     width: 100%;
     padding: 8px 0px;
 }
@@ -348,10 +356,10 @@ span.numContrainte {
 }
 
 .currentTour{
-    background-color: #007bff5c ;
+    background-color: #7bbaff;
 }
 .closedTour{
-    background-color: green ;
+    background-color: #99ce99;
 }
 .forPlayingTour{
     background-color: lightgray ;
@@ -365,6 +373,15 @@ div.currentTour div.match{
     align-items: center;
 }
 
+.match span{
+    text-align: center;
+}
+
 .equipe{
     display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.headerTour{
+    box-shadow: 0px 0px 14px 2px #9a9a9a;
 }

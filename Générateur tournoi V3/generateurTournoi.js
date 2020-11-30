@@ -67,8 +67,9 @@ class GlobalDataBase{
         var fichier = new FileReader(); 
         fichier.onload = function() { 
             var datas = JSON.parse(fichier.result);
-            this.load(datas);
-            this.save();
+            bd.load(datas);
+            bd.save();
+            selectPage();
         }   
         fichier.readAsText(evt.target.files[0]); 
     }
@@ -96,6 +97,9 @@ class GlobalDataBase{
             datas["tournoi"].niveauListe,
             datas["tournoi"].genreListe,
             datas["tournoi"].contraintes,
+            datas["tournoi"].tours,
+            datas["tournoi"].currentTour,
+            datas["tournoi"].limitPoint,
         );
     }
 
@@ -161,6 +165,13 @@ var contrainteListe = [
         "name": "LIMITPOINT",
         "title": "Ecart de point limité", 
         "desc": "On limite l'écart des points entre les deux équipes au début du match. Limite : ",
+        "actif": true, 
+        "disabled": false, 
+    },
+    {
+        "name": "ATTENTE",
+        "title": "Attente minimum", 
+        "desc": "On essaye de faire joueur un maximum tout le monde.",
         "actif": true, 
         "disabled": false, 
     }
@@ -660,7 +671,7 @@ function buildHandicaps(){
 }
 
 function buildHeaderTour(i){
-    var header = MH.makeDiv("headerTour", "container sticky-top");
+    var header = MH.makeDiv("headerTour" + i, "headerTour container sticky-top");
     if (bd.tournoi.currentTour == i) header.classList.add("currentTour");
     else if (bd.tournoi.currentTour > i) header.classList.add("closedTour");
     else if (bd.tournoi.currentTour < i) header.classList.add("forPlayingTour");
@@ -694,7 +705,7 @@ function buildTour(tour, i) {
 
 function buildMatch(match, j) {
     var divMatch = MH.makeDiv(null, "divMatch");
-    var num = MH.makeSpan(j + 1);
+    var num = MH.makeSpan("Match " + (j + 1));
     var matchDom = MH.makeDiv(null, "match");
     var listEquipeA = MH.makeDiv(null, "equipe");
     
@@ -718,7 +729,8 @@ function buildMatch(match, j) {
         "min": match["ptsEquipeB"], 
         "max": 50, 
         "value": match["ptsEquipeB"], 
-        "id": "match" + j
+        "id": "match" + j,
+        "column-reverse": true
     });
     matchDom.appendChild(listEquipeB);
     matchDom.appendChild(ptEquipeB);
@@ -1008,8 +1020,15 @@ function buildPropertyEditor(pKey, type, attributes){
     key.setAttribute("for", attributes["id"]);
     var value = this.buildEditor(type, attributes);
     value.classList.add("propertyValue");
-    if (pKey != undefined) property.appendChild(key);  
-    property.appendChild(value);
+    if (attributes["column-reverse"] == true){
+        key.classList.add("columnReverse");
+        property.appendChild(value);
+        if (pKey != undefined) property.appendChild(key);  
+    }else{
+        if (pKey != undefined) property.appendChild(key);  
+        property.appendChild(value);
+    }
+    
     return property;
 }
 
@@ -1167,6 +1186,7 @@ function validTour(){
         bd.tournoi.currentTour++;
         bd.save();
         selectPage(pages.EXECUTION_TOURNOI);
+        window.location.href = "#headerTour" + bd.tournoi.currentTour;
     }else{
         finTournoi();
     }
@@ -1489,7 +1509,7 @@ class MH {
 
 
 /********GENERATION DU TOURNOI */
-var sac, allMatchs;
+var sac, allMatchs, joueurAttente;
 function alea(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
@@ -1598,6 +1618,20 @@ function testContraintes(match){
                             match.pointContrainte += facteur; 
                     }
                 }
+            } else if (bd.tournoi.contraintes[j].name == "ATTENTE"){
+                var j;
+                for (var m = 0; m < match["equipeA"].length; m++){
+                    j = match["equipeA"][m];
+                    if (attentes.filter(joueur => joueur.name == j.name).length > 0){
+                        match.pointContrainte += (facteur * attentes[0]["nb"]); 
+                    }
+                }
+                for (var m = 0; m < match["equipeB"].length; m++){
+                    j = match["equipeB"][m];
+                    if (attentes.filter(joueur => joueur.name == j.name).length > 0){
+                        match.pointContrainte += (facteur * attentes[0]["nb"]); 
+                    }
+                }
             }
         }
     }
@@ -1614,6 +1648,7 @@ function genereTournoi(){
 
     selecteurMatch = -1;
     bd.tournoi.tours = [];
+    joueurAttente = [];
 
     //init
     for (var i = 0; i < bd.joueurs.length; i++){
@@ -1695,6 +1730,20 @@ function genereTournoi(){
                 currentIndexOf = sac.indexOf(currentMatch.equipeB[k]);
                 if (currentIndexOf != -1) sac.splice(currentIndexOf, 1);
             }
+
+            //on ajoute dans joueur attente les joueurs restant dans le sac
+            var flag;
+            for (var k = 0; k < sac.length; k++){
+                flag = false;
+                for (var m = 0; m < joueurAttente.length; m++) {
+                    if (joueurAttente[m].name == sac[k].name){
+                        joueurAttente[m]["nb"]++;
+                        flag = true;
+                    }
+                }
+                if (!flag) joueurAttente.push({"name": sac[k].name, "nb": 1});
+            }
+
         }
         bd.tournoi.tours.push({"matchs": matchs, "joueurAttente": sac});
     }
