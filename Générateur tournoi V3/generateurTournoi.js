@@ -86,7 +86,7 @@ class GlobalDataBase{
                 datas["joueurs"][i].name,
                 datas["joueurs"][i].genre,
                 datas["joueurs"][i].niveau,
-                datas["joueurs"][i].selected
+                datas["joueurs"][i].selected 
                 ));
         }
         this.tournoi = new Tournoi(
@@ -183,47 +183,47 @@ var niveauListe = {
     },
     "P11": {
         "value": "P11",
-        "handicap": 2
+        "handicap": -2
     },
     "P10": {
         "value": "P10",
-        "handicap": 4
+        "handicap": -4
     },
     "D9": {
         "value": "D9", 
-        "handicap": 8
+        "handicap": -8
     },
     "D8": {
         "value": "D8",
-        "handicap": 10
+        "handicap": -10
     },
     "D7": {
         "value": "D7",
-        "handicap": 12
+        "handicap": -12
     },
     "R6": {
         "value": "R6", 
-        "handicap": 13
+        "handicap": -13
     },
     "R5": {
         "value": "R5",
-        "handicap": 14
+        "handicap": -14
     },
     "R4": {
         "value": "R4",
-        "handicap": 15
+        "handicap": -15
     },
     "N3": {
         "value": "N3", 
-        "handicap": 16
+        "handicap": -16
     },
     "N2": {
         "value": "N2",
-        "handicap": 17
+        "handicap": -17
     },
     "N1": {
         "value": "N1",
-        "handicap": 18
+        "handicap": -18
     }
 }
 var genreListe = {
@@ -1224,12 +1224,21 @@ function editSelectionJoueurs(){
 }
 function validModificationJoueur(){
     if (currentEditionId == -1){
+
+        if (bd.joueurs.filter(j => j.name == document.getElementById("nomJoueur").value).length > 0) 
+            return;
+
         bd.addJoueur(new Joueur(
             document.getElementById("nomJoueur").value,
             bd.tournoi.genreListe[document.body.querySelector("div.radiogenre input:checked").id],
             bd.tournoi.niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
             false));
     }else{
+
+        if (bd.joueurs[currentEditionId].name != document.getElementById("nomJoueur").value && 
+        bd.joueurs.filter(j => j.name == document.getElementById("nomJoueur").value).length > 0) 
+        return;
+        
         bd.updateJoueur(currentEditionId, {
             "name": document.getElementById("nomJoueur").value,
             "niveau": bd.tournoi.niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
@@ -1519,53 +1528,109 @@ function alea(max) {
 //on met les joueurs dans le sac de façon aléatoire
 function mettreJoueursDansSac() {
     sac = [];
-    if (bd.tournoi.typeTournoi == typeTournoiListe.SIMPLE){
-        for (var i = 0; i < bd.joueurs.length; i++){
-            if (bd.joueurs[i].selected){
-                sac.splice(alea(sac.length), 0, bd.joueurs[i]);
-            }
+    for (var i = 0; i < bd.joueurs.length; i++){
+        if (bd.joueurs[i].selected){
+            bd.joueurs[i].index = i;
+            sac.splice(alea(sac.length), 0, bd.joueurs[i]);
         }
-    }else{
-
     }
-   
 }
+
 //on créé tous les matchs possibles
 function populateAllMatchs(){
     allMatchs = [];
     var match, equipeA, equipeB, ptsEquipeA, ptsEquipeB;        
     var tournoiSimple = bd.tournoi.typeTournoi == typeTournoiListe.SIMPLE;
-    for (var i = 0; i < sac.length - (tournoiSimple ? 0 : 1); i++){
-        for (var j = 0; j < sac.length; j++){
-            if (j > i) {
-                if (tournoiSimple){
-                    equipeA = [sac[i]];
-                    equipeB = [sac[j]];
-                }else{
-                    equipeA = [sac[i], sac[i+1]];
-                    equipeB = [sac[j], sac[j+1]];
+
+    if (tournoiSimple){
+        for (var i = 0; i < sac.length; i++){
+            for (var j = 0; j < sac.length; j++){
+                equipeA = [sac[i]];
+                equipeB = [sac[j]];
+                if (matchCoherent(equipeA, equipeB)) {
+                    allMatchs.push(newMatch(equipeA, equipeB));
                 }
-                ptsEquipeA = 0;
-                for (var m = 0; m < sac[i].length; m++){
-                    ptsEquipeA += sac[i][m].getPointsHandicap();
+            }
+        }
+    }else{
+
+        //on génére tous les binomes possible
+        var binomes = [];
+        for (var i = 0; i < sac.length; i++){
+            for (var j = 0; j < sac.length; j++){
+                if (j > i) {
+                    binomes.push([sac[i], sac[j]]);
                 }
-                ptsEquipeB = 0;
-                for (var m = 0; m < sac[j].length; m++){
-                    ptsEquipeB += sac[j][m].getPointsHandicap();
+            }
+        }
+        //on génére tous les matchs possibles
+        for (var i = 0; i < binomes.length; i++){
+            for (var j = 0; j < binomes.length; j++){
+                equipeA = binomes[i];
+                equipeB = binomes[j];
+                if (matchCoherent(equipeA, equipeB)) {
+                    allMatchs.push(newMatch(equipeA, equipeB));
                 }
-                match = {
-                    "equipeA": equipeA, 
-                    "equipeB": equipeB, 
-                    "pointContrainte": 0, 
-                    "ptsEquipeA": ptsEquipeA, 
-                    "ptsEquipeB": ptsEquipeB, 
-                };  
-                allMatchs.push(match);
             }
         }
     }
     return allMatchs;
 }
+
+function newMatch(equipeA, equipeB){
+    var ptsEquipeA = 0;
+    for (var m = 0; m < equipeA.length; m++){
+        ptsEquipeA += equipeA[m].getPointsHandicap();
+    }
+    var ptsEquipeB = 0;
+    for (var m = 0; m < equipeB.length; m++){
+        ptsEquipeB += equipeB[m].getPointsHandicap();
+    }
+
+    //équilibrage des points
+    var departNegatif = bd.tournoi.departMatchNegatif;
+    if (ptsEquipeA > ptsEquipeB){
+        ptsEquipeA -= ptsEquipeB;
+        ptsEquipeB = 0;
+        if ((departNegatif && ptsEquipeA > 0) ||
+        (!departNegatif && ptsEquipeA < 0)){
+            ptsEquipeB = ptsEquipeA * (-1);
+            ptsEquipeA = 0;
+        }
+    }else {
+        ptsEquipeB -= ptsEquipeA;
+        ptsEquipeA = 0;
+        if ((departNegatif && ptsEquipeB > 0) ||
+        (!departNegatif && ptsEquipeB < 0)){
+            ptsEquipeA = ptsEquipeB * (-1);
+            ptsEquipeB = 0;
+        }
+    }
+    
+    var max = Math.max(ptsEquipeA, ptsEquipeB);
+    if (max > 15){
+        ptsEquipeA -= (max - 15);
+        ptsEquipeB -= (max - 15);
+    }
+
+    return {
+        "equipeA": equipeA, 
+        "equipeB": equipeB, 
+        "pointContrainte": 0, 
+        "ptsEquipeA": ptsEquipeA, 
+        "ptsEquipeB": ptsEquipeB, 
+    }; 
+}
+
+function matchCoherent(equipeA, equipeB){
+    for (var i = 0; i < equipeA.length; i++){
+        for (var j = 0; j < equipeB.length; j++){
+            if (equipeA[i] == equipeB[j]) return false;
+        }
+    }
+    return true;
+}
+
 function testContraintes(match){
     var facteur = 1;
     for (var j = bd.tournoi.contraintes.length - 1; j >= 0; j--){
@@ -1680,6 +1745,7 @@ function genereTournoi(){
         var matchs = [];
         var currentMatch;
         for (var j = 0; j < nbMatch; j++){
+            if (allMatchs.length == 0) break; //s'il n'y a plus de match dispo on sort
             currentMatch = allMatchs[0];
             matchs.push(currentMatch);
             //attribution adversaires
