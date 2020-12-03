@@ -401,6 +401,13 @@ function buildHeader(){
             add.innerHTML = "Ajouter";
             add.classList.add("btn-success");
             header.appendChild(add);
+            var importJoueur = MH.makeButton({
+                type: "click", 
+                func: importJoueurs.bind(this)
+            }/*, "add"*/);
+            importJoueur.innerHTML = "Importer";
+            importJoueur.classList.add("btn-primary");
+            header.appendChild(importJoueur);
         break;
         case pages.MODIFICATION_JOUEUR:
             header.appendChild(MH.makeButton({
@@ -638,6 +645,7 @@ function buildHandicaps(){
 
     var scoreNeg = buildPropertyEditor("Début de match avec un score négatif ?", "checkbox", 
     {id: "departMatchNegatif", value : bd.tournoi.departMatchNegatif});
+    scoreNeg.setAttribute("id", "divMatchNegatif");
     scoreNeg.classList.add("container");
     all.appendChild(scoreNeg);
     
@@ -1212,6 +1220,38 @@ function retourSelectionJoueur(){
 }
 function addJoueur(evt){
     editJoueur(-1, evt);
+}
+function importJoueurs(evt){
+
+    /*$.ajax({
+        crossOrigin: true,
+        url: "https://www.google.com/",
+        success: function(data) {
+          $('#test').html(data);
+        }
+      });*/
+
+    /*$.get("http://jsontest.com/", function(response){
+        console.log(response);
+    });*/
+   /*$.ajax({
+        url : 'https://badnet.org/',
+        type : 'GET',
+        success : function(code_html, statut){
+            console.log("ok");
+        },
+ 
+        error : function(resultat, statut, erreur){
+            console.log("error");
+          
+        },
+ 
+        complete : function(resultat, statut){
+            console.log("complete");
+ 
+        }
+ 
+     });*/
 }
 function editPreparation(){
     selectPage(pages.MODIFICATION_PREPARATION);

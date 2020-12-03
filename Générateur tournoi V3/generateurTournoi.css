@@ -54,21 +54,21 @@ div#footer.selection{
 }
 
 div#headerJoueur, div#headerPreparation, div#headerContrainte, div#headerTour{
-    background-color: rgb(180,180,180);
+    background-color: rgb(209 205 205);
     display: flex;
     justify-content: space-between;
     padding: 0px 10px;
     align-items: center;
-    text-shadow: 1px 1px 1px white;
-    font-size: 1.2em;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.4), 1px 1px 0 rgba(255,255,255,1);
+    font-size: 1.5rem;
     font-weight: bold;
-    color: #3f3f3f;
+    color: #5b5b5b;
     line-height: 1em;
     box-shadow: 0px 3px 7px -1px #9a9a9a;
 }
 
 .headerTitle{
-    font-size: 1.5em;
+    font-size: 2em;
     color: white;
     text-shadow: 2px 2px 1px #676565;
     line-height: 1em;
@@ -113,10 +113,6 @@ div.divJoueur.selectionJoueur{
     cursor: pointer;
 }
 
-div.divJoueur.selectionJoueur:hover{
-    /*background: linear-gradient(rgba(190, 190, 190, 0.2), rgba(20, 20, 20, 0.3));*/
-}
-
 div.joueur.homme, div.joueurSelection.homme{
     background-color: rgb(168 194 210);
 }
@@ -154,6 +150,12 @@ div.joueur.selection{
 
 div.joueurSelection{
     display: flex;
+    border-bottom: 1px solid gray;
+    cursor: pointer;
+}
+
+div.joueurSelection:hover{
+    background: linear-gradient(45deg, #dbdbdb, #a8c2d2);;
 }
 
 span.nomJoueur{
@@ -170,6 +172,7 @@ div.property{
 div.propertyRow{
     flex-direction: row-reverse;
     justify-content: flex-end;
+    align-items: center;
 }
 
 .propertyValue{
@@ -182,7 +185,7 @@ button.bouton{
 
 label.propertyKey{
     color: gray;
-    font-size: 0.7em;
+    font-size: 1em;
     padding-left: 5px;
 }
 label.propertyKey.columnReverse{
@@ -254,16 +257,19 @@ span.signature {
 
 .numberSpinnerPlusMoins{
     margin: 0px !important;
+    border: 0px;
 }
 
 .numberSpinnerPlus{
     border-top-left-radius: 0px !important;
     border-bottom-left-radius: 0px !important;
+    border: 0px;
 }
 
 .numberSpinnerMoins{
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
+    border: 0px;
 }
 
 .handicaps{
@@ -273,11 +279,11 @@ span.signature {
 }
 
 .contrainteTitle{
-    font-size: 1em;
+    font-size: 1.5em;
     font-weight: bold;
 }
 .contrainteDesc{
-    font-size: 0.7em;
+    font-size: 1em;
     color: gray;
 }
 
@@ -388,4 +394,23 @@ div.currentTour div.match{
 }
 .headerTour{
     box-shadow: 0px 0px 14px 2px #9a9a9a;
+}
+
+.badge{
+    font-size: 0.9rem;
+    box-shadow: 0px 0px 5px 2px #9a9a9a;
+    margin-left: 3px;
+}
+
+#divMatchNegatif label{
+    margin-bottom:0px;
+}
+#divMatchNegatif{
+    margin-bottom: 7px;
+    font-size: 1.5rem;
+    /* border-bottom: 1px solid gray; */
+    box-shadow: 2px 2px 5px 0px grey;
+    padding: 15px;
+    border-radius: 5px;
+    cursor: pointer;
 }
