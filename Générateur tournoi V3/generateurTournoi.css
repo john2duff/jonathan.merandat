@@ -246,7 +246,27 @@ span.signature {
     align-items: center;
     border: gray 1px solid;
     width:  140px;
+    height: initial;
     border-radius: 6px;
+}
+
+.numberSpinner.vertical{
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+    align-items: center;
+    border: gray 1px solid;
+    width:  40px;
+    height: 120px;
+    border-radius: 6px;
+}
+
+.numberSpinner.vertical button{
+    width: 40px;
+}
+
+.numberSpinner.vertical span{
+    line-height: 50px;
 }
 
 .numberSpinnerValue{
@@ -269,6 +289,18 @@ span.signature {
 .numberSpinnerMoins{
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
+    border: 0px;
+}
+
+.numberSpinnerPlusVertical{
+    border-bottom-left-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    border: 0px;
+}
+
+.numberSpinnerMoinsVertical{
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
     border: 0px;
 }
 
@@ -319,6 +351,7 @@ span.numContrainte {
 }
 .ssTitle{
     margin-right: 10px;
+    font-size: 1.5rem;
 }
 .nbSsTitle{
     font-size: 0.7em;
@@ -328,7 +361,7 @@ span.numContrainte {
 
 .match{
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     border: 1px solid gray;
     margin: 0px;
     border-radius: 10px;
@@ -346,7 +379,8 @@ span.numContrainte {
 .divMatch{
     display: flex;
     flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    align-items: flex-start;
     margin: 10px;
 }
 
@@ -385,12 +419,14 @@ div.currentTour div.match{
 
 .match span{
     text-align: center;
+    
 }
 
 .equipe{
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
+    flex-direction: column;
 }
 .headerTour{
     box-shadow: 0px 0px 14px 2px #9a9a9a;

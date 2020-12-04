@@ -461,7 +461,7 @@ function buildHeader(){
     }
     return header;
 }
-
+var currentIndexMatch;
 function buildBody(){
     var body = MH.makeDiv("body", "container");
     switch (currentPage){
@@ -485,6 +485,7 @@ function buildBody(){
             body.appendChild(buildListContraintes());
         break;
         case pages.EXECUTION_TOURNOI:
+            currentIndexMatch = 1;
             for (var i = 0; i < bd.tournoi.tours.length; i++){
                 body.appendChild(buildHeaderTour(i));
                 body.appendChild(buildTour(bd.tournoi.tours[i], i));
@@ -713,18 +714,19 @@ function buildTour(tour, i) {
 
 function buildMatch(match, j) {
     var divMatch = MH.makeDiv(null, "divMatch");
-    var num = MH.makeSpan("Match " + (j + 1));
+    var num = MH.makeSpan("Match " + currentIndexMatch++);
     var matchDom = MH.makeDiv(null, "match");
     var listEquipeA = MH.makeDiv(null, "equipe");
     
     for (var j = 0; j < match.equipeA.length; j++){
         listEquipeA.appendChild(buildJoueur(match.equipeA[j], match.equipeA[j].index));
     }
-    var ptEquipeA = buildPropertyEditor("Score", "numberSpinner", {
+    var ptEquipeA = buildPropertyEditor(null , "numberSpinner", {
         "min": match["ptsEquipeA"], 
         "max": 50, 
         "value": match["ptsEquipeA"], 
-        "id": "match" + j
+        "id": "match" + j, 
+        "vertical": true
     });
     matchDom.appendChild(ptEquipeA);
     matchDom.appendChild(listEquipeA);
@@ -733,12 +735,12 @@ function buildMatch(match, j) {
     for (var j = 0; j < match.equipeB.length; j++){
         listEquipeB.appendChild(buildJoueur(match.equipeB[j], match.equipeB[j].index));
     }
-    var ptEquipeB = buildPropertyEditor("Score", "numberSpinner", {
+    var ptEquipeB = buildPropertyEditor(null, "numberSpinner", {
         "min": match["ptsEquipeB"], 
         "max": 50, 
         "value": match["ptsEquipeB"], 
-        "id": "match" + j,
-        "column-reverse": true
+        "id": "match" + j, 
+        "vertical": true
     });
     matchDom.appendChild(listEquipeB);
     matchDom.appendChild(ptEquipeB);
@@ -1026,14 +1028,14 @@ function buildPropertyEditor(pKey, type, attributes){
     var key = MH.makeLabel(pKey);
     key.classList.add("propertyKey");
     key.setAttribute("for", attributes["id"]);
-    var value = this.buildEditor(type, attributes);
+    var value = buildEditor(type, attributes);
     value.classList.add("propertyValue");
     if (attributes["column-reverse"] == true){
         key.classList.add("columnReverse");
         property.appendChild(value);
-        if (pKey != undefined) property.appendChild(key);  
+        if (pKey != null) property.appendChild(key);  
     }else{
-        if (pKey != undefined) property.appendChild(key);  
+        if (pKey != null) property.appendChild(key);  
         property.appendChild(value);
     }
     
@@ -1076,7 +1078,8 @@ function buildEditor(type, attributes){
             input.setAttribute("id", attributes["id"]);
             return input;
         case "numberSpinner":
-            var divInputNumber = MH.makeDiv(attributes["id"], "numberSpinner");
+            var vertical = attributes["vertical"] == true;
+            var divInputNumber = MH.makeDiv(attributes["id"], "numberSpinner" + (vertical ? " vertical" : ""));
             divInputNumber.setAttribute("min", attributes["min"]);
             divInputNumber.setAttribute("max", attributes["max"]);
             divInputNumber.setAttribute("value", attributes["value"]);
@@ -1088,7 +1091,7 @@ function buildEditor(type, attributes){
             buttonMoins.innerHTML = "-";
             buttonMoins.classList.add("btn-secondary");
             buttonMoins.classList.add("numberSpinnerPlusMoins");
-            buttonMoins.classList.add("numberSpinnerMoins");
+            buttonMoins.classList.add("numberSpinnerMoins"+ (vertical ? "Vertical" : ""));
             var buttonPlus = MH.makeButton({
                 type: "click", 
                 func: numberPlusOuMoins.bind(this, true)
@@ -1096,7 +1099,7 @@ function buildEditor(type, attributes){
             buttonPlus.innerHTML = "+";
             buttonPlus.classList.add("btn-secondary");
             buttonPlus.classList.add("numberSpinnerPlusMoins");
-            buttonPlus.classList.add("numberSpinnerPlus");
+            buttonPlus.classList.add("numberSpinnerPlus"+ (vertical ? "Vertical" : ""));
             var spanNumber = MH.makeSpan(attributes["value"], "numberSpinnerValue");
             divInputNumber.appendChild(buttonMoins);
             divInputNumber.appendChild(spanNumber);
