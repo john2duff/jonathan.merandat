@@ -98,6 +98,16 @@ div.joueur.selection{
     flex: 1 1 auto;
     justify-content: space-between;
     border: none;
+    background-color: transparent;
+}
+
+
+div.joueur.selection.homme{
+    background-color: transparent !important;
+}
+
+div.joueur.selection.femme{
+    background-color: transparent !important;
 }
 
 div.divPreparation{
@@ -113,10 +123,10 @@ div.divJoueur.selectionJoueur{
     cursor: pointer;
 }
 
-div.joueur.homme, div.joueurSelection.homme{
-    background-color: rgb(168 194 210);
+div.joueur.homme{
+    background-color: rgb(168, 194, 210);
 }
-div.joueur.femme, div.joueurSelection.femme{
+div.joueur.femme{
     background-color: #feb494;
 }
 
@@ -127,7 +137,11 @@ div.joueur:last-child, div.divPreparation:last-child {
 div.joueur.accueil{
     border: 1px solid gray;
     margin: 5px;
-    border-radius: 10px;
+    border-radius: 5px;
+    align-items: center;
+    font-size: 0.9rem;
+    box-shadow: 5px 3px 5px 0px grey;
+    justify-content: center;
 }
 
 div.divJoueurs.accueil {
@@ -136,13 +150,6 @@ div.divJoueurs.accueil {
     flex-wrap: wrap;
     padding: 10px;
 }    
-
-div.joueur {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-}
 
 div.joueur.selection{
     flex: 1 1 auto;
@@ -154,12 +161,18 @@ div.joueurSelection{
     cursor: pointer;
 }
 
-div.joueurSelection:hover{
+div.joueurSelection.homme:hover{
+    background-color: none;
     background: linear-gradient(45deg, #dbdbdb, #a8c2d2);;
+}
+div.joueurSelection.femme:hover{
+    background-color: none;
+    background: linear-gradient(45deg, #dbdbdb,#feb494);;
 }
 
 span.nomJoueur{
     margin: 0px 5px;
+    flex: 1 1 auto;
 }
 
 div.property{
@@ -362,11 +375,11 @@ span.numContrainte {
 .match{
     display: flex;
     flex-direction: row;
-    border: 1px solid gray;
     margin: 0px;
     border-radius: 10px;
-    background-color: lightgray;
-    padding: 5px;
+    background-color: #bfbfbf;
+    padding: 0px;
+    align-items: center;
 }
 
 .matchs{
@@ -380,14 +393,14 @@ span.numContrainte {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     margin: 10px;
 }
 
 .joueurAttente{
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
     width: 100%;
     padding: 8px 0px;
@@ -427,6 +440,7 @@ div.currentTour div.match{
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    flex: 1 1 auto;
 }
 .headerTour{
     box-shadow: 0px 0px 14px 2px #9a9a9a;
@@ -449,4 +463,80 @@ div.currentTour div.match{
     padding: 15px;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.pointMatch{
+    margin: 0px !important;
+}
+
+.volant{
+    height: 20px;
+    margin: 10px 5px;
+}
+
+.divImgVolant{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.sepVolant{
+        /* flex: 1 1 auto; */
+        background-color: gray;
+        height: 30px;
+        width: 2px;
+        border-radius: 50%;
+        box-shadow: 0px 0px 16px 1px #575757;
+}
+
+.allSelect{
+    display: flex;
+    margin-bottom: 0px;
+    justify-content: flex-start;
+    margin: 10px;
+    align-items: center;
+    cursor: pointer;
+}
+
+#listGroupeJoueur{
+    display: flex;
+    width: 100%;
+}
+.groupeJoueur{
+    cursor: pointer;
+    width: 100%;
+    padding: 10px;
+}
+.groupeJoueur:hover{
+    background-color: lightgray;
+}
+.groupeJoueur span{
+    margin-left:10px;
+}
+
+div.forPlayingTour button, div.closedTour button{
+    pointer-events: none;
+}
+
+.headerMatch{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.victoire{
+    background-color: transparent;
+    border: none;
+    height: 30px;
+    padding: 0px;
+    width: 40px;
+    opacity: 0.3;
+    margin: 3px 0px !important;
+}
+.victoire:hover{
+    /*background-color: #9ce9be;*/
+    border: none;
+    opacity: 1;
 }
