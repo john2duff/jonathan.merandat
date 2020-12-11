@@ -337,7 +337,7 @@ class Tournoi{
                         currentMatch["equipeB"][k]["niveau"])
                     equipeB.push(currentJoueur);
                 }
-                matchs.push({"equipeA": equipeA, "equipeB": equipeB, "ptsEquipeA": currentMatch["ptsEquipeA"], "ptsEquipeB": currentMatch["ptsEquipeB"]  })
+                matchs.push({"equipeA": equipeA, "equipeB": equipeB, "ptsEquipeA": currentMatch["ptsEquipeA"], "ptsEquipeB": currentMatch["ptsEquipeB"], "ptsEquipeADepart": currentMatch["ptsEquipeADepart"], "ptsEquipeBDepart": currentMatch["ptsEquipeBDepart"]  })
             }
             var joueurAttente = [];
             for (var j = 0; j < this.tours[i]["joueurAttente"].length; j++){
@@ -369,7 +369,7 @@ var bd = new GlobalDataBase(DB_NAME);
 var groupeJoueurs = {
     "Badlevier": [
         new Joueur("John", genreListe.HOMME, niveauListe.D9), 
-        new Joueur("Carole", genreListe.HOMME, niveauListe.P10), 
+        new Joueur("Carole", genreListe.FEMME, niveauListe.P10), 
         new Joueur("Olivier", genreListe.HOMME, niveauListe.D9), 
         new Joueur("Christophe", genreListe.HOMME, niveauListe.D9), 
         new Joueur("Norbert", genreListe.HOMME, niveauListe.P10), 
@@ -740,12 +740,21 @@ function buildHandicaps(){
 
 function buildHeaderTour(i){
     var header = MH.makeDiv("headerTour" + i, "headerTour container sticky-top");
-    if (bd.tournoi.currentTour == i) header.classList.add("currentTour");
-    else if (bd.tournoi.currentTour > i) header.classList.add("closedTour");
-    else if (bd.tournoi.currentTour < i) header.classList.add("forPlayingTour");
     var ssTitle = MH.makeDiv(null, "divSsTitle");
     var ss1 = MH.makeSpan("Tour " + (i + 1), "ssTitle");
     ssTitle.appendChild(ss1);
+    var ss2;
+    if (bd.tournoi.currentTour == i) {
+        ss2 = MH.makeSpan("En cours ...");
+        header.classList.add("currentTour");
+    } else if (bd.tournoi.currentTour > i) {
+        ss2 = MH.makeSpan("Terminé");
+        header.classList.add("closedTour");
+    } else if (bd.tournoi.currentTour < i) {
+        ss2 = MH.makeSpan("A venir ...");
+        header.classList.add("forPlayingTour");
+    }
+    ssTitle.appendChild(ss2);
     header.appendChild(ssTitle);
     return header;
 }
@@ -783,7 +792,7 @@ function buildMatch(match, j) {
         listEquipeA.appendChild(buildJoueur(match.equipeA[k], match.equipeA[k].index));
     }
     var ptEquipeA = buildPropertyEditor(null , "numberSpinner", {
-        "min": match["ptsEquipeA"], 
+        "min": match["ptsEquipeADepart"], 
         "max": 50, 
         "value": match["ptsEquipeA"], 
         "id": "match" + j,
@@ -808,12 +817,12 @@ function buildMatch(match, j) {
         listEquipeB.appendChild(buildJoueur(match.equipeB[k], match.equipeB[k].index));
     }
     var ptEquipeB = buildPropertyEditor(null, "numberSpinner", {
-        "min": match["ptsEquipeB"], 
+        "min": match["ptsEquipeBDepart"], 
         "max": 50, 
         "value": match["ptsEquipeB"], 
         "id": "match" + j, 
         "indexmatch": currentIndexMatch,  
-        "indexequipe": "ptsEquipeA",  
+        "indexequipe": "ptsEquipeB",  
         "vertical": true
     });
     ptEquipeB.classList.add("pointMatch");
@@ -838,6 +847,8 @@ function buildMatch(match, j) {
 
     divMatch.appendChild(matchDom);
     currentIndexMatch++;
+
+    refreshMatch(matchDom);
     return divMatch;
 }
 
@@ -1579,15 +1590,62 @@ function numberPlusOuMoins(sens, span, newValue){
     var indexMatch = parseInt(span.parentElement.getAttribute("indexmatch"));
     var indexEquipe = span.parentElement.getAttribute("indexequipe");
     changeScore(indexMatch, indexEquipe, retourValue);
+    refreshMatch(span.closest(".match"));
+
 }
 function editHandicaps(){
     selectPage(pages.MODIFICATION_HANDICAPS);
 }
 function changeScore(indexMatch, indexEquipe, value){
+
     bd.updateMatch(indexMatch, indexEquipe, value);
 }
 function victoire(span){
-    numberPlusOuMoins(null, span, 21);
+    var match = span.closest(".match");
+    var equipes = match.querySelectorAll("div.pointMatch>div.numberSpinner");
+    var equipeA = equipes[0];
+    var scoreEquipeA = parseInt(equipeA.getAttribute("value"));
+    var equipeB = equipes[1];
+    var scoreEquipeB = parseInt(equipeB.getAttribute("value"));
+
+    var equipeCurrent = span.closest(".numberSpinner");
+    var currentIsEquipeA = equipeCurrent.getAttribute("indexequipe") == "ptsEquipeA";
+    var scoreEquipeOppose = currentIsEquipeA ? scoreEquipeB : scoreEquipeA;
+    var target;
+    if (scoreEquipeOppose <= 19){
+        target = 21;
+    }else{
+        target = scoreEquipeOppose + 2;
+    }
+    numberPlusOuMoins(null, span, target);
+}
+
+function refreshMatch(domMatch){
+    var equipes = domMatch.querySelectorAll("div.pointMatch>div.numberSpinner");
+    var equipeA = equipes[0];
+    var scoreEquipeA = parseInt(equipeA.getAttribute("value"));
+    var equipeB = equipes[1];
+    var scoreEquipeB = parseInt(equipeB.getAttribute("value"));
+
+    if (scoreEquipeA == scoreEquipeB){
+        equipeA.classList.remove("perd");
+        equipeA.classList.remove("gagne");
+        equipeB.classList.remove("perd");
+        equipeB.classList.remove("gagne");
+        equipeA.classList.add("egalite");
+        equipeB.classList.add("egalite");
+    }else{
+        equipeA.classList.remove("egalite");
+        equipeB.classList.remove("egalite");
+        equipeA.classList.add(scoreEquipeA > scoreEquipeB ? "gagne" : "perd");
+        equipeA.classList.remove(scoreEquipeA > scoreEquipeB ? "perd" : "gagne");
+        equipeB.classList.add(scoreEquipeB > scoreEquipeA ? "gagne" : "perd");
+        equipeB.classList.remove(scoreEquipeB > scoreEquipeA ? "perd" : "gagne");
+    } 
+}
+
+function refreshButtonCloture(){
+    var currentTour = document.body.querySelector("div.tour.currentTour");
 }
 
 //***** MAKER HTML */
@@ -1842,6 +1900,8 @@ function newMatch(equipeA, equipeB){
         "pointContrainte": 0, 
         "ptsEquipeA": ptsEquipeA, 
         "ptsEquipeB": ptsEquipeB, 
+        "ptsEquipeADepart": ptsEquipeA, 
+        "ptsEquipeBDepart": ptsEquipeB
     }; 
 }
 

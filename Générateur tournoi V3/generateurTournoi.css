@@ -540,3 +540,12 @@ div.forPlayingTour button, div.closedTour button{
     border: none;
     opacity: 1;
 }
+
+.gagne{
+    background-color: lightgreen;
+    font-weight: bold;
+}
+
+.perd{
+    background-color: coral;
+}
