@@ -55,7 +55,7 @@ class GlobalDataBase{
     }
 
     export() {
-        var name = "Tournoi - " + new Date().getDate();
+        var name = "Tournoi - " + bd.tournoi.date.getDate();
         var type = "application/json";
         var anchor = document.createElement("a");
         anchor.href = window.URL.createObjectURL(new Blob([JSON.stringify(this.getDatas())], {type}));
@@ -86,7 +86,8 @@ class GlobalDataBase{
                 datas["joueurs"][i].name,
                 datas["joueurs"][i].genre,
                 datas["joueurs"][i].niveau,
-                datas["joueurs"][i].selected 
+                datas["joueurs"][i].selected,
+                datas["joueurs"][i].points
                 ));
         }
         this.tournoi = new Tournoi(
@@ -100,6 +101,7 @@ class GlobalDataBase{
             datas["tournoi"].tours,
             datas["tournoi"].currentTour,
             datas["tournoi"].limitPoint,
+            datas["tournoi"].date
         );
     }
 
@@ -268,6 +270,7 @@ class Joueur{
         this.selected = pSelected != undefined ? pSelected : false;
         this.adversaires = [];
         this.coequipiers = [];
+        this.points = 0;
     }
     name = null;
     genre = null;
@@ -275,6 +278,7 @@ class Joueur{
     selected = false;
     adversaires = null;
     coequipiers = null;
+    points = 0;
 
     getPointsHandicap(){
         return this.genre.handicap + this.niveau.handicap;
@@ -286,12 +290,13 @@ class Joueur{
             "genre": this.genre,
             "niveau": this.niveau,
             "selected": this.selected,
+            "points": this.points
         }
     }
 }
 
 class Tournoi{
-    constructor(pTypeTournoi, pNbTour, pNbTerrain, pDepartMatchNegatif, pNiveauListe, pGenreListe, pContraintes, pTours, pCurrentTour, pLimitPoint){
+    constructor(pTypeTournoi, pNbTour, pNbTerrain, pDepartMatchNegatif, pNiveauListe, pGenreListe, pContraintes, pTours, pCurrentTour, pLimitPoint, pDate){
         this.typeTournoi = pTypeTournoi != undefined ? pTypeTournoi : typeTournoiListe.SIMPLE;
         this.nbTour = pNbTour != undefined ? pNbTour : 5;
         this.nbTerrain = pNbTerrain != undefined ? pNbTerrain : 5;
@@ -302,7 +307,9 @@ class Tournoi{
         this.tours = pTours != undefined ? pTours : [];
         this.currentTour = pCurrentTour != undefined ? pCurrentTour : -1;
         this.limitPoint = pLimitPoint != undefined ? pLimitPoint : 10;
+        this.date = pDate != undefined ? pDate : new Date();
     }
+
     typeTournoi = null;
     nbTour = null;
     nbTerrain = null;
@@ -312,6 +319,7 @@ class Tournoi{
     contraintes = null;
     currentTour = null;
     limitPoint = null;
+    date = null;
 
     toJson(){
         var tours = [];
@@ -514,6 +522,8 @@ function buildBody(){
         case pages.ACCUEIL:
             body.appendChild(buildListJoueur());
             body.appendChild(buildPreparation());
+            if (bd.tournoi.tours.length > 0)
+                body.appendChild(buildClassement());
         break;
         case pages.SELECTION_JOUEUR:
             body.appendChild(buildListJoueur());
@@ -556,7 +566,7 @@ function buildFooter(){
                 func: lancerTournoi.bind(this)
             });
             var nbJoueurSelected = bd.getNbJoueurSelected();
-            var typeTournoi = bd.getTournoi().typeTournoi;
+            var typeTournoi = bd.tournoi.typeTournoi;
             if ((typeTournoi == typeTournoiListe.SIMPLE && nbJoueurSelected < 2) ||
             (typeTournoi == typeTournoiListe.DOUBLE && nbJoueurSelected < 4)){
                 buttonLancerTournoi.innerHTML = "Nombre de joueurs insuffisant";
@@ -707,6 +717,27 @@ function buildPreparation(){
     }
 
     return listPrep;
+}
+
+function buildClassement(){
+    var listJoueursClassement = MH.makeDiv("listJoueursClassement");
+    listJoueursClassement.appendChild(buildHeaderJoueurClassement());
+    var divJoueursClassement = MH.makeDiv(null, "divJoueursClassement");
+    var tableClassement = MH.makeElt("table", null, "tableClassement");
+    var listJoueursSelected = bd.joueurs.filter(j => j.selected);
+    var listJoueurSort = listJoueursSelected.sort((a, b) => a.points - b.points);
+    var trJoueur;
+    for (var i = 0; i < listJoueurSort.length; i++){
+        trJoueur = MH.makeElt("tr", null, "trJoueurClassement");
+        trJoueur.appendChild(MH.makeTd(i + 1, "classementJoueur"));
+        trJoueur.appendChild(MH.makeTd(listJoueurSort[i].name, "nomJoueur"));
+        trJoueur.appendChild(MH.makeTd(listJoueurSort[i].points, "pointsJoueur"));
+        trJoueur.appendChild(MH.makeTd(buildBadgeNiveau(listJoueurSort[i]).outerHTML));
+        tableClassement.appendChild(trJoueur);
+    }
+    divJoueursClassement.appendChild(tableClassement);
+    listJoueursClassement.appendChild(divJoueursClassement);
+    return listJoueursClassement;
 }
 
 function buildHandicaps(){
@@ -881,6 +912,17 @@ function buildHeaderJoueur(){
 
         break;
     }
+    return header;
+}
+
+function buildHeaderJoueurClassement(){
+    var header = MH.makeDiv("headerJoueurClassement", "container sticky-top");
+    var ssTitle = MH.makeDiv(null, "divSsTitle");
+    var ss1 = MH.makeSpan("Classement", "ssTitle");
+    var ss2 = MH.makeSpan("Tournoi du " + bd.tournoi.date.toLocaleDateString() + " à " + bd.tournoi.date.toLocaleTimeString(), "nbSsTitle");
+    ssTitle.appendChild(ss1);
+    ssTitle.appendChild(ss2);
+    header.appendChild(ssTitle);
     return header;
 }
 
@@ -1092,35 +1134,13 @@ function buildJoueur(joueur, i){
             joueurDom.appendChild(check);
             joueurDom.classList.add("selection");
             joueurDom.appendChild(MH.makeSpan(joueur.name, "nomJoueur"));
-            var niveau = MH.makeSpan(joueur.niveau.value);
-            niveau.classList.add("badge");
-            if (joueur.niveau.value[0] == "P"){
-                niveau.classList.add("badge-secondary");
-            }else if (joueur.niveau.value[0] == "D"){
-                niveau.classList.add("badge-warning");
-            }else if (joueur.niveau.value[0] == "R"){
-                niveau.classList.add("badge-danger");
-            }else if (joueur.niveau.value[0] == "N"){
-                niveau.classList.add("badge-dark");
-            }
-            joueurDom.appendChild(niveau);
+            joueurDom.appendChild(buildBadgeNiveau(joueur));
             break;
         case pages.ACCUEIL:
         case pages.EXECUTION_TOURNOI:
             joueurDom.classList.add("accueil");
             joueurDom.appendChild(MH.makeSpan(joueur.name, "nomJoueur"));
-            var niveau = MH.makeSpan(joueur.niveau.value);
-            niveau.classList.add("badge");
-            if (joueur.niveau.value[0] == "P"){
-                niveau.classList.add("badge-secondary");
-            }else if (joueur.niveau.value[0] == "D"){
-                niveau.classList.add("badge-warning");
-            }else if (joueur.niveau.value[0] == "R"){
-                niveau.classList.add("badge-danger");
-            }else if (joueur.niveau.value[0] == "N"){
-                niveau.classList.add("badge-dark");
-            }
-            joueurDom.appendChild(niveau);
+            joueurDom.appendChild(buildBadgeNiveau(joueur));
             break;
         case pages.MODIFICATION_JOUEUR:
             joueurDom.appendChild(buildPropertyEditor("Nom", "text", {"id": "nomJoueur", value : joueur.name}));
@@ -1155,6 +1175,21 @@ function buildJoueur(joueur, i){
         break;
     }
     return joueurDom;
+}
+
+function buildBadgeNiveau(joueur){
+    var niveau = MH.makeSpan(joueur.niveau.value);
+    niveau.classList.add("badge");
+    if (joueur.niveau.value[0] == "P"){
+        niveau.classList.add("badge-secondary");
+    }else if (joueur.niveau.value[0] == "D"){
+        niveau.classList.add("badge-warning");
+    }else if (joueur.niveau.value[0] == "R"){
+        niveau.classList.add("badge-danger");
+    }else if (joueur.niveau.value[0] == "N"){
+        niveau.classList.add("badge-dark");
+    }
+    return niveau;
 }
 
 function buildPropertyViewer(pKey, pValue){
@@ -1336,6 +1371,7 @@ function showModalFinTournoi(){
     $('#modalFinTournoi').modal('show');
 }
 function finTournoi(){
+    //save scores
     bd.updateTournoi({"currentTour": -1});
     $('#modalFinTournoi').modal('hide');
     selectPage(pages.ACCUEIL);
@@ -1612,7 +1648,6 @@ function editHandicaps(){
     selectPage(pages.MODIFICATION_HANDICAPS);
 }
 function changeScore(indexMatch, indexEquipe, value){
-
     bd.updateMatch(indexMatch, indexEquipe, value);
 }
 function victoire(span){
@@ -1659,10 +1694,6 @@ function refreshMatch(domMatch){
     } 
 }
 
-function refreshButtonCloture(){
-    var currentTour = document.body.querySelector("div.tour.currentTour");
-}
-
 //***** MAKER HTML */
 class MH {
     static idCompt = 0;
@@ -1679,6 +1710,7 @@ class MH {
         if (style != undefined) elt.style = style;
         return elt;
     } 
+    static makeTd(content, className){var span = this.makeElt("span", undefined, className); span.innerHTML = content; var td = MH.makeElt("td"); td.appendChild(span); return td;};
     static makeSpan(content, className){var span = this.makeElt("span", undefined, className); span.innerHTML = content; return span;};
     static makeLabel(content, className, forr){var label = this.makeElt("label", undefined, className); label.innerHTML = content; if (forr != undefined) label.setAttribute("for", forr); return label;};
     static makeDiv(id, className, style){return this.makeElt("div", id, className, style)}
