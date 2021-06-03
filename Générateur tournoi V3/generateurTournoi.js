@@ -555,8 +555,18 @@ function buildFooter(){
                 type: "click", 
                 func: lancerTournoi.bind(this)
             });
-            buttonLancerTournoi.innerHTML = "Lancer le tournoi";
-            buttonLancerTournoi.classList.add("btn-success");
+            var nbJoueurSelected = bd.getNbJoueurSelected();
+            var typeTournoi = bd.getTournoi().typeTournoi;
+            if ((typeTournoi == typeTournoiListe.SIMPLE && nbJoueurSelected < 2) ||
+            (typeTournoi == typeTournoiListe.DOUBLE && nbJoueurSelected < 4)){
+                buttonLancerTournoi.innerHTML = "Nombre de joueurs insuffisant";
+                buttonLancerTournoi.classList.add("btn-secondary");
+                buttonLancerTournoi.setAttribute("disabled", true);
+            }else{
+                buttonLancerTournoi.innerHTML = "Lancer le tournoi";
+                buttonLancerTournoi.classList.add("btn-success");
+            }
+
             footer.appendChild(buttonLancerTournoi);
             break;
         case pages.SELECTION_JOUEUR:
