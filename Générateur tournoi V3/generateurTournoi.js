@@ -1191,7 +1191,7 @@ function buildEditor(type, attributes){
                     "value": attributes["elements"][i]["value"]
                 });
                 if (attributes["elements"][i]["checked"] === true) input.setAttribute("checked", "true");
-                label = MH.makeElt("label", null, "labelCkeckbox");
+                label = MH.makeElt("label", null, "labelCheckbox");
                 label.setAttribute("for", attributes["elements"][i]["id"]);
                 label.innerHTML = attributes["elements"][i]["value"];
                 divInput.appendChild(input);
@@ -1354,7 +1354,7 @@ function retourModificationContraintes(){
 }
 
 function retourModificationJoueur(){
-    validModificationJoueur();
+    cancelModificationJoueur();
 }
 function retourSelectionJoueur(){
     updateSelectJoueur();
@@ -1587,10 +1587,15 @@ function numberPlusOuMoins(sens, span, newValue){
         retourValue = parseInt(span.innerHTML);
     }
     
-    var indexMatch = parseInt(span.parentElement.getAttribute("indexmatch"));
-    var indexEquipe = span.parentElement.getAttribute("indexequipe");
-    changeScore(indexMatch, indexEquipe, retourValue);
-    refreshMatch(span.closest(".match"));
+    switch (currentPage){
+        case pages.EXECUTION_TOURNOI:
+            var indexMatch = parseInt(span.parentElement.getAttribute("indexmatch"));
+            var indexEquipe = span.parentElement.getAttribute("indexequipe");
+            changeScore(indexMatch, indexEquipe, retourValue);
+            refreshMatch(span.closest(".match"));
+        break;
+    }
+
 
 }
 function editHandicaps(){

@@ -3,7 +3,10 @@ body{
 font-family: 'Inconsolata', monospace;
 font-family: 'Indie Flower', cursive;
 font-family: 'Marvel', sans-serif;
+user-select: none;
 }
+
+
 
 div#global{
     display: flex;
@@ -190,6 +193,8 @@ div.propertyRow{
 
 .propertyValue{
     margin-left: 0px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 button.bouton{
@@ -218,7 +223,7 @@ span.propertyValue{
     margin: 10px;
 }
 
-.labelCkeckbox{
+.labelCheckbox{
     margin-left: 5px;
     margin-bottom: 0px;
 }
@@ -226,7 +231,12 @@ span.propertyValue{
 div.divRadio{
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+div.divRadio label.labelCheckbox {
+    cursor: pointer;
 }
 
 span.headerTitle{
@@ -548,4 +558,8 @@ div.forPlayingTour button, div.closedTour button{
 
 .perd{
     background-color: coral;
+}
+
+#limitPoint{
+    width: 45px;
 }
