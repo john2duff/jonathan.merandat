@@ -567,7 +567,7 @@ function buildFooter(){
             footer.appendChild(signature);
             var buttonLancerTournoi = MH.makeButton({
                 type: "click", 
-                func: lancerTournoi.bind(this)
+                func: preLancerTournoi.bind(this)
             });
             var nbJoueurSelected = bd.getNbJoueurSelected();
             var typeTournoi = bd.tournoi.typeTournoi;
@@ -633,16 +633,15 @@ function buildFooter(){
             }));
         break;
         case pages.EXECUTION_TOURNOI:
-            /*footer.appendChild(MH.makeButtonCancel({
-                type: "click", 
-                func: cancelModificationContraintes.bind(this)
-            }));*/
             var validTourDom = MH.makeButtonValid({
                 type: "click", 
                 func: validTour.bind(this)
             });
-            validTourDom.innerHTML = "Cloturer tour " + (bd.tournoi.currentTour + 1);
-            //if (!bd.allMatchDoneCurrentTour()) validTourDom.classList.add("disabled");
+            if (bd.tournoi.currentTour == bd.tournoi.tours.length - 1){
+                validTourDom.innerHTML = "Cloturer le tournoi";
+            }else{
+                validTourDom.innerHTML = "Cloturer tour " + (bd.tournoi.currentTour + 1);
+            }
             footer.appendChild(validTourDom);   
         break;
         case pages.IMPORT_JOUEURS:
@@ -1366,12 +1365,22 @@ function reset(){
     $('#modalReset').modal('toggle');
     selectPage(pages.ACCUEIL);
 }
+function preLancerTournoi(){
+    if (bd.tournoi.tours.length > 0){
+        $('#modalPreLancer').modal('toggle');
+    }else{
+        lancerTournoi();
+    }
+}
+
 function lancerTournoi(){
+    $('#modalPreLancer').modal('hide');
     genereTournoi();
     bd.updateTournoi({"date": new Date()});
     bd.updateTournoi({"currentTour": 0});
     selectPage(pages.EXECUTION_TOURNOI);
 }
+
 function showModalFinTournoi(){
     $('#modalFinTournoi').modal('show');
 }
