@@ -1381,16 +1381,17 @@ function finTournoi(){
         for (var j = 0; j < bd.tournoi.tours[i].matchs.length; j++){
             scoreEquipeA = bd.tournoi.tours[i].matchs[j].ptsEquipeA;
             scoreEquipeB = bd.tournoi.tours[i].matchs[j].ptsEquipeB;
-            equipeAGagne = scoreEquipeA > scoreEquipeB && scoreEquipeA == 21;
-            equipeAGagneMoins = scoreEquipeA > scoreEquipeB && scoreEquipeA > 21;
-            equipeBGagneMoins = scoreEquipeB > scoreEquipeA && scoreEquipeB > 21;
+            egalite = scoreEquipeA == scoreEquipeB;
+            equipeAGagne = scoreEquipeA > scoreEquipeB && (scoreEquipeA - scoreEquipeB > 2);
+            equipeAGagneMoins = scoreEquipeA > scoreEquipeB && (scoreEquipeA - scoreEquipeB <= 2);
+            equipeBGagneMoins = scoreEquipeB > scoreEquipeA && (scoreEquipeB - scoreEquipeA <= 2);
             for (var k = 0; k < bd.tournoi.tours[i].matchs[j].equipeA.length; k++){
                 bd.tournoi.tours[i].matchs[j].equipeA[k].points += 
-                equipeAGagne ? 5 : (equipeAGagneMoins ? 3 : (equipeBGagneMoins ? 2 : 1));
+                egalite ? 4 : (equipeAGagne ? 5 : (equipeAGagneMoins ? 3 : (equipeBGagneMoins ? 2 : 1)));
             }
             for (var m = 0; m < bd.tournoi.tours[i].matchs[j].equipeB.length; m++){
                 bd.tournoi.tours[i].matchs[j].equipeB[m].points += 
-                equipeAGagne ? 1 : (equipeAGagneMoins ? 2 : (equipeBGagneMoins ? 3 : 5));
+                egalite ? 4 : (equipeAGagne ? 1 : (equipeAGagneMoins ? 2 : (equipeBGagneMoins ? 3 : 5)));
             }
         }
     }
@@ -1400,6 +1401,19 @@ function finTournoi(){
     selectPage(pages.ACCUEIL);
 }
 function validTour(){   
+    var matchsNonTermine = false;
+    for (var i = 0; i < bd.tournoi.tours[bd.tournoi.currentTour].matchs.length; i++){
+        if (bd.tournoi.tours[bd.tournoi.currentTour].matchs[i].ptsEquipeA < 21 &&
+            bd.tournoi.tours[bd.tournoi.currentTour].matchs[i].ptsEquipeB < 21){
+                matchsNonTermine = true;
+                break;
+            }
+    }
+
+    if (matchsNonTermine){
+        showModalMatchsNonTermine();
+        return;
+    }
     if (bd.tournoi.currentTour < bd.tournoi.nbTour - 1){
         bd.tournoi.currentTour++;
         bd.save();
@@ -1484,6 +1498,10 @@ function validImportJoueurs(){
 function showModalJoueurExist(nomJoueur){
     $('#modalJoueurExist div.modal-body').html('Le joueur : ' + nomJoueur + ' existe déjà.');
     $('#modalJoueurExist').modal('show');
+}
+function showModalMatchsNonTermine(nomJoueur){
+    $('#modalMatchNonTermine div.modal-body').html('Tous les matchs ne sont pas terminés pour ce tour !');
+    $('#modalMatchNonTermine').modal('show');
 }
 
 function editPreparation(){
