@@ -101,7 +101,7 @@ class GlobalDataBase{
             datas["tournoi"].tours,
             datas["tournoi"].currentTour,
             datas["tournoi"].limitPoint,
-            datas["tournoi"].date
+            new Date(datas["tournoi"].date)
         );
     }
 
@@ -263,14 +263,14 @@ var genreListe = {
 
 //Models
 class Joueur{
-    constructor(pName, pGenre, pNiveau, pSelected){
+    constructor(pName, pGenre, pNiveau, pSelected, pPoints){
         this.name = pName == undefined ? "Nouveau joueur " + (bd.joueurs.length + 1) : pName;
         this.genre = pGenre != undefined ? pGenre : bd.tournoi.genreListe.HOMME;
         this.niveau = pNiveau != undefined ? pNiveau : bd.tournoi.niveauListe.P12;
         this.selected = pSelected != undefined ? pSelected : false;
         this.adversaires = [];
         this.coequipiers = [];
-        this.points = 0;
+        this.points = pPoints != undefined ? pPoints : 0;
     }
     name = null;
     genre = null;
@@ -334,7 +334,8 @@ class Tournoi{
                     currentJoueur = new Joueur(
                         currentMatch["equipeA"][k]["name"], 
                         currentMatch["equipeA"][k]["genre"], 
-                        currentMatch["equipeA"][k]["niveau"])
+                        currentMatch["equipeA"][k]["niveau"], 
+                        currentMatch["equipeA"][k]["points"])
                     equipeA.push(currentJoueur);
                 }
                 equipeB = [];
@@ -342,7 +343,8 @@ class Tournoi{
                     currentJoueur = new Joueur(
                         currentMatch["equipeB"][k]["name"], 
                         currentMatch["equipeB"][k]["genre"], 
-                        currentMatch["equipeB"][k]["niveau"])
+                        currentMatch["equipeB"][k]["niveau"], 
+                        currentMatch["equipeB"][k]["points"])
                     equipeB.push(currentJoueur);
                 }
                 matchs.push({"equipeA": equipeA, "equipeB": equipeB, "ptsEquipeA": currentMatch["ptsEquipeA"], "ptsEquipeB": currentMatch["ptsEquipeB"], "ptsEquipeADepart": currentMatch["ptsEquipeADepart"], "ptsEquipeBDepart": currentMatch["ptsEquipeBDepart"]  })
@@ -352,7 +354,8 @@ class Tournoi{
                 joueurAttente.push(new Joueur(
                     this.tours[i]["joueurAttente"][j]["name"], 
                     this.tours[i]["joueurAttente"][j]["genre"], 
-                    this.tours[i]["joueurAttente"][j]["niveau"]
+                    this.tours[i]["joueurAttente"][j]["niveau"], 
+                    this.tours[i]["joueurAttente"][j]["points"]
                 ));
             }
             tours.push({"matchs": matchs, "joueurAttente": joueurAttente})
@@ -366,7 +369,8 @@ class Tournoi{
             "genreListe": this.genreListe,
             "contraintes": this.contraintes,
             "tours": tours,
-            "currentTour": this.currentTour
+            "currentTour": this.currentTour, 
+            "date": this.date
         };
     }
 }
@@ -376,16 +380,16 @@ var bd = new GlobalDataBase(DB_NAME);
 
 var groupeJoueurs = {
     "Badlevier": [
-        new Joueur("John", genreListe.HOMME, niveauListe.D9), 
-        new Joueur("Carole", genreListe.FEMME, niveauListe.P10), 
-        new Joueur("Olivier", genreListe.HOMME, niveauListe.D9), 
-        new Joueur("Christophe", genreListe.HOMME, niveauListe.D9), 
-        new Joueur("Norbert", genreListe.HOMME, niveauListe.P10), 
-        new Joueur("Marc", genreListe.HOMME, niveauListe.P10), 
-        new Joueur("Aurélien", genreListe.HOMME, niveauListe.D9), 
-        new Joueur("Gaby", genreListe.HOMME, niveauListe.P11), 
-        new Joueur("Marie", genreListe.FEMME, niveauListe.P10), 
-        new Joueur("Ludivine", genreListe.FEMME, niveauListe.P10), 
+        new Joueur("John", genreListe.HOMME, niveauListe.D9, 0), 
+        new Joueur("Carole", genreListe.FEMME, niveauListe.P10, 0), 
+        new Joueur("Olivier", genreListe.HOMME, niveauListe.D9, 0), 
+        new Joueur("Christophe", genreListe.HOMME, niveauListe.D9, 0), 
+        new Joueur("Norbert", genreListe.HOMME, niveauListe.P10, 0), 
+        new Joueur("Marc", genreListe.HOMME, niveauListe.P10, 0), 
+        new Joueur("Aurélien", genreListe.HOMME, niveauListe.D9, 0), 
+        new Joueur("Gaby", genreListe.HOMME, niveauListe.P11, 0), 
+        new Joueur("Marie", genreListe.FEMME, niveauListe.P10, 0), 
+        new Joueur("Ludivine", genreListe.FEMME, niveauListe.P10, 0), 
     ]
 }
 
@@ -725,7 +729,7 @@ function buildClassement(){
     var divJoueursClassement = MH.makeDiv(null, "divJoueursClassement");
     var tableClassement = MH.makeElt("table", null, "tableClassement");
     var listJoueursSelected = bd.joueurs.filter(j => j.selected);
-    var listJoueurSort = listJoueursSelected.sort((a, b) => a.points - b.points);
+    var listJoueurSort = listJoueursSelected.sort((a, b) => b.points - a.points);
     var trJoueur;
     for (var i = 0; i < listJoueurSort.length; i++){
         trJoueur = MH.makeElt("tr", null, "trJoueurClassement");
@@ -889,7 +893,7 @@ function buildMatch(match, j) {
     divMatch.appendChild(matchDom);
     currentIndexMatch++;
 
-    refreshMatch(matchDom);
+    refreshMatch(matchDom, match);
     return divMatch;
 }
 
@@ -1269,7 +1273,7 @@ function buildEditor(type, attributes){
 
             var buttonMoins = MH.makeButton({
                 type: "click", 
-                func: numberPlusOuMoins.bind(this, false, spanNumber, undefined)
+                func: numberPlusOuMoins.bind(this, false, spanNumber, undefined, )
             });
             buttonMoins.innerHTML = "-";
             buttonMoins.classList.add("btn-secondary");
@@ -1364,6 +1368,7 @@ function reset(){
 }
 function lancerTournoi(){
     genereTournoi();
+    bd.updateTournoi({"date": new Date()});
     bd.updateTournoi({"currentTour": 0});
     selectPage(pages.EXECUTION_TOURNOI);
 }
@@ -1371,12 +1376,30 @@ function showModalFinTournoi(){
     $('#modalFinTournoi').modal('show');
 }
 function finTournoi(){
-    //save scores
+    var scoreEquipeA, scoreEquipeB, equipeAGagne, equipeAGagneMoins, equipeBGagneMoins;
+    for (var i = 0; i < bd.tournoi.tours.length; i++){
+        for (var j = 0; j < bd.tournoi.tours[i].matchs.length; j++){
+            scoreEquipeA = bd.tournoi.tours[i].matchs[j].ptsEquipeA;
+            scoreEquipeB = bd.tournoi.tours[i].matchs[j].ptsEquipeB;
+            equipeAGagne = scoreEquipeA > scoreEquipeB && scoreEquipeA == 21;
+            equipeAGagneMoins = scoreEquipeA > scoreEquipeB && scoreEquipeA > 21;
+            equipeBGagneMoins = scoreEquipeB > scoreEquipeA && scoreEquipeB > 21;
+            for (var k = 0; k < bd.tournoi.tours[i].matchs[j].equipeA.length; k++){
+                bd.tournoi.tours[i].matchs[j].equipeA[k].points += 
+                equipeAGagne ? 5 : (equipeAGagneMoins ? 3 : (equipeBGagneMoins ? 2 : 1));
+            }
+            for (var m = 0; m < bd.tournoi.tours[i].matchs[j].equipeB.length; m++){
+                bd.tournoi.tours[i].matchs[j].equipeB[m].points += 
+                equipeAGagne ? 1 : (equipeAGagneMoins ? 2 : (equipeBGagneMoins ? 3 : 5));
+            }
+        }
+    }
+
     bd.updateTournoi({"currentTour": -1});
     $('#modalFinTournoi').modal('hide');
     selectPage(pages.ACCUEIL);
 }
-function validTour(){
+function validTour(){   
     if (bd.tournoi.currentTour < bd.tournoi.nbTour - 1){
         bd.tournoi.currentTour++;
         bd.save();
@@ -1480,7 +1503,8 @@ function validModificationJoueur(){
             nomJoueur,
             bd.tournoi.genreListe[document.body.querySelector("div.radiogenre input:checked").id],
             bd.tournoi.niveauListe[document.body.querySelector("div.radioniveau input:checked").id],
-            false));
+            false, 
+            0));
     }else{
         ok = bd.updateJoueur(currentEditionId, {
             "name": nomJoueur,
@@ -1642,7 +1666,6 @@ function numberPlusOuMoins(sens, span, newValue){
         break;
     }
 
-
 }
 function editHandicaps(){
     selectPage(pages.MODIFICATION_HANDICAPS);
@@ -1670,7 +1693,7 @@ function victoire(span){
     numberPlusOuMoins(null, span, target);
 }
 
-function refreshMatch(domMatch){
+function refreshMatch(domMatch, match){
     var equipes = domMatch.querySelectorAll("div.pointMatch>div.numberSpinner");
     var equipeA = equipes[0];
     var scoreEquipeA = parseInt(equipeA.getAttribute("value"));
@@ -1692,6 +1715,7 @@ function refreshMatch(domMatch){
         equipeB.classList.add(scoreEquipeB > scoreEquipeA ? "gagne" : "perd");
         equipeB.classList.remove(scoreEquipeB > scoreEquipeA ? "perd" : "gagne");
     } 
+
 }
 
 //***** MAKER HTML */
@@ -2052,6 +2076,7 @@ function genereTournoi(){
     for (var i = 0; i < bd.joueurs.length; i++){
         bd.joueurs[i].adversaires = [];
         bd.joueurs[i].coequipiers = [];
+        bd.joueurs[i].points = 0;
     }
 
     var nbMatch;
