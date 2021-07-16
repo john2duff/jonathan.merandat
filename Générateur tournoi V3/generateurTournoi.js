@@ -1775,7 +1775,7 @@ class MH {
     }
     static makeIcon(type){
         var img = MH.makeElt("img");
-        var src = "../bootstrap-icons-1.0.0/";
+        var src = "./bootstrap-icons-1.0.0/";
         switch (type){
             case "edit":
                 src += "pencil-fill.svg";
