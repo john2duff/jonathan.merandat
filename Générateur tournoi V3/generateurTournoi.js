@@ -448,7 +448,7 @@ function buildHeader(){
                 type: "click", 
                 func: addJoueur.bind(this)
             }/*, "add"*/);
-            add.innerHTML = "Ajouter";
+            add.innerHTML = "Nouveau joueur";
             add.classList.add("btn-success");
             header.appendChild(add);
             var importJoueur = MH.makeButton({
@@ -1775,7 +1775,7 @@ class MH {
     }
     static makeIcon(type){
         var img = MH.makeElt("img");
-        var src = "./bootstrap-icons-1.0.0/";
+        var src = "./";
         switch (type){
             case "edit":
                 src += "pencil-fill.svg";
