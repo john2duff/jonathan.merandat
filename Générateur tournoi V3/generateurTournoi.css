@@ -3,7 +3,10 @@ body{
 font-family: 'Inconsolata', monospace;
 font-family: 'Indie Flower', cursive;
 font-family: 'Marvel', sans-serif;
+user-select: none;
 }
+
+
 
 div#global{
     display: flex;
@@ -53,7 +56,7 @@ div#footer.selection{
     justify-content: space-between;
 }
 
-div#headerJoueur, div#headerPreparation, div#headerContrainte, div#headerTour{
+div#headerJoueur, div#headerPreparation, div#headerContrainte, div#headerTour, div#headerJoueurClassement{
     background-color: rgb(209 205 205);
     display: flex;
     justify-content: space-between;
@@ -68,13 +71,13 @@ div#headerJoueur, div#headerPreparation, div#headerContrainte, div#headerTour{
 }
 
 .headerTitle{
-    font-size: 2em;
+    font-size: 1.5em;
     color: white;
     text-shadow: 2px 2px 1px #676565;
     line-height: 1em;
 }
 
-div#listJoueurs, div#listPreparation, div#listContraintes{
+div#listJoueurs, div#listPreparation, div#listContraintes, div#listJoueursClassement{
     width: 100%;
 }
 
@@ -190,6 +193,8 @@ div.propertyRow{
 
 .propertyValue{
     margin-left: 0px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 button.bouton{
@@ -227,7 +232,12 @@ span.propertyValue{
 div.divRadio{
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+div.divRadio label.labelCheckbox {
+    cursor: pointer;
 }
 
 span.headerTitle{
@@ -239,15 +249,6 @@ label.selectionJoueur{
     margin-left: 10px;
     cursor: pointer;
     margin-bottom: 0px;
-}
-
-span.signature {
-    color: white;
-    /* font-weight: 600; */
-    font-style: italic;
-    font-size: 0.8em;
-    /* width: 135px; */
-    /* margin: auto; */
 }
 
 #navbarDropdownMenuLink{
@@ -280,7 +281,7 @@ span.signature {
 }
 
 .numberSpinner.vertical span{
-    line-height: 50px;
+    line-height: 44px;
 }
 
 .numberSpinnerValue{
@@ -365,7 +366,7 @@ span.numContrainte {
 }
 .ssTitle{
     margin-right: 10px;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 .nbSsTitle{
     font-size: 0.7em;
@@ -550,3 +551,112 @@ div.forPlayingTour button, div.closedTour button{
 .perd{
     background-color: coral;
 }
+
+#limitPoint{
+    width: 45px;
+}
+
+.divJoueurClassement{
+    display: flex;
+    justify-content: center;
+}
+
+.pointsJoueur{
+    flex: 0.5 1 auto;
+}
+
+.divJoueursClassement{
+    margin: 10px 20%;
+}
+
+.tableClassement{
+    width: 100%;
+    text-align: center;
+}
+
+.logoLigue{
+    height: 40px;
+    border-radius: 5px;
+}
+
+.logoLigue:hover{
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0px 0px 8px 9px #96a3d0;
+    cursor: pointer;
+}
+
+.aide{
+    padding: 10px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #ffcf62;
+    border-radius: 5px;
+    color: black;
+    font-style: italic;
+}
+
+.aide:hover{
+    background-color: #f8dc9b;
+}
+
+.aide img{
+    margin-right: 5px;
+    height: 20px;
+}
+
+.divLogoComite{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.logoComite{
+    height: 60px;
+    margin: 10px;
+}
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+  }
+  
+  /* Style the buttons that are used to open the tab content */
+  .tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+  }
+  
+  /* Change background color of buttons on hover */
+  .tab button:hover {
+    background-color: #ddd;
+  }
+  
+  /* Create an active/current tablink class */
+  .tab button.active {
+    background-color: #ccc;
+  }
+  
+  /* Style the tab content */
+  .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+  }
+
+  .checkInclude{
+      pointer-events: none;
+  }
+
+  #theadClassement th{
+    font-weight: 800;
+    color: white;
+    background-color: #919191;
+  }

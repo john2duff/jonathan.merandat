@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
-            "url": "file:///E:/GenerateurTournoiWeb/jonathan.merandat/G%C3%A9n%C3%A9rateur%20tournoi%20V3/generateurTounoi.html",
+            "url": "file:///C:/Users/jonathan/Documents/Personnel et confidentiel/gitHub/jonathan.merandat/Générateur tournoi V3/generateurTournoi.html",
             "webRoot": "${workspaceFolder}"
         }
     ]
