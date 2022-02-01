@@ -230,6 +230,7 @@ span.propertyValue{
 .labelCheckbox{
     margin-left: 5px;
     margin-bottom: 0px;
+    cursor: pointer;
 }
 
 div.divRadio{

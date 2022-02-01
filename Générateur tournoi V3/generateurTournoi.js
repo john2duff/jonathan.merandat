@@ -141,6 +141,8 @@ class GlobalDataBase{
                 this.tournoi[att] = attributes[att];
             }
         } 
+        //mise à jour des contraintes disponibles en fonction du type de tournoi
+        this.tournoi.contraintes.filter(c => c.name == "COEQUIPIER")[0].disabled = this.tournoi["typeTournoi"] == typeTournoiListe.SIMPLE;
         this.save();
     }
 
@@ -156,6 +158,11 @@ class GlobalDataBase{
                 index++;
             }
         }
+    }
+
+    updateContraintes(contraintes){
+        if (contraintes != undefined) this.tournoi.contraintes = contraintes;
+        this.save();
     }
 }
 
@@ -413,7 +420,7 @@ var pages = {
 }
 var currentPage = bd.tournoi.currentTour == -1 ? pages.ACCUEIL : pages.EXECUTION_TOURNOI;
 
-function selectPage(page){
+function selectPage(page, force){
     if (page != undefined) currentPage = page;
     buildPage();
     MH.loadEvents();
@@ -716,8 +723,12 @@ function buildPreparation(){
             for (var t in typeTournoiListe){
                 elementsTypeTournoi.push({"id": t, "name": "typeTournoi", "value": typeTournoiListe[t], "checked": bd.tournoi.typeTournoi ===  typeTournoiListe[t]});
             }
-            divPrep.appendChild(buildPropertyEditor("Type de tournoi", "radio", 
-            {name: "typeTournoi", elements : elementsTypeTournoi}));
+            var typeTournoiRadio = buildPropertyEditor("Type de tournoi", "radio", 
+            {name: "typeTournoi", elements : elementsTypeTournoi});
+            MH.addNewEvent("SIMPLE", "change", validModificationPreparation.bind(this, true));
+            MH.addNewEvent("DOUBLE", "change", validModificationPreparation.bind(this, true));
+
+            divPrep.appendChild(typeTournoiRadio);
 
             var elementsModeTournoi = [];
             for (var t in modeTournoiListe){
@@ -996,16 +1007,18 @@ function buildListContraintes(){
     for (var i = 0; i < bd.tournoi.contraintes.length; i++){
         switch (currentPage){
             case pages.MODIFICATION_PREPARATION:
-                if (bd.tournoi.contraintes[i].actif){
+                if (bd.tournoi.contraintes[i].actif && !bd.tournoi.contraintes[i].disabled){
                     listContraintes.appendChild(buildContrainte(bd.tournoi.contraintes[i], i, compt));
                     flag = true;
                     compt++;
                 }
             break;
             case pages.MODIFICATION_CONTRAINTES:
-                listContraintes.appendChild(buildContrainte(bd.tournoi.contraintes[i], i, compt));
-                flag = true;
-                compt++;
+                if (!bd.tournoi.contraintes[i].disabled){
+                    listContraintes.appendChild(buildContrainte(bd.tournoi.contraintes[i], i, compt));
+                    flag = true;
+                    compt++;
+                }
             break;
         }
     }
@@ -1061,6 +1074,7 @@ function buildContrainte(contrainte, i, compt){
             contrainteDom.appendChild(MH.makeSpan(compt, "numContrainte"));
             var div = MH.makeLabel(null, "ssContrainte");
             div.setAttribute("for", "checkContrainte" + i);
+            div.setAttribute("data-name", contrainte.name);
             div.appendChild(MH.makeSpan(contrainte.title, "contrainteTitle"));
             div.appendChild(MH.makeSpan(contrainte.desc, "contrainteDesc"));
             contrainteDom.appendChild(div);
@@ -1629,27 +1643,39 @@ function cancelModificationHandicaps(){
 function validModificationContraintes(){
 
     var contraintes = document.body.querySelectorAll(".divContrainte");
+    var retourContraintes = [];
     var currentContrainte;
     for (var i = 0; i < contraintes.length; i++){
-        currentContrainte = bd.tournoi.contraintes[i];
-        currentContrainte["actif"] = contraintes[i].querySelector("input").checked;
+        retourContraintes.push({
+            "name": contraintes[i].getAttribute("data-name"),
+            "title": contraintes[i].getAttribute("data-title"), 
+            "desc": contraintes[i].getAttribute("data-desc"),
+            "actif": contraintes[i].querySelector("input").checked, 
+            "disabled": !(contraintes[i].getAttribute("data-name") == "COEQUIPIER" && bd.tournoi.typeTournoi.typeTournoiListe.SIMPLE), 
+        });
         if (currentContrainte.name == "LIMITPOINT") {
             bd.updateTournoi({"limitPoint": contraintes[i].querySelector("#limitPoint").value });
         }
     }
-    bd.updateTournoi(); //pour sauvegarder
+    bd.updateContraintes(retourContraintes);
     selectPage(pages.MODIFICATION_PREPARATION);
 }
 function cancelModificationContraintes(){
     selectPage(pages.MODIFICATION_PREPARATION);
 }
-function validModificationPreparation(){
+function validModificationPreparation(dontExit){
     bd.updateTournoi({
         "typeTournoi": typeTournoiListe[document.body.querySelector("div.radiotypeTournoi input:checked").id],
         "nbTour": parseInt(document.body.querySelector("#nbTour .numberSpinnerValue").innerHTML),
         "nbTerrain": parseInt(document.body.querySelector("#nbTerrain .numberSpinnerValue").innerHTML)
-    });
-    selectPage(pages.ACCUEIL);
+    }); 
+    bd.updateContraintes();
+    if (dontExit === true) {
+        selectPage(pages.MODIFICATION_PREPARATION);
+    }else{
+        selectPage(pages.ACCUEIL);
+    }
+
 }
 function cancelModificationPreparation(){
     selectPage(pages.ACCUEIL);
@@ -1698,17 +1724,19 @@ function selectAll(input){
 }
 function monterContrainte(i){
     if (i > 0){
+        var cDisabled = bd.tournoi.contraintes[i - 1].disabled;
         var movedElt = bd.tournoi.contraintes[i];
         bd.tournoi.contraintes.splice(i, 1);
-        bd.tournoi.contraintes.splice(i-1, 0, movedElt);
+        bd.tournoi.contraintes.splice(i - 1 - (cDisabled ? 1 : 0), 0, movedElt);
     }
     selectPage(pages.MODIFICATION_CONTRAINTES);
 }
 function descendreContrainte(i){
-    if (i < bd.tournoi.contraintes.length -1){
+    if (i < bd.tournoi.contraintes.length - 1){
+        var cDisabled = bd.tournoi.contraintes[i + 1].disabled;
         var movedElt = bd.tournoi.contraintes[i];
         bd.tournoi.contraintes.splice(i, 1);
-        bd.tournoi.contraintes.splice(i+1, 0, movedElt);
+        bd.tournoi.contraintes.splice(i + 1 + (cDisabled ? 1 : 0), 0, movedElt);
     }
     selectPage(pages.MODIFICATION_CONTRAINTES);
 }
