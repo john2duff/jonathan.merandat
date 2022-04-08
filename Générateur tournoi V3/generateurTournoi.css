@@ -1,10 +1,12 @@
 body{
     font-family: 'Handlee', cursive;
-font-family: 'Inconsolata', monospace;
-font-family: 'Indie Flower', cursive;
-font-family: 'Marvel', sans-serif;
-user-select: none;
+    font-family: 'Inconsolata', monospace;
+    font-family: 'Indie Flower', cursive;
+    font-family: 'Marvel', sans-serif;
+    user-select: none;
+    overflow: hidden;
 }
+
 
 
 
@@ -145,6 +147,9 @@ div.joueur.accueil{
     font-size: 0.9rem;
     box-shadow: 5px 3px 5px 0px grey;
     justify-content: center;
+    max-width: 75px;
+    max-height: 104px;
+    overflow: hidden;
 }
 
 div.divJoueurs.accueil {
@@ -176,6 +181,9 @@ div.joueurSelection.femme:hover{
 span.nomJoueur{
     margin: 0px 5px;
     flex: 1 1 auto;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-height: 70px;
 }
 
 div.property{
@@ -272,7 +280,7 @@ label.selectionJoueur{
     align-items: center;
     border: gray 1px solid;
     width:  40px;
-    height: 120px;
+    height: 132px;
     border-radius: 6px;
 }
 
@@ -281,7 +289,7 @@ label.selectionJoueur{
 }
 
 .numberSpinner.vertical span{
-    line-height: 44px;
+    line-height: 60px;
 }
 
 .numberSpinnerValue{
@@ -291,7 +299,7 @@ label.selectionJoueur{
 }
 
 .numberSpinnerPlusMoins{
-    margin: 0px !important;
+    margin: -1px !important;
     border: 0px;
 }
 
@@ -382,6 +390,7 @@ span.numContrainte {
     background-color: #bfbfbf;
     padding: 0px;
     align-items: center;
+    width: 299px;
 }
 
 .matchs{
@@ -442,7 +451,7 @@ div.currentTour div.match{
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    flex: 1 1 auto;
+    width: 95px;
 }
 .headerTour{
     box-shadow: 0px 0px 14px 2px #9a9a9a;
