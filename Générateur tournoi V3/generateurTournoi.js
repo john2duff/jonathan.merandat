@@ -92,6 +92,7 @@ class GlobalDataBase{
         }
         this.tournoi = new Tournoi(
             datas["tournoi"].typeTournoi,
+            datas["tournoi"].modeTournoi,
             datas["tournoi"].nbTour, 
             datas["tournoi"].nbTerrain,
             datas["tournoi"].departMatchNegatif,
@@ -170,6 +171,10 @@ var typeTournoiListe = {
     "SIMPLE": "Simple",
     "DOUBLE": "Double"
 }
+var modeTournoiListe = {
+    "ONESHOT": "Tous les tours <br> <span> On génére tous les tours en une fois dans le but de faire jouer tout le monde avec tout le monde quelque soit les niveaux. </span>",
+    "STEPBYSTEP": "Tour par tour <br> <span> On génére le premier tour,  "
+}
 var contrainteListe = [
     {
         "name": "ADVERSAIRE",
@@ -195,7 +200,7 @@ var contrainteListe = [
     {
         "name": "ISOSEXE",
         "title": "Egalité des sexes", 
-        "desc": "On ne permet que des match où il y a autant d'homme que de femme dans chaque équipe.",
+        "desc": "On ne permet que des matchs où il y a autant d'hommes que de femmes dans chaque équipe.",
         "actif": true, 
         "disabled": false, 
     },
@@ -303,8 +308,9 @@ class Joueur{
 }
 
 class Tournoi{
-    constructor(pTypeTournoi, pNbTour, pNbTerrain, pDepartMatchNegatif, pNiveauListe, pGenreListe, pContraintes, pTours, pCurrentTour, pLimitPoint, pDate){
+    constructor(pTypeTournoi, pModeTournoi, pNbTour, pNbTerrain, pDepartMatchNegatif, pNiveauListe, pGenreListe, pContraintes, pTours, pCurrentTour, pLimitPoint, pDate){
         this.typeTournoi = pTypeTournoi != undefined ? pTypeTournoi : typeTournoiListe.SIMPLE;
+        this.modeTournoi = pModeTournoi != undefined ? pModeTournoi : modeTournoiListe.ONESHOT;
         this.nbTour = pNbTour != undefined ? pNbTour : 5;
         this.nbTerrain = pNbTerrain != undefined ? pNbTerrain : 5;
         this.departMatchNegatif = pDepartMatchNegatif != undefined ? pDepartMatchNegatif : false;
@@ -318,6 +324,7 @@ class Tournoi{
     }
 
     typeTournoi = null;
+    modeTournoi = null;
     nbTour = null;
     nbTerrain = null;
     departMatchNegatif = null;
@@ -690,7 +697,7 @@ function buildHeaderPreparation(){
             header.appendChild(MH.makeButton({
                 type: "click", 
                 func: editPreparation.bind(this)
-            }, "edit"));
+            }, "edit", "Modifier"));
         break;
         case pages.SELECTION_JOUEUR:
 
@@ -706,6 +713,7 @@ function buildPreparation(){
     switch (currentPage){
         case pages.ACCUEIL:
             divPrep.appendChild(buildPropertyViewer("Type de tournoi", bd.tournoi.typeTournoi));
+            divPrep.appendChild(buildPropertyViewer("Mode", bd.tournoi.modeTournoi));
             divPrep.appendChild(buildPropertyViewer("Nombre de tour", bd.tournoi.nbTour));
             divPrep.appendChild(buildPropertyViewer("Nombre de terrain", bd.tournoi.nbTerrain));
             listPrep.appendChild(divPrep);
@@ -721,6 +729,13 @@ function buildPreparation(){
             MH.addNewEvent("DOUBLE", "change", validModificationPreparation.bind(this, true));
 
             divPrep.appendChild(typeTournoiRadio);
+
+            var elementsModeTournoi = [];
+            for (var t in modeTournoiListe){
+                elementsModeTournoi.push({"id": t, "name": "modeTournoi", "value": modeTournoiListe[t], "checked": bd.tournoi.modeTournoi ===  modeTournoiListe[t]});
+            }
+            divPrep.appendChild(buildPropertyEditor("Mode", "radio", 
+            {name: "modeTournoi", elements : elementsModeTournoi}));
 
             divPrep.appendChild(buildPropertyEditor("Nombre de tour", "numberSpinner", {
                 "min": 1, 
@@ -942,7 +957,7 @@ function buildHeaderJoueur(){
             header.appendChild(MH.makeButton({
                 type: "click", 
                 func: editSelectionJoueurs.bind(this)
-            }, "edit"));
+            }, "edit", "Modifier"));
         break;
         case pages.SELECTION_JOUEUR:
 
@@ -975,7 +990,7 @@ function buildHeaderContrainte(){
             header.appendChild(MH.makeButton({
                 type: "click", 
                 func: editContraintes.bind(this)
-            }, "edit"));
+            }, "edit", "Modifier"));
         break;
     }
     return header;
@@ -1422,6 +1437,7 @@ function afficheInfo(evt){
 
 function lancerTournoi(){
     $('#modalPreLancer').modal('hide');
+
     genereTournoi();
     bd.updateTournoi({"date": new Date()});
     bd.updateTournoi({"currentTour": 0});
@@ -1894,7 +1910,7 @@ class MH {
         img.setAttribute("heigth", "12");
         return img;
     }
-    static makeButton(callBack, icon){
+    static makeButton(callBack, icon, txt){
         var newId = undefined;
         if (callBack != undefined){
             newId = MH.getNewId();
@@ -1903,6 +1919,9 @@ class MH {
         var button = MH.makeElt("button", newId, "btn");
         if (icon != undefined){
             button.innerHTML = MH.makeIcon(icon).outerHTML;
+        }
+        if (txt != undefined){
+            button.innerHTML += txt;
         }
         return button;
     }
