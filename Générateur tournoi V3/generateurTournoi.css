@@ -7,9 +7,6 @@ body{
     overflow: hidden;
 }
 
-
-
-
 div#global{
     display: flex;
     flex-direction: column;
@@ -123,9 +120,9 @@ div.divPreparation{
     display: flex;
     margin: 0px 10px;
     padding: 5px;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: start;
 } 
 
 div.divJoueur.selectionJoueur{
@@ -207,6 +204,7 @@ div.propertyRow{
     margin-left: 0px;
     display: flex;
     flex-wrap: wrap;
+    flex-direction: column;
 }
 
 button.bouton{
