@@ -732,6 +732,7 @@ function buildPreparation(){
 
             var elementsModeTournoi = [];
             for (var t in modeTournoiListe){
+                if (t == "STEPBYSTEP") continue; //pas encore développé
                 elementsModeTournoi.push({"id": t, "name": "modeTournoi", "value": modeTournoiListe[t], "checked": bd.tournoi.modeTournoi ===  modeTournoiListe[t]});
             }
             divPrep.appendChild(buildPropertyEditor("Mode", "radio", 
