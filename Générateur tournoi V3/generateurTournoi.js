@@ -1,4 +1,4 @@
-
+window.addEventListener("dblclick", function(evt){evt.preventDefault();});
 //Base de données locale
 class GlobalDataBase{
     constructor(dbName){
