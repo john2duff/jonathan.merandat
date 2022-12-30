@@ -758,7 +758,7 @@ function buildPreparation(){
                 "min": 1, 
                 "max": 30,
                 "value": bd.tournoi.nbPoints, 
-                "id": "nbTour"
+                "id": "nbPoints"
             }));
             var handicaps = MH.makeButton({
                 type: "click", 
