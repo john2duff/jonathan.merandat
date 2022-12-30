@@ -102,7 +102,8 @@ class GlobalDataBase{
             datas["tournoi"].tours,
             datas["tournoi"].currentTour,
             datas["tournoi"].limitPoint,
-            new Date(datas["tournoi"].date)
+            new Date(datas["tournoi"].date),
+            datas["tournoi"].nbPoints
         );
     }
 
@@ -308,7 +309,7 @@ class Joueur{
 }
 
 class Tournoi{
-    constructor(pTypeTournoi, pModeTournoi, pNbTour, pNbTerrain, pDepartMatchNegatif, pNiveauListe, pGenreListe, pContraintes, pTours, pCurrentTour, pLimitPoint, pDate){
+    constructor(pTypeTournoi, pModeTournoi, pNbTour, pNbTerrain, pDepartMatchNegatif, pNiveauListe, pGenreListe, pContraintes, pTours, pCurrentTour, pLimitPoint, pDate, pNbPoint){
         this.typeTournoi = pTypeTournoi != undefined ? pTypeTournoi : typeTournoiListe.SIMPLE;
         this.modeTournoi = pModeTournoi != undefined ? pModeTournoi : modeTournoiListe.ONESHOT;
         this.nbTour = pNbTour != undefined ? pNbTour : 5;
@@ -321,6 +322,7 @@ class Tournoi{
         this.currentTour = pCurrentTour != undefined ? pCurrentTour : -1;
         this.limitPoint = pLimitPoint != undefined ? pLimitPoint : 10;
         this.date = pDate != undefined ? pDate : new Date();
+        this.nbPoints = pNbPoint != undefined ? pNbPoint : 21;
     }
 
     typeTournoi = null;
@@ -334,6 +336,7 @@ class Tournoi{
     currentTour = null;
     limitPoint = null;
     date = null;
+    nbPoints = null;
 
     toJson(){
         var tours = [];
@@ -384,7 +387,8 @@ class Tournoi{
             "contraintes": this.contraintes,
             "tours": tours,
             "currentTour": this.currentTour, 
-            "date": this.date
+            "date": this.date,
+            "nbPoints": this.nbPoints
         };
     }
 }
@@ -749,6 +753,12 @@ function buildPreparation(){
                 "max": 20, 
                 "value": bd.tournoi.nbTerrain,
                 "id": "nbTerrain"
+            }));
+             divPrep.appendChild(buildPropertyEditor("Nombre de points", "numberSpinner", {
+                "min": 1, 
+                "max": 30,
+                "value": bd.tournoi.nbPoints, 
+                "id": "nbTour"
             }));
             var handicaps = MH.makeButton({
                 type: "click", 
@@ -1476,8 +1486,8 @@ function finTournoi(){
 function validTour(){   
     var matchsNonTermine = false;
     for (var i = 0; i < bd.tournoi.tours[bd.tournoi.currentTour].matchs.length; i++){
-        if (bd.tournoi.tours[bd.tournoi.currentTour].matchs[i].ptsEquipeA < 21 &&
-            bd.tournoi.tours[bd.tournoi.currentTour].matchs[i].ptsEquipeB < 21){
+        if (bd.tournoi.tours[bd.tournoi.currentTour].matchs[i].ptsEquipeA < bd.tournoi.nbPoints &&
+            bd.tournoi.tours[bd.tournoi.currentTour].matchs[i].ptsEquipeB < bd.tournoi.nbPoints){
                 matchsNonTermine = true;
                 break;
             }
@@ -1790,8 +1800,8 @@ function victoire(span){
     var currentIsEquipeA = equipeCurrent.getAttribute("indexequipe") == "ptsEquipeA";
     var scoreEquipeOppose = currentIsEquipeA ? scoreEquipeB : scoreEquipeA;
     var target;
-    if (scoreEquipeOppose <= 19){
-        target = 21;
+    if (scoreEquipeOppose <= bd.tournoi.nbPoints -2){
+        target = bd.tournoi.nbPoints;
     }else{
         target = scoreEquipeOppose + 2;
     }
