@@ -1678,7 +1678,8 @@ function validModificationPreparation(dontExit){
     bd.updateTournoi({
         "typeTournoi": typeTournoiListe[document.body.querySelector("div.radiotypeTournoi input:checked").id],
         "nbTour": parseInt(document.body.querySelector("#nbTour .numberSpinnerValue").innerHTML),
-        "nbTerrain": parseInt(document.body.querySelector("#nbTerrain .numberSpinnerValue").innerHTML)
+        "nbTerrain": parseInt(document.body.querySelector("#nbTerrain .numberSpinnerValue").innerHTML),
+        "nbPoints": parseInt(document.body.querySelector("#nbPoints .numberSpinnerValue").innerHTML)
     }); 
     bd.updateContraintes();
     if (dontExit === true) {
