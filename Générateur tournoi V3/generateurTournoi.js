@@ -1,3 +1,17 @@
+function preventZoom(e) {
+  var t2 = e.timeStamp;
+  var t1 = e.currentTarget.dataset.lastTouch || t2;
+  var dt = t2 - t1;
+  var fingers = e.touches.length;
+  e.currentTarget.dataset.lastTouch = t2;
+
+  if (!dt || dt > 500 || fingers > 1) return; // not double-tap
+
+  e.preventDefault();
+  e.target.click();
+}
+
+
 window.addEventListener("dblclick", function(evt){evt.preventDefault();});
 //Base de données locale
 class GlobalDataBase{
@@ -1340,6 +1354,7 @@ function buildEditor(type, attributes){
                 type: "click", 
                 func: numberPlusOuMoins.bind(this, false, spanNumber, undefined, )
             });
+            buttonMoins.addEventListener('touchstart', preventZoom); 
             buttonMoins.innerHTML = "-";
             buttonMoins.classList.add("btn-secondary");
             buttonMoins.classList.add("numberSpinnerPlusMoins");
@@ -1350,6 +1365,7 @@ function buildEditor(type, attributes){
                 type: "click", 
                 func: numberPlusOuMoins.bind(this, true, spanNumber, undefined)
             });
+            buttonPlus.addEventListener('touchstart', preventZoom); 
             buttonPlus.innerHTML = "+";
             buttonPlus.classList.add("btn-secondary");
             buttonPlus.classList.add("numberSpinnerPlusMoins");
