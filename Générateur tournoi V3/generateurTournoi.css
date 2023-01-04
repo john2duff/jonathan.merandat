@@ -148,9 +148,11 @@ div.joueur.accueil{
     font-size: 0.9rem;
     box-shadow: 5px 3px 5px 0px grey;
     justify-content: center;
-    max-width: 75px;
+    max-width: 100px;
     max-height: 104px;
     overflow: hidden;
+    flex-direction: column;
+    line-height: 16px;
 }
 
 div.divJoueurs.accueil {
@@ -180,7 +182,7 @@ div.joueurSelection.femme:hover{
 }
 
 span.nomJoueur{
-    margin: 0px 5px;
+    margin: 0px 0px 5px 5px;
     flex: 1 1 auto;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -416,7 +418,8 @@ span.numContrainte {
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: 8px 0px;
+    flex-wrap: wrap;
+    padding: 5px;
 }
 .tour{
     width: 100%;
