@@ -1072,11 +1072,9 @@ function buildListContraintes(){
                 }
             break;
             case pages.MODIFICATION_CONTRAINTES:
-                if (!bd.tournoi.contraintes[i].disabled){
-                    listContraintes.appendChild(buildContrainte(bd.tournoi.contraintes[i], i, compt));
-                    flag = true;
-                    compt++;
-                }
+                listContraintes.appendChild(buildContrainte(bd.tournoi.contraintes[i], i, compt));
+                flag = true;
+                compt++;
             break;
         }
     }
@@ -1133,6 +1131,8 @@ function buildContrainte(contrainte, i, compt){
             var div = MH.makeLabel(null, "ssContrainte");
             div.setAttribute("for", "checkContrainte" + i);
             div.setAttribute("data-name", contrainte.name);
+            div.setAttribute("data-title", contrainte.title);
+            div.setAttribute("data-desc", contrainte.desc);
             div.appendChild(MH.makeSpan(contrainte.title, "contrainteTitle"));
             div.appendChild(MH.makeSpan(contrainte.desc, "contrainteDesc"));
             contrainteDom.appendChild(div);
@@ -1706,13 +1706,14 @@ function validModificationContraintes(){
     var retourContraintes = [];
     var currentContrainte;
     for (var i = 0; i < contraintes.length; i++){
-        retourContraintes.push({
-            "name": contraintes[i].getAttribute("data-name"),
-            "title": contraintes[i].getAttribute("data-title"), 
-            "desc": contraintes[i].getAttribute("data-desc"),
+        currentContrainte = {
+            "name": bd.tournoi.contraintes[i].name,
+            "title": bd.tournoi.contraintes[i].title, 
+            "desc": bd.tournoi.contraintes[i].desc,
             "actif": contraintes[i].querySelector("input").checked, 
-            "disabled": !(contraintes[i].getAttribute("data-name") == "COEQUIPIER" && bd.tournoi.typeTournoi.typeTournoiListe.SIMPLE), 
-        });
+            "disabled": bd.tournoi.contraintes[i].disabled, 
+        }
+        retourContraintes.push(currentContrainte);
         if (currentContrainte.name == "LIMITPOINT") {
             bd.updateTournoi({"limitPoint": contraintes[i].querySelector("#limitPoint").value });
         }
