@@ -1,9 +1,0 @@
-côté serveur : 
-    - Deno :
-        - préparation dynamique des pages html / script / css
-            -> système de cache des pages
-        - base de données ?
-
-Côté client : 
-    - Javascript / html / css
-
