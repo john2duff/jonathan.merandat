@@ -1,0 +1,87 @@
+:root {
+    --bg1-color: #f1f1f1;
+    --text1-color: #000000;
+    --bg2-color: #476d7c;
+    --text2-color: #fff;
+    --bg3-color: #b6dde2;
+    --text3-color: #000000;
+    --bg4-color: #c8c8c8;
+    --text4-color: #000000;
+    --radius: 5px;
+    --padding-button: 5px;
+}
+
+.theme-dark {
+    --bg1-color: #000000;
+    --text1-color: #--bg1-color: #f1f1f1;    ;
+    --bg2-color: #fff;
+    --text2-color: #476d7cfff;
+    --bg3-color: #000000;
+    --text3-color: #b6dde2;
+    --bg4-color: #ffffff;
+    --text4-color: #349170;
+    --radius: 5px;
+}
+
+body {
+    background: var(--bg1-color);
+    color: var(--text1-color);
+}
+
+.header{
+    background: var(--bg2-color);
+    color: var(--text2-color);
+    position: sticky;
+    top: 0;
+    padding: 5px 10px;
+}
+
+.footer {
+    background: var(--bg4-color);
+    color: var(--text4-color);
+    position: sticky;
+    bottom: 0;
+    padding: 5px 10px;
+}
+
+.sous-header {
+    background: var(--bg3-color);
+    color: var(--text3-color);
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    position: sticky;
+    top: 0;
+    z-index:1;
+}
+
+.sous-header-secondary {
+    background: var(--bg4-color);
+    color: var(--text4-color);
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    position: sticky;
+    top: 44px;
+}
+
+.btn-primary {
+    background: var(--bg2-color);
+    color: var(--text2-color); 
+    border-radius: var(--radius);
+    padding: 2px 5px;
+}
+
+.btn-secondary {
+    background: var(--bg4-color);
+    color: var(--text4-color);
+    border-radius: var(--radius);
+    padding: 2px 5px;
+}
+
+.btn-ternairy {
+    background: var(--bg3-color);
+    color: var(--text3-color);
+    border-radius: var(--radius);
+    padding: 2px 5px;
+}

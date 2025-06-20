@@ -24,49 +24,30 @@ let settings = JSON.parse(
   localStorage.getItem("settings") || JSON.stringify({ terrains: 2, tours: 3 })
 );
 let scores = JSON.parse(localStorage.getItem("scores") || "{}");
-let planning = [];
+let planning = JSON.parse(localStorage.getItem("planning") || "[]");
 let manualMode = false;
 
+// -- DOM CREATION --
 window.addEventListener("DOMContentLoaded", () => {
-  // -- DOM CREATION --
   document.body.innerHTML = `
-  <header>
-    <h1>⚽ Tournoi Badminton</h1>
+  <header class="header">
+      <span>🏸 Tournoi Badminton</span>
     <nav>
-      <button onclick="showSection('players')">👥 Joueurs</button>
-      <button onclick="showSection('settings')">⚙️ Paramètres</button>
+      <button onclick="showSection('preparation')">👥  Préparation</button>
       <button onclick="showSection('tournament')">🏆 Tournoi</button>
       <button onclick="toggleStatsPanel()">📊 Statistiques</button>
+      <button class="hidden"> ⚙️</button>
     </nav>
   </header>
-  <div id="main">
-    <section id="players"></section>
-    <section id="settings" style="display:none"></section>
+  <div id="main" class="flex-auto overflow-auto container m-auto">
+    <section id="preparation"></section>
     <section id="tournament" style="display:none"></section>
   </div>
   <aside id="statsPanel" class="hidden"></aside>
 `;
 
-  // -- CSS --
-  const style = document.createElement("style");
-  style.textContent = `
-  body { font-family: sans-serif; margin: 0; }
-  header { background: #222; color: #fff; padding: 0.5em; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-  nav button { margin: 0.2em; }
-  section { padding: 1em; }
-  #statsPanel { position: fixed; top: 0; right: 0; width: 300px; height: 100vh; background: #f5f5f5; border-left: 1px solid #ccc; padding: 1em; overflow-y: auto; display: none; }
-  #statsPanel.open { display: block; }
-  @media (max-width: 600px) {
-    #statsPanel { width: 100%; height: 50vh; bottom: 0; top: auto; border-left: none; border-top: 1px solid #ccc; }
-  }
-  .player-entry { display: flex; gap: 0.5em; margin-bottom: 0.5em; flex-wrap: wrap; }
-  .player-entry input, .player-entry select { flex: 1; min-width: 100px; }
-  .match { margin: 0.5em 0; background: #f0f0f0; padding: 0.5em; border-radius: 5px; }
-  .valid { color: green; }
-  .invalid { color: red; }
-`;
-  document.head.appendChild(style);
-  showSection("players");
+  renderPreparationSection();
+  renderTournament();
 });
 
 // -- UI FUNCTIONS --
@@ -86,14 +67,32 @@ function saveData() {
   localStorage.setItem("players", JSON.stringify(players));
   localStorage.setItem("settings", JSON.stringify(settings));
   localStorage.setItem("scores", JSON.stringify(scores));
+  localStorage.setItem("planning", JSON.stringify(planning));
 }
 
 // -- RENDER PLAYERS SECTION --
-function renderPlayersSection() {
-  const el = document.getElementById("players");
+function renderPreparationSection() {
+  const el = document.getElementById("preparation");
   el.innerHTML = `
-    <h2>Liste des joueurs</h2>
-    <form id="form-add-player">
+    <div class="sous-header">
+      <h2 >Paramètres</h2>
+    </div>
+    <div class="m-5">
+      <label>Nombre de terrains : <input type="number" min="1" value="${
+        settings.terrains
+      }" onchange="settings.terrains=parseInt(this.value);saveData()"></label><br>
+      <label>Nombre de tours : <input type="number" min="1" value="${
+        settings.tours
+      }" onchange="settings.tours=parseInt(this.value);saveData()"></label><br>
+    </div>
+
+    <div class="sous-header justify-between">
+      <h2 >Liste des joueurs</h2>
+      <span>${players.length} joueurs enregistrés</span>
+    </div>
+    <div class="m-5">
+
+    <form id="form-add-player" class="my-2">
         <input id="name-player" placeholder="Nouveau joueur" value="" />
         <select id="gender-player" >
             <option value="H" selected>H</option>
@@ -109,11 +108,15 @@ function renderPlayersSection() {
           )
           .join("")}
       </select>
-        <button type="submit" id="addPlayer">Ajouter un joueur</button>
-    <label>${players.length} joueurs enregistrés</label>
+        <button class="btn-primary w-36" type="submit" id="addPlayer">Ajouter un joueur</button>
 
     </form>
     <div id="playerList"></div>
+    </div>
+
+    <footer class="footer flex justify-end">
+      <button class="btn-primary" onclick="generatePlanning();showSection('tournament');">Générer le planning</button>
+    </footer>
   `;
 
   el.querySelector("#form-add-player").onsubmit = () => {
@@ -148,7 +151,7 @@ function renderPlayersSection() {
     };
     players.splice(0, 0, newPlayer);
     saveData();
-    renderPlayersSection();
+    renderPreparationSection();
     el.querySelector("#name-player").focus();
   };
 
@@ -156,15 +159,15 @@ function renderPlayersSection() {
   list.innerHTML = players
     .map(
       (p, i) => `
-    <div class="player-entry">
+    <div class="mb-1">
       <input value="${
         p.name
-      }" onchange="players[${i}].name=this.value;saveData();renderPlayersSection()" />
-      <select onchange="players[${i}].gender=this.value;saveData();renderPlayersSection()">
+      }" onchange="players[${i}].name=this.value;saveData();renderPreparationSection()" />
+      <select onchange="players[${i}].gender=this.value;saveData();renderPreparationSection()">
         <option value="H" ${p.gender === "H" ? "selected" : ""}>H</option>
         <option value="F" ${p.gender === "F" ? "selected" : ""}>F</option>
       </select>
-      <select onchange="players[${i}].level=this.value;saveData();renderPlayersSection()">
+      <select onchange="players[${i}].level=this.value;saveData();renderPreparationSection()">
         ${levels
           .map(
             (l) =>
@@ -174,22 +177,11 @@ function renderPlayersSection() {
           )
           .join("")}
       </select>
-      <button onclick="players.splice(${i},1);saveData();renderPlayersSection()">Supprimer</button>
+      <button class="btn-secondary w-36" onclick="players.splice(${i},1);saveData();renderPreparationSection()">Supprimer</button>
     </div>
   `
     )
     .join("");
-}
-
-// -- RENDER SETTINGS SECTION --
-function renderSettingsSection() {
-  const el = document.getElementById("settings");
-  el.innerHTML = `
-    <h2>Paramètres</h2>
-    <label>Nombre de terrains : <input type="number" min="1" value="${settings.terrains}" onchange="settings.terrains=parseInt(this.value);saveData()"></label><br>
-    <label>Nombre de tours : <input type="number" min="1" value="${settings.tours}" onchange="settings.tours=parseInt(this.value);saveData()"></label><br>
-    <button onclick="generatePlanning();showSection('tournament');">Générer le planning</button>
-  `;
 }
 
 // -- RENDER TOURNAMENT SECTION --
@@ -198,47 +190,85 @@ function renderTournament() {
   const el = document.getElementById("tournament");
   let indexMatch = 0;
   el.innerHTML = `
-      <h2>Tournoi</h2>
+      <h2 class="sous-header">Tournoi</h2>
       ${planning
         .map((tour, index) => {
           return `
-            <div class="tour">
-                <h3>Tour ${index + 1}</h3>
-                ${tour
-                  .map((match, index) => {
-                    indexMatch++;
-                    return `
-                        <h4>Match ${indexMatch} - Terrain ${index + 1}</h4>
-                        <div class="match">
-                            <strong>Équipe 1</strong>
-                            <div class="team1">
-                                ${match.team1
-                                  .map((player) => {
-                                    return `
-                                        <span>${player.name}</span>
-                                    `;
-                                  })
-                                  .join("")}
-                            </div>
-                            <strong>Équipe 2</strong>
-                            <div class="team2">
-                                ${match.team2
-                                  .map((player) => {
-                                    return `
-                                        <span>${player.name}</span>
-                                    `;
-                                  })
-                                  .join("")}
-                            </div>
+            <div class="ml-5">
+                <h3 class="sous-header-secondary">Tour ${index + 1}</h3>
+                <div class="flex justify-center flex-wrap gap-4">
+                  ${tour
+                    .map((match, index) => {
+                      indexMatch++;
+                      return `
+                        <div class="flex flex-col mx-2">
+                          <h4>Match ${indexMatch} - Terrain ${index + 1}</h4>
+                          <div class="flex items-center border p-2 rounded">
+                              <div class="flex flex-col mx-2">
+                                  ${match.team1
+                                    .map((player) => {
+                                      return `
+                                          <span>${player.name}</span>
+                                      `;
+                                    })
+                                    .join("")}
+                              </div>
+                              🏸
+                              <div class="flex flex-col mx-2">
+                                  ${match.team2
+                                    .map((player) => {
+                                      return `
+                                          <span>${player.name}</span>
+                                      `;
+                                    })
+                                    .join("")}
+                              </div>
+                          </div>
                         </div>
-                    `;
-                  })
-                  .join("")}
+                      `;
+                    })
+                    .join("")}
+                </div>
             </div>
         `;
         })
         .join("")}
     `;
+}
+
+function renderStats() {
+  const panel = document.getElementById("statsPanel");
+  let total = 0,
+    invalids = 0;
+  for (const key in scores) {
+    const val = scores[key];
+    if (typeof val === "number") total++;
+    const [tour, idx, team] = key.split("-");
+    const opp = team === "t1" ? "t2" : "t1";
+    const oppScore = scores[`${tour}-${idx}-${opp}`];
+    if (
+      val >= 21 &&
+      oppScore >= 0 &&
+      Math.abs(val - oppScore) >= 2 &&
+      val <= 32 &&
+      oppScore <= 32
+    ) {
+      // valid
+    } else {
+      invalids++;
+    }
+  }
+  panel.innerHTML = `
+    <h3>📊 Statistiques</h3>
+    <p>Total de scores saisis : ${total}</p>
+    <p class="${invalids === 0 ? "valid" : "invalid"}">
+      ${
+        invalids === 0
+          ? "✅ Tous les scores sont valides"
+          : `❌ ${invalids} score(s) invalides`
+      }
+    </p>
+  `;
 }
 
 // -- GENERATE MATCH PLANNING --
@@ -339,27 +369,7 @@ function generatePlanning() {
     planning.push(matches);
   }
 
+  renderStats();
+
   localStorage.setItem("planning", JSON.stringify(planning));
-}
-
-// -- UI FUNCTIONS --
-function showSection(id) {
-  document
-    .querySelectorAll("section")
-    .forEach((sec) => (sec.style.display = "none"));
-
-  const sectionEl = document.getElementById(id);
-  if (id === "players") renderPlayersSection();
-  if (id === "settings") renderSettingsSection();
-  if (id === "tournament") renderTournament();
-
-  sectionEl.style.display = "block";
-}
-
-function toggleStatsPanel() {
-  const panel = document.getElementById("statsPanel");
-  panel.classList.toggle("open");
-  if (panel.classList.contains("open")) {
-    renderStatsPanel();
-  }
 }
