@@ -30,24 +30,21 @@ let manualMode = false;
 // -- DOM CREATION --
 window.addEventListener("DOMContentLoaded", () => {
   document.body.innerHTML = `
-  <header class="header">
-      <span>🏸 Tournoi Badminton</span>
-    <nav>
-      <button onclick="showSection('preparation')">👥  Préparation</button>
-      <button onclick="showSection('tournament')">🏆 Tournoi</button>
-      <button onclick="toggleStatsPanel()">📊 Statistiques</button>
-      <button class="hidden"> ⚙️</button>
-    </nav>
+  <header class="header flex justify-start items-center">
+      <span>🏸 Générateur de tournoi de Badminton</span>
   </header>
-  <div id="main" class="flex-auto overflow-auto container m-auto">
+  <div id="main">
     <section id="preparation"></section>
     <section id="tournament" style="display:none"></section>
   </div>
-  <aside id="statsPanel" class="hidden"></aside>
+  <aside id="statsPanel" class=""></aside>
 `;
 
   renderPreparationSection();
   renderTournament();
+  if (planning.length > 0) {
+    renderStats();
+  }
 });
 
 // -- UI FUNCTIONS --
@@ -75,7 +72,7 @@ function renderPreparationSection() {
   const el = document.getElementById("preparation");
   el.innerHTML = `
     <div class="sous-header">
-      <h2 >Paramètres</h2>
+      <h2> ⚙️Paramètres</h2>
     </div>
     <div class="m-5">
       <label>Nombre de terrains : <input type="number" min="1" value="${
@@ -87,7 +84,7 @@ function renderPreparationSection() {
     </div>
 
     <div class="sous-header justify-between">
-      <h2 >Liste des joueurs</h2>
+      <h2>👥 Liste des joueurs</h2>
       <span>${players.length} joueurs enregistrés</span>
     </div>
     <div class="m-5">
@@ -115,7 +112,18 @@ function renderPreparationSection() {
     </div>
 
     <footer class="footer flex justify-end">
-      <button class="btn-primary" onclick="generatePlanning();showSection('tournament');">Générer le planning</button>
+    ${
+      planning.length == 0
+        ? `
+      <button class="btn-primary" onclick="generatePlanning();showSection('tournament');"> 🏆 Générer le tournoi</button>
+      `
+        : `
+      <div class="flex justify-between w-full p-2">
+        <button class="btn-primary" onclick="generatePlanning();showSection('tournament');"> 🏆 Régénérer le tournoi</button>
+        <button class="btn-secondary" onclick="showSection('tournament');"> Tournoi en cours ➜</button>
+      </div>
+      `
+    }
     </footer>
   `;
 
@@ -190,7 +198,11 @@ function renderTournament() {
   const el = document.getElementById("tournament");
   let indexMatch = 0;
   el.innerHTML = `
-      <h2 class="sous-header">Tournoi</h2>
+      <div class="sous-header flex justify-start">
+        <button class="btn-secondary" onclick="showSection('preparation');"> Retour </button>
+        <span>🏆 Tournoi</span>
+        <button onclick="toggleStatsPanel()">📊 Statistiques</button>
+      </div>
       ${planning
         .map((tour, index) => {
           return `
@@ -233,6 +245,7 @@ function renderTournament() {
         `;
         })
         .join("")}
+
     `;
 }
 
@@ -240,24 +253,82 @@ function renderStats() {
   const panel = document.getElementById("statsPanel");
   let total = 0,
     invalids = 0;
-  for (const key in scores) {
-    const val = scores[key];
-    if (typeof val === "number") total++;
-    const [tour, idx, team] = key.split("-");
-    const opp = team === "t1" ? "t2" : "t1";
-    const oppScore = scores[`${tour}-${idx}-${opp}`];
-    if (
-      val >= 21 &&
-      oppScore >= 0 &&
-      Math.abs(val - oppScore) >= 2 &&
-      val <= 32 &&
-      oppScore <= 32
-    ) {
-      // valid
-    } else {
-      invalids++;
-    }
+  const opponentsMap = {}; // { playerName: { opponentName: count } }
+  const teammateMap = {}; // { playerName: { teammateName: count } }
+  const waitCount = {};
+
+  planning.forEach((matches, tourIdx) => {
+    const playersInTour = new Set();
+    matches.forEach((match, matchIdx) => {
+      const allPlayers = [...match.team1, ...match.team2];
+      allPlayers.forEach((p) => playersInTour.add(p.name));
+
+      match.team1.forEach((p1) => {
+        match.team2.forEach((p2) => {
+          opponentsMap[p1.name] = opponentsMap[p1.name] || {};
+          opponentsMap[p1.name][p2.name] =
+            (opponentsMap[p1.name][p2.name] || 0) + 1;
+        });
+      });
+
+      [match.team1, match.team2].forEach((team) => {
+        team.forEach((p1) => {
+          team.forEach((p2) => {
+            if (p1.name !== p2.name) {
+              teammateMap[p1.name] = teammateMap[p1.name] || {};
+              teammateMap[p1.name][p2.name] =
+                (teammateMap[p1.name][p2.name] || 0) + 1;
+            }
+          });
+        });
+      });
+
+      const s1 = scores[`${tourIdx}-${matchIdx}-t1`];
+      const s2 = scores[`${tourIdx}-${matchIdx}-t2`];
+      if (typeof s1 === "number" && typeof s2 === "number") {
+        total++;
+        if (
+          !(
+            s1 >= 21 &&
+            s2 >= 0 &&
+            Math.abs(s1 - s2) >= 2 &&
+            s1 <= 32 &&
+            s2 <= 32
+          )
+        )
+          invalids++;
+      }
+    });
+
+    players.forEach((p) => {
+      if (!playersInTour.has(p.name)) {
+        waitCount[p.name] = waitCount[p.name] || [];
+        waitCount[p.name].push(tourIdx + 1);
+      }
+    });
+  });
+
+  function renderAccordions(map, label) {
+    return Object.entries(map)
+      .map(([p, data]) => {
+        const repeated = Object.entries(data).filter(([, count]) => count > 1);
+        if (!repeated.length) return "";
+        return `
+        <button class="accordion" onclick="this.classList.toggle('open')">${p} - ${label}</button>
+        <div class="accordion-content">
+          ${repeated
+            .map(([other, count]) => `<div>${other} (${count} fois)</div>`)
+            .join("")}
+        </div>
+      `;
+      })
+      .join("");
   }
+
+  const waitList = Object.entries(waitCount).sort(
+    (a, b) => b[1].length - a[1].length
+  );
+
   panel.innerHTML = `
     <h3>📊 Statistiques</h3>
     <p>Total de scores saisis : ${total}</p>
@@ -268,6 +339,23 @@ function renderStats() {
           : `❌ ${invalids} score(s) invalides`
       }
     </p>
+    <h4>Adversaires rencontrés plusieurs fois</h4>
+    ${renderAccordions(opponentsMap, "adversaires répétés")}
+    <h4>Coéquipiers répétés</h4>
+    ${renderAccordions(teammateMap, "coéquipiers répétés")}
+    <h4>Joueurs souvent en attente</h4>
+    ${waitList
+      .map(
+        ([name, tours]) => `
+      <button class="accordion" onclick="this.classList.toggle('open')">${name} - ${
+          tours.length
+        } attente(s)</button>
+      <div class="accordion-content">
+        ${tours.map((t) => `<div>Tour ${t}</div>`).join("")}
+      </div>
+    `
+      )
+      .join("")}
   `;
 }
 
