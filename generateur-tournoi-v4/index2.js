@@ -94,7 +94,7 @@ function renderPreparationSection() {
     <div class="sous-header">
       <h2> ⚙️Paramètres</h2>
     </div>
-    <div class="flex flex-wrap gap-4">
+    <div class="flex flex-wrap gap-4 m-5">
       <label>Nombre de terrains : <input type="number" min="1" value="${
         settings.terrains
       }" onchange="settings.terrains=parseInt(this.value);saveData()"></label> 
@@ -102,8 +102,8 @@ function renderPreparationSection() {
         settings.tours
       }" onchange="settings.tours=parseInt(this.value);saveData()"></label>
       
-      <button class="accordion" onclick="this.classList.toggle('open')">Gestion des contraintes</button>
-      <div class="accordion-content">
+      <button class="accordion" onclick="this.classList.toggle('open')"> ﹀ Gestion des contraintes</button>
+      <div class="accordion-content"> 
       ${Object.entries(settings.priorities)
         .map(
           ([priority, poids]) =>
@@ -135,7 +135,7 @@ function renderPreparationSection() {
           )
           .join("")}
       </select>
-        <button class="btn-primary w-36" type="submit" id="addPlayer">Ajouter un joueur</button>
+        <button class="btn-primary w-10" type="submit" id="addPlayer">+</button>
 
     </form>
     <div id="playerList"></div>
@@ -199,7 +199,7 @@ function renderPreparationSection() {
     .map(
       (p, i) => `
     <div class="mb-1">
-      <input value="${
+      <input id="name_${i}" value="${
         p.name
       }" onchange="players[${i}].name=this.value;saveData();renderPreparationSection()" />
       <select onchange="players[${i}].gender=this.value;saveData();renderPreparationSection()">
@@ -216,7 +216,7 @@ function renderPreparationSection() {
           )
           .join("")}
       </select>
-      <button class="btn-secondary w-36" onclick="players.splice(${i},1);saveData();renderPreparationSection()">Supprimer</button>
+      <button class="btn-secondary w-10" onclick="players.splice(${i},1);saveData();renderPreparationSection()"> 🗑 </button>
     </div>
   `
     )
@@ -235,7 +235,7 @@ function renderTournament() {
       ${planning
         .map((tour, index) => {
           return `
-            <div class="ml-5">
+            <div class="">
                 <h3 class="sous-header-secondary">Tour ${index + 1}</h3>
                 <div class="flex justify-center flex-wrap gap-4">
                   ${tour
@@ -343,7 +343,7 @@ function renderStats() {
         const repeated = Object.entries(data).filter(([, count]) => count > 1);
         if (!repeated.length) return "";
         return `
-        <button class="accordion" onclick="this.classList.toggle('open')">${p} - ${label}</button>
+        <button class="accordion" onclick="this.classList.toggle('open')">${p} ${label}</button>
         <div class="accordion-content">
           ${repeated
             .map(([other, count]) => `<div>${other} (${count} fois)</div>`)
@@ -358,14 +358,8 @@ function renderStats() {
     (a, b) => b[1].length - a[1].length
   );
 
-  const adversaireContrainte = renderAccordions(
-    opponentsMap,
-    "adversaires répétés"
-  );
-  const coequipierContrainte = renderAccordions(
-    opponentsMap,
-    "coéquipiers répétés"
-  );
+  const adversaireContrainte = renderAccordions(opponentsMap, "");
+  const coequipierContrainte = renderAccordions(opponentsMap, "");
 
   panel.innerHTML = `
 
