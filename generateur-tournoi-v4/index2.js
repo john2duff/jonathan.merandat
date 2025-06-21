@@ -19,25 +19,30 @@ const levels = [
   "N1",
 ];
 const levelValue = Object.fromEntries(levels.map((lvl, i) => [lvl, i]));
-let players = JSON.parse(localStorage.getItem("players") || "[]");
-let settings = JSON.parse(
-  localStorage.getItem("settings") || JSON.stringify({ terrains: 2, tours: 3 })
-);
-let scores = JSON.parse(localStorage.getItem("scores") || "{}");
-let planning = JSON.parse(localStorage.getItem("planning") || "[]");
+let tournoi = JSON.parse(localStorage.getItem("gen-tournoi") || "{}");
+let players = tournoi.players || [];
+let settings = tournoi.settings || {
+  terrains: 2,
+  tours: 3,
+  priorities: { equipier: 1, adversaire: 1, attente: 2, sexe: 2, niveau: 1 },
+};
+let scores = tournoi.scores || {};
+let planning = tournoi.planning || [];
 let manualMode = false;
 
 // -- DOM CREATION --
 window.addEventListener("DOMContentLoaded", () => {
   document.body.innerHTML = `
-  <header class="header flex justify-start items-center">
-      <span>🏸 Générateur de tournoi de Badminton</span>
-  </header>
-  <div id="main">
-    <section id="preparation"></section>
-    <section id="tournament" style="display:none"></section>
+  <div id="global" class="flex flex-col overflow-auto">
+    <header class="header flex justify-start items-center">
+        <span>🏸 Générateur de tournoi de Badminton</span>
+    </header>
+    <div id="main" class="flex">
+      <section id="preparation" class="flex-auto"></section>
+      <section id="tournament" class="flex-auto" style="display:none"></section>
+    </div>
   </div>
-  <aside id="statsPanel" class=""></aside>
+  <aside id="statsPanel" class="h-screen overflow-auto"></aside>
 `;
 
   renderPreparationSection();
@@ -55,16 +60,31 @@ function showSection(id) {
   document.getElementById(id).style.display = "block";
 }
 
-function toggleStatsPanel() {
+function toggleStatsPanel(forceHide = null) {
   const panel = document.getElementById("statsPanel");
-  panel.classList.toggle("open");
+  if (forceHide === true) {
+    panel.classList.remove("open");
+  } else {
+    panel.classList.toggle("open");
+  }
+  const global = document.getElementById("global");
+  if (panel.classList.contains("open")) {
+    global.classList.add("withStatPanel");
+  } else {
+    global.classList.remove("withStatPanel");
+  }
 }
 
 function saveData() {
-  localStorage.setItem("players", JSON.stringify(players));
-  localStorage.setItem("settings", JSON.stringify(settings));
-  localStorage.setItem("scores", JSON.stringify(scores));
-  localStorage.setItem("planning", JSON.stringify(planning));
+  localStorage.setItem(
+    "gen-tournoi",
+    JSON.stringify({
+      players,
+      settings,
+      scores,
+      planning,
+    })
+  );
 }
 
 // -- RENDER PLAYERS SECTION --
@@ -74,13 +94,23 @@ function renderPreparationSection() {
     <div class="sous-header">
       <h2> ⚙️Paramètres</h2>
     </div>
-    <div class="m-5">
+    <div class="flex flex-wrap gap-4">
       <label>Nombre de terrains : <input type="number" min="1" value="${
         settings.terrains
-      }" onchange="settings.terrains=parseInt(this.value);saveData()"></label><br>
+      }" onchange="settings.terrains=parseInt(this.value);saveData()"></label> 
       <label>Nombre de tours : <input type="number" min="1" value="${
         settings.tours
-      }" onchange="settings.tours=parseInt(this.value);saveData()"></label><br>
+      }" onchange="settings.tours=parseInt(this.value);saveData()"></label>
+      
+      <button class="accordion" onclick="this.classList.toggle('open')">Gestion des contraintes</button>
+      <div class="accordion-content">
+      ${Object.entries(settings.priorities)
+        .map(
+          ([priority, poids]) =>
+            `<label>${priority} : <input type="number" min="1" max="10" value="${poids}" onchange="settings.priorities['${priority}']=parseInt(this.value);saveData()"></label>`
+        )
+        .join("")}
+      </div>
     </div>
 
     <div class="sous-header justify-between">
@@ -115,11 +145,11 @@ function renderPreparationSection() {
     ${
       planning.length == 0
         ? `
-      <button class="btn-primary" onclick="generatePlanning();showSection('tournament');"> 🏆 Générer le tournoi</button>
+      <button class="btn-primary" onclick="generePlanning();showSection('tournament');"> 🏆 Générer le tournoi</button>
       `
         : `
       <div class="flex justify-between w-full p-2">
-        <button class="btn-primary" onclick="generatePlanning();showSection('tournament');"> 🏆 Régénérer le tournoi</button>
+        <button class="btn-primary" onclick="generePlanning();showSection('tournament');"> 🏆 Régénérer le tournoi</button>
         <button class="btn-secondary" onclick="showSection('tournament');"> Tournoi en cours ➜</button>
       </div>
       `
@@ -156,6 +186,7 @@ function renderPreparationSection() {
       name,
       gender: el.querySelector("#gender-player").value,
       level: el.querySelector("#level-player").value,
+      id: crypto.randomUUID?.(),
     };
     players.splice(0, 0, newPlayer);
     saveData();
@@ -194,13 +225,11 @@ function renderPreparationSection() {
 
 // -- RENDER TOURNAMENT SECTION --
 function renderTournament() {
-  let planning = JSON.parse(localStorage.getItem("planning") || []);
   const el = document.getElementById("tournament");
   let indexMatch = 0;
   el.innerHTML = `
-      <div class="sous-header flex justify-start">
-        <button class="btn-secondary" onclick="showSection('preparation');"> Retour </button>
-        <span>🏆 Tournoi</span>
+      <div class="sous-header flex justify-between">
+        <button onclick="toggleStatsPanel(true);showSection('preparation');"> <div style="transform:rotate(180deg)">➜<div>  </button>
         <button onclick="toggleStatsPanel()">📊 Statistiques</button>
       </div>
       ${planning
@@ -329,135 +358,221 @@ function renderStats() {
     (a, b) => b[1].length - a[1].length
   );
 
+  const adversaireContrainte = renderAccordions(
+    opponentsMap,
+    "adversaires répétés"
+  );
+  const coequipierContrainte = renderAccordions(
+    opponentsMap,
+    "coéquipiers répétés"
+  );
+
   panel.innerHTML = `
-    <h3>📊 Statistiques</h3>
-    <p>Total de scores saisis : ${total}</p>
-    <p class="${invalids === 0 ? "valid" : "invalid"}">
-      ${
-        invalids === 0
-          ? "✅ Tous les scores sont valides"
-          : `❌ ${invalids} score(s) invalides`
-      }
-    </p>
-    <h4>Adversaires rencontrés plusieurs fois</h4>
-    ${renderAccordions(opponentsMap, "adversaires répétés")}
-    <h4>Coéquipiers répétés</h4>
-    ${renderAccordions(teammateMap, "coéquipiers répétés")}
-    <h4>Joueurs souvent en attente</h4>
-    ${waitList
-      .map(
-        ([name, tours]) => `
-      <button class="accordion" onclick="this.classList.toggle('open')">${name} - ${
-          tours.length
-        } attente(s)</button>
-      <div class="accordion-content">
-        ${tours.map((t) => `<div>Tour ${t}</div>`).join("")}
-      </div>
-    `
-      )
-      .join("")}
+
+    <h3 class="header flex justify-between">
+    📊 Statistiques
+    <button onclick="toggleStatsPanel(true);">✖</button>
+    </h3>
+    
+    <h4>${
+      adversaireContrainte == ""
+        ? `✅ Aucun adversaire identique</h4>`
+        : `❌ Adversaire répétés</h4> ${adversaireContrainte}`
+    }
+    <h4>${
+      coequipierContrainte == ""
+        ? `✅ Aucun coéquipier identique</h4>`
+        : `❌ Coéquipé répétés</h4> ${coequipierContrainte}`
+    }
+
+    <h4>${
+      waitList.length == 0
+        ? `✅ Aucun joueur en attente</h4>`
+        : `❌ Joueurs en attente</h4>${waitList
+            .map(
+              ([name, tours]) => `
+          <button class="accordion" onclick="this.classList.toggle('open')">${name} - ${
+                tours.length
+              } attente(s)</button>
+          <div class="accordion-content">
+            ${tours.map((t) => `<div>Tour ${t}</div>`).join("")}
+          </div>
+        `
+            )
+            .join("")}`
+    }
+    
   `;
 }
 
-// -- GENERATE MATCH PLANNING --
-function generatePlanning() {
+// -- UTILITAIRES --
+function shuffle(array) {
+  return array
+    .map((x) => [Math.random(), x])
+    .sort()
+    .map((x) => x[1]);
+}
+
+function getLevelScore(p) {
+  return levelValue[p.level] || 0;
+}
+
+function sameTeamCount(p1, p2, planning) {
+  let count = 0;
+  for (const tour of planning) {
+    for (const match of tour) {
+      if (
+        (match.team1.includes(p1) && match.team1.includes(p2)) ||
+        (match.team2.includes(p1) && match.team2.includes(p2))
+      ) {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+function sameOpponentCount(p1, p2, planning) {
+  let count = 0;
+  for (const tour of planning) {
+    for (const match of tour) {
+      if (
+        (match.team1.includes(p1) && match.team2.includes(p2)) ||
+        (match.team2.includes(p1) && match.team1.includes(p2))
+      ) {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+function matchScore(team1, team2, planning, joueursAttente, params) {
+  let score = 100;
+  const { equipe, adversaire, attente, sexe, niveau } = params;
+
+  // Coéquipiers déjà ensemble
+  if (sameTeamCount(team1[0], team1[1], planning) > 0) score -= 10 * equipe;
+  if (sameTeamCount(team2[0], team2[1], planning) > 0) score -= 10 * equipe;
+
+  // Adversaires déjà rencontrés
+  for (const p1 of team1) {
+    for (const p2 of team2) {
+      if (sameOpponentCount(p1, p2, planning) > 0) score -= 5 * adversaire;
+    }
+  }
+
+  // Attente minimisée
+  for (const p of [...team1, ...team2]) {
+    if (joueursAttente[p.id]) score -= 2 * attente;
+  }
+
+  // Mixité
+  const mixte = (t) => t.filter((p) => p.gender === "F").length === 1;
+  if (!(mixte(team1) && mixte(team2))) score -= 5 * sexe;
+
+  // Écart de niveau max autorisé
+  const tous = [...team1, ...team2];
+  const ecart =
+    Math.max(...tous.map(getLevelScore)) - Math.min(...tous.map(getLevelScore));
+  if (ecart > settings.ecartMax) score -= (ecart - settings.ecartMax) * niveau;
+
+  return score;
+}
+
+// -- GÉNÉRATION DU PLANNING --
+async function generePlanning() {
+  const loader = document.createElement("div");
+  loader.id = "loader";
+  loader.style.position = "fixed";
+  loader.style.top = "0";
+  loader.style.left = "0";
+  loader.style.width = "100%";
+  loader.style.height = "100%";
+  loader.style.background = "rgba(255,255,255,0.8)";
+  loader.style.display = "flex";
+  loader.style.flexDirection = "column";
+  loader.style.alignItems = "center";
+  loader.style.justifyContent = "center";
+  loader.style.zIndex = "1000";
+  const progress = document.createElement("progress");
+  progress.max = settings.tours;
+  progress.value = 0;
+  const label = document.createElement("div");
+  label.style.marginTop = "1em";
+  loader.append("Génération du planning en cours...", progress, label);
+  document.body.append(loader);
+
   planning = [];
-  const history = {};
-
-  function key(a, b) {
-    return [a, b].sort().join("|");
-  }
-
-  function scoreMatch(p1, p2, p3, p4) {
-    let score = 0;
-    const team1 = [p1, p2];
-    const team2 = [p3, p4];
-    const all = [...team1, ...team2];
-
-    // Penalty for repeated teammates or opponents
-    score -= (history[key(p1.name, p2.name)] || 0) * 5;
-    score -= (history[key(p3.name, p4.name)] || 0) * 5;
-    for (let a of team1)
-      for (let b of team2) score -= (history[key(a.name, b.name)] || 0) * 2;
-
-    // Penalize cross-gender inconsistencies
-    const gender1 = new Set(team1.map((p) => p.gender));
-    const gender2 = new Set(team2.map((p) => p.gender));
-    if (
-      gender1.size === 1 &&
-      gender2.size === 1 &&
-      [...gender1][0] !== [...gender2][0]
-    )
-      score -= 10;
-
-    // Level balance bonus
-    const levelDiff = Math.abs(
-      levelValue[p1.level] +
-        levelValue[p2.level] -
-        (levelValue[p3.level] + levelValue[p4.level])
-    );
-    score -= levelDiff;
-
-    return score;
-  }
+  const joueursParTour = players.length / 4;
+  let joueursAttente = {};
 
   for (let tour = 0; tour < settings.tours; tour++) {
-    const matches = [];
-    const used = new Set();
-    let tourPlayers = [...players];
+    label.innerHTML = `Tour ${tour + 1} / ${settings.tours}`;
+    await new Promise((r) => requestAnimationFrame(r));
+    const joueursUtilises = new Set();
 
-    for (let t = 0; t < settings.terrains; t++) {
-      let bestScore = -Infinity;
-      let bestCombo = null;
+    const tourMatches = [];
+    let disponibles = shuffle(
+      players.filter((p) => !joueursUtilises.has(p.id))
+    );
+    const combinaisons = [];
 
-      for (let i = 0; i < tourPlayers.length; i++) {
-        for (let j = i + 1; j < tourPlayers.length; j++) {
-          for (let k = 0; k < tourPlayers.length; k++) {
-            if (used.has(k) || k === i || k === j) continue;
-            for (let l = k + 1; l < tourPlayers.length; l++) {
-              if (used.has(l) || l === i || l === j) continue;
-              const p1 = tourPlayers[i],
-                p2 = tourPlayers[j],
-                p3 = tourPlayers[k],
-                p4 = tourPlayers[l];
-              const s = scoreMatch(p1, p2, p3, p4);
-              if (s > bestScore) {
-                bestScore = s;
-                bestCombo = [i, j, k, l];
-              }
-            }
+    // Générer toutes les combinaisons possibles
+    for (let i = 0; i < disponibles.length; i++) {
+      for (let j = i + 1; j < disponibles.length; j++) {
+        for (let k = j + 1; k < disponibles.length; k++) {
+          for (let l = k + 1; l < disponibles.length; l++) {
+            const groupe = [
+              disponibles[i],
+              disponibles[j],
+              disponibles[k],
+              disponibles[l],
+            ];
+            const team1 = [groupe[0], groupe[1]];
+            const team2 = [groupe[2], groupe[3]];
+            const score = matchScore(
+              team1,
+              team2,
+              planning,
+              joueursAttente,
+              settings.priorities
+            );
+            combinaisons.push({ team1, team2, score, joueurs: groupe });
           }
         }
       }
-
-      if (bestCombo) {
-        const [i, j, k, l] = bestCombo;
-        const match = {
-          team1: [tourPlayers[i], tourPlayers[j]],
-          team2: [tourPlayers[k], tourPlayers[l]],
-        };
-        matches.push(match);
-        [i, j, k, l].forEach((idx) => used.add(idx));
-
-        const pairs = [
-          [i, j],
-          [k, l],
-          [i, k],
-          [i, l],
-          [j, k],
-          [j, l],
-        ];
-        pairs.forEach(([a, b]) => {
-          const hKey = key(tourPlayers[a].name, tourPlayers[b].name);
-          history[hKey] = (history[hKey] || 0) + 1;
-        });
-      }
     }
 
-    planning.push(matches);
+    console.log(
+      `Tour ${tour + 1} - ${combinaisons.length} combinaisons trouvées`
+    );
+
+    // Trier et sélectionner les meilleures combinaisons sans chevauchement
+    combinaisons.sort((a, b) => b.score - a.score);
+    const selectionnes = new Set();
+    for (const comb of combinaisons) {
+      if (tourMatches.length >= settings.terrains) break;
+      if (comb.joueurs.some((p) => selectionnes.has(p.id))) continue;
+      tourMatches.push({ team1: comb.team1, team2: comb.team2 });
+      comb.joueurs.forEach((p) => selectionnes.add(p.id));
+    }
+
+    // Marquer les joueurs qui n'ont pas joué pour les contraintes futures
+    players.forEach((p) => {
+      if (!selectionnes.has(p.id)) {
+        joueursAttente[p.id] = (joueursAttente[p.id] || 0) + 1;
+      }
+    });
+
+    planning.push(tourMatches);
+
+    progress.value = tour + 1;
   }
 
+  saveData();
+  renderTournament();
   renderStats();
 
-  localStorage.setItem("planning", JSON.stringify(planning));
+  document.body.removeChild(loader);
 }
