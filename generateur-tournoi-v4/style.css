@@ -26,6 +26,7 @@
 body {
     background: var(--bg1-color);
     color: var(--text1-color);
+    margin-bottom: 50px;
 }
 
 input,
@@ -51,7 +52,7 @@ textarea:focus {
 }
 #global {
     height: 100vh;
-    width: 100vw;
+    width: 100%;
 }
 
 #global.withPanel {
@@ -74,6 +75,7 @@ textarea:focus {
 #panel.open {
     display: block;
 }
+
 
 @media (max-width: 600px) {
     body{
@@ -124,8 +126,10 @@ textarea:focus {
 .footer {
     background: var(--bg1-color);
     color: var(--text1-color);
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    height: 80px;
+    width: 100%;
     padding: 5px 10px;
     z-index: 5;
     border-top: lightgray 1px solid;

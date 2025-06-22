@@ -48,17 +48,24 @@ let scores = tournoi.scores || {};
 let planning = tournoi.planning || [];
 let manualMode = false;
 
+let opponentsMap = {}; // { playerName: { opponentName: count } }
+let teammateMap = {}; // { playerName: { teammateName: count } }
+let waitCount = {};
+let sexeIssues = [];
+let niveauIssues = [];
+let maxTries = 0;
+
 // -- DOM CREATION --
 window.addEventListener("DOMContentLoaded", () => {
   document.body.innerHTML = `
-  <div id="global" class="flex flex-col overflow-auto">
+  <div id="global" class="flex flex-col">
     <header class="header flex justify-between items-center">
         <span>🏸 Générateur de tournoi de Badminton</span>
       <button class="btn-primary" onclick="reset();">Reset</button>
     </header>
-    <div id="main" class="flex">
-      <section id="preparation" class="flex-auto"></section>
-      <section id="tournament" class="flex-auto" style="display:none"></section>
+    <div id="main" class="flex flex-auto">
+      <section id="preparation" class="flex flex-col flex-auto"></section>
+      <section id="tournament" class="flex flex-col flex-auto" style="display:none"></section>
     </div>
   </div>
   <aside id="panel" class="h-screen overflow-auto"></aside>
@@ -140,39 +147,38 @@ function renderPreparationSection() {
       <h2>👥 Liste des joueurs</h2>
       <span>${players.length} joueurs enregistrés</span>
     </div>
-    <div class="">
-
-    <form id="form-add-player" class="sous-header-secondary flex flex-wrap gap-1">
-        <input id="name-player" placeholder="Nouveau joueur" value="" />
-        <select id="gender-player" >
-            <option value="H" selected>H</option>
-            <option value="F">F</option>
+    <div class="flex-auto">
+      <form id="form-add-player" class=" sous-header-secondary flex flex-wrap gap-1">
+          <input id="name-player" placeholder="Nouveau joueur" value="" />
+          <select id="gender-player" >
+              <option value="H" selected>H</option>
+              <option value="F">F</option>
+          </select>
+          <select id="level-player" >
+          ${levels
+            .map(
+              (l) =>
+                `<option value="${l}" ${
+                  "NC" === l ? "selected" : ""
+                }>${l}</option>`
+            )
+            .join("")}
         </select>
-        <select id="level-player" >
-        ${levels
-          .map(
-            (l) =>
-              `<option value="${l}" ${
-                "NC" === l ? "selected" : ""
-              }>${l}</option>`
-          )
-          .join("")}
-      </select>
-        <button class="btn-primary rounded" type="submit" id="addPlayer">+ Ajouter un joueur</button>
+          <button class="btn-primary rounded" type="submit" id="addPlayer">+ Ajouter un joueur</button>
 
-    </form>
-    <div id="playerList" class="m-5"></div>
+      </form>
+      <div id="playerList" class="m-5"></div>
     </div>
 
     <footer class="footer flex justify-end">
     ${
       planning.length == 0
         ? `
-      <button class="btn-primary" onclick="regenerate();"> 🏆 Générer le tournoi</button>
+      <button class="btn-primary" onclick="prepareOptimise(); optimisePlanning();"> 🏆 Générer le tournoi</button>
       `
         : `
       <div class="flex justify-between w-full p-2">
-        <button class="btn-primary" onclick="regenerate(true);"> 🏆 Régénérer le tournoi</button>
+        <button class="btn-primary" onclick="prepareOptimise(); optimisePlanning();"> 🏆 Régénérer le tournoi</button>
         <button class="btn-secondary" onclick="showSection('tournament');"> Tournoi en cours ➜</button>
       </div>
       `
@@ -381,20 +387,19 @@ function renderPanel() {
   <div id="contrainte-panel">
   ${renderContraintes("panel", true)}
   </div>
-  <div id="stats-panel">
+  <div id="stats-panel" class="flex flex-col">
   </div>
   `;
 }
 
-function renderStats() {
-  const stats = document.getElementById("stats-panel");
+function evaluerPlanning() {
   let total = 0,
     invalids = 0;
-  const opponentsMap = {}; // { playerName: { opponentName: count } }
-  const teammateMap = {}; // { playerName: { teammateName: count } }
-  const waitCount = {};
-  const sexeIssues = [];
-  const niveauIssues = [];
+  opponentsMap = {}; // { playerName: { opponentName: count } }
+  teammateMap = {}; // { playerName: { teammateName: count } }
+  waitCount = {};
+  sexeIssues = [];
+  niveauIssues = [];
 
   planning.forEach((matches, tourIdx) => {
     const playersInTour = new Set();
@@ -470,6 +475,38 @@ function renderStats() {
     });
   });
 
+  let score = 1000;
+
+  // Adversaires rencontrés plusieurs fois
+  let repeatOpponentCount = 0;
+  for (const key in opponentsMap) {
+    if (opponentsMap[key] > 1) repeatOpponentCount += opponentsMap[key] - 1;
+  }
+  score -= repeatOpponentCount * settings.priorities.adversaire;
+
+  // Coéquipiers répétés
+  let repeatTeammateCount = 0;
+  for (const key in teammateMap) {
+    if (teammateMap[key] > 1) repeatTeammateCount += teammateMap[key] - 1;
+  }
+  score -= repeatTeammateCount * settings.priorities.equipier;
+
+  // Nombre total d'attentes
+  const totalWaits = Object.values(waitCount).reduce((a, b) => a + b.length, 0);
+  score -= totalWaits * settings.priorities.attente;
+
+  // Problèmes d'équilibre des sexes
+  score -= sexeIssues.length * settings.priorities.sexe;
+
+  // Problèmes d'écart de niveau
+  score -= niveauIssues.length * settings.priorities.niveau;
+
+  return Math.max(0, score); // Pour éviter un score négatif
+}
+
+function renderStats() {
+  const stats = document.getElementById("stats-panel");
+
   function renderAccordions(map, label) {
     return Object.entries(map)
       .map(([p, data]) => {
@@ -497,7 +534,7 @@ function renderStats() {
   stats.innerHTML = `
   ${
     adversaireContrainte == ""
-      ? `✅ Aucun adversaire identique</h4>`
+      ? `<span>✅ Aucun adversaire identique</span>`
       : `<button class="accordion" onclick="this.classList.toggle('open')">❌ Adversaire répétés</button>
        <div class="accordion-content">
         <div class="flex flex-col w-full">
@@ -507,7 +544,7 @@ function renderStats() {
   }
   ${
     coequipierContrainte == ""
-      ? `✅ Aucun coéquipier identique</h4>`
+      ? `<span>✅ Aucun coéquipier identique</span>`
       : `<button class="accordion" onclick="this.classList.toggle('open')">❌ Coéquipiers répétés</button> 
       <div class="accordion-content">
         <div class="flex flex-col w-full">
@@ -518,7 +555,7 @@ function renderStats() {
 
   ${
     sexeIssues.length == 0
-      ? `✅ Aucun problème de mixité</h4>`
+      ? `<span>✅ Aucun problème de mixité</span>`
       : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
           sexeIssues.length
         } problèmes de mixité</button> 
@@ -538,7 +575,7 @@ function renderStats() {
 
   ${
     niveauIssues.length == 0
-      ? `✅ Aucun problème d'écart de point</h4>`
+      ? `<span>✅ Aucun problème d'écart de point</span>`
       : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
           niveauIssues.length
         } problèmes d'écart de point</button> 
@@ -558,7 +595,7 @@ function renderStats() {
 
   ${
     waitList.length == 0
-      ? `✅ Aucun joueur en attente`
+      ? `<span>✅ Aucun joueur en attente</span>`
       : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
           waitList.length
         } joueurs en attente</button> 
@@ -673,40 +710,24 @@ function matchScore(team1, team2, planning, joueursAttente, params) {
 async function generePlanning() {
   return new Promise(async (resolve, reject) => {
     try {
-      const loader = document.createElement("div");
-      loader.id = "loader";
-      loader.style.position = "fixed";
-      loader.style.top = "0";
-      loader.style.left = "0";
-      loader.style.width = "100%";
-      loader.style.height = "100%";
-      loader.style.background = "rgba(255,255,255,0.8)";
-      loader.style.display = "flex";
-      loader.style.flexDirection = "column";
-      loader.style.alignItems = "center";
-      loader.style.justifyContent = "center";
-      loader.style.zIndex = "1000";
-      const progress = document.createElement("progress");
-      progress.max = settings.tours;
-      progress.value = 0;
-      const label = document.createElement("div");
-      label.style.marginTop = "1em";
-      loader.append("Génération du planning en cours...", progress, label);
-      document.getElementById("global").append(loader);
+      if (shuffledOrdersIndex > shuffledOrders.length - 1) {
+        resolve(false);
+        return;
+      }
 
-      planning = [];
+      let shuffled = shuffledOrders[shuffledOrdersIndex];
+      shuffledOrdersIndex++;
+
+      let planning = [];
       const joueursParTour = players.length / 4;
       let joueursAttente = {};
 
       for (let tour = 0; tour < settings.tours; tour++) {
-        label.innerHTML = `Tour ${tour + 1} / ${settings.tours}`;
-        await new Promise((r) => requestAnimationFrame(r));
         const joueursUtilises = new Set();
 
         const tourMatches = [];
-        let disponibles = shuffle(
-          players.filter((p) => !joueursUtilises.has(p.id))
-        );
+        let disponibles = shuffled.filter((p) => !joueursUtilises.has(p.id));
+
         const combinaisons = [];
 
         // Générer toutes les combinaisons possibles
@@ -757,15 +778,150 @@ async function generePlanning() {
         });
 
         planning.push(tourMatches);
-        progress.value = tour + 1;
       }
 
       saveData();
       renderPreparationSection();
-      document.getElementById("global").removeChild(loader);
-      resolve();
+      resolve(planning);
     } catch {
       reject();
     }
   });
+}
+
+let bestPlanning = null;
+let bestScore = -Infinity;
+let stopRequested = false;
+let shuffledOrders = null;
+let shuffledOrdersIndex = -1;
+let totalOrdersMessage = null;
+
+function prepareOptimise() {
+  const totalOrders = factorial(players.length);
+  shuffledOrders = [];
+  if (totalOrders > 100) {
+    totalOrdersMessage =
+      "Combinaisons possibles : " +
+      totalOrders +
+      ". Seulement 100 au hasard seront testé";
+  }
+  var t = Math.min(totalOrders, 100);
+  for (let i = 0; i < t; i++) {
+    shuffledOrders.push(
+      getNthPermutation(players, Math.floor(Math.random() * (totalOrders + 1)))
+    );
+  }
+  //shuffledOrders = generateShuffledOrders(100);
+  shuffledOrdersIndex = 0;
+  maxTries = shuffledOrders.length;
+  addProgressBar();
+}
+
+async function optimisePlanning() {
+  showSection("tournament");
+  togglePanel();
+
+  for (let i = 0; i < maxTries && !stopRequested; i++) {
+    planning = await generePlanning();
+    //c'est que l'on n'a plus de set de joueurs
+    if (planning === false) {
+      break;
+    }
+    const score = evaluerPlanning();
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestPlanning = planning;
+      renderTournament();
+      renderStats();
+    }
+
+    document.getElementById(
+      "label-progress-bar"
+    ).innerHTML = `Recherche de la meilleure distribution ${
+      i + 1
+    } / ${maxTries} </br>
+    Meilleur score : ${bestScore} / 1000 `;
+    document.getElementById("progress-bar").value = i + 1;
+
+    if (score === 1000) break;
+    await new Promise((r) => requestAnimationFrame(r));
+  }
+
+  if (bestPlanning) {
+    planning = bestPlanning;
+    renderTournament();
+    renderStats();
+  }
+  document.getElementById("global").removeChild(loader);
+  stopRequested = false;
+}
+
+function stopRequest() {
+  stopRequested = true;
+}
+
+function addProgressBar() {
+  const loader = document.createElement("div");
+  loader.id = "loader";
+  loader.style.position = "fixed";
+  loader.style.top = "0";
+  loader.style.left = "0";
+  loader.style.width = "100%";
+  loader.style.height = "100%";
+  loader.style.background = "rgba(255,255,255,0.8)";
+  loader.style.display = "flex";
+  loader.style.flexDirection = "column";
+  loader.style.alignItems = "center";
+  loader.style.justifyContent = "center";
+  loader.style.zIndex = "1000";
+  const progress = document.createElement("progress");
+  progress.id = "progress-bar";
+  progress.max = maxTries;
+  progress.value = 0;
+  const label = document.createElement("div");
+  label.style.marginTop = "1em";
+  label.id = "label-progress-bar";
+  loader.innerHTML = `<span calss="flex w-80 justidy-between" >Génération du tournoi en cours... <button class="btn-secondary" onclick="stopRequest()"> Arrêter le traitement </button></span> </br> ${
+    totalOrdersMessage ? totalOrdersMessage : ""
+  }`;
+  loader.appendChild(progress);
+  loader.appendChild(label);
+  document.getElementById("global").append(loader);
+}
+
+/*function generateShuffledOrders(maxTries) {
+  const seen = new Set();
+  const results = [];
+  const totalOrders = factorial(players.length);
+
+  while (results.length < maxTries && results.length < totalOrders) {
+    const shuffled = [...players].sort(() => Math.random() - 0.5);
+    const key = shuffled.map((p) => p.id).join("-");
+    if (!seen.has(key)) {
+      seen.add(key);
+      results.push(shuffled);
+    }
+  }
+
+  return results;
+}*/
+
+function factorial(n) {
+  return n <= 1 ? 1 : n * factorial(n - 1);
+}
+function getNthPermutation(arr, n) {
+  const result = [];
+  const items = [...arr];
+  let k = n;
+
+  for (let i = arr.length; i > 0; i--) {
+    const f = factorial(i - 1);
+    const index = Math.floor(k / f);
+    result.push(items[index]);
+    items.splice(index, 1);
+    k = k % f;
+  }
+
+  return result;
 }
