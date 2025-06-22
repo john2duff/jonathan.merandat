@@ -327,7 +327,7 @@ function onInputSlider(e, from, priority, refreshTournament) {
 function renderPanel() {
   const panel = document.getElementById("panel");
   panel.innerHTML = `
-  <h3 class="header flex justify-between">
+  <h3 class="sous-header flex justify-between">
   📊 Statistiques
   <button onclick="togglePanel(true);">✖</button>
   </h3>
