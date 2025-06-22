@@ -18,12 +18,29 @@ const levels = [
   "N2",
   "N1",
 ];
+
+const levelValue = {
+  NC: 0,
+  P12: 1,
+  P11: 2,
+  P10: 3,
+  D9: 4,
+  D8: 5,
+  D7: 6,
+  R6: 7,
+  R5: 8,
+  R4: 9,
+  N3: 10,
+  N2: 11,
+  N1: 12,
+};
+
 const defaultConfig = {
   terrains: 2,
   tours: 3,
+  ecartMax: 10,
   priorities: { equipier: 1, adversaire: 1, attente: 2, sexe: 2, niveau: 1 },
 };
-const levelValue = Object.fromEntries(levels.map((lvl, i) => [lvl, i]));
 let tournoi = JSON.parse(localStorage.getItem("gen-tournoi") || "{}");
 let players = tournoi.players || [];
 let settings = tournoi.settings || defaultConfig;
@@ -35,7 +52,7 @@ let manualMode = false;
 window.addEventListener("DOMContentLoaded", () => {
   document.body.innerHTML = `
   <div id="global" class="flex flex-col overflow-auto">
-    <header class="header flex justify-start items-center">
+    <header class="header flex justify-between items-center">
         <span>🏸 Générateur de tournoi de Badminton</span>
       <button class="btn-primary" onclick="reset();">Reset</button>
     </header>
@@ -70,9 +87,9 @@ function togglePanel(forceHide = null) {
   }
   const global = document.getElementById("global");
   if (panel.classList.contains("open")) {
-    global.classList.add("withStatPanel");
+    global.classList.add("withPanel");
   } else {
-    global.classList.remove("withStatPanel");
+    global.classList.remove("withPanel");
   }
 }
 
@@ -123,9 +140,9 @@ function renderPreparationSection() {
       <h2>👥 Liste des joueurs</h2>
       <span>${players.length} joueurs enregistrés</span>
     </div>
-    <div class="m-5">
+    <div class="">
 
-    <form id="form-add-player" class="my-2">
+    <form id="form-add-player" class="sous-header-secondary flex flex-wrap gap-1">
         <input id="name-player" placeholder="Nouveau joueur" value="" />
         <select id="gender-player" >
             <option value="H" selected>H</option>
@@ -141,10 +158,10 @@ function renderPreparationSection() {
           )
           .join("")}
       </select>
-        <button class=" w-10 rounded" type="submit" id="addPlayer">+</button>
+        <button class="btn-primary rounded" type="submit" id="addPlayer">+ Ajouter un joueur</button>
 
     </form>
-    <div id="playerList"></div>
+    <div id="playerList" class="m-5"></div>
     </div>
 
     <footer class="footer flex justify-end">
@@ -155,7 +172,7 @@ function renderPreparationSection() {
       `
         : `
       <div class="flex justify-between w-full p-2">
-        <button class="btn-primary" onclick="regenerate();"> 🏆 Régénérer le tournoi</button>
+        <button class="btn-primary" onclick="regenerate(true);"> 🏆 Régénérer le tournoi</button>
         <button class="btn-secondary" onclick="showSection('tournament');"> Tournoi en cours ➜</button>
       </div>
       `
@@ -166,7 +183,7 @@ function renderPreparationSection() {
   el.querySelector("#form-add-player").onsubmit = () => {
     let name = el.querySelector("#name-player").value.trim();
     const wasEmpty = name == "";
-    if (name == "") {
+    if (name == "" || players.find((p) => p.name === name)) {
       const names = [
         "Paul",
         "Robin",
@@ -181,11 +198,12 @@ function renderPreparationSection() {
       ];
       let tries = 0;
       do {
-        name =
-          "[Auto] " +
-          names[Math.floor(Math.random() * names.length)] +
-          "_" +
-          Math.floor(Math.random() * 100);
+        name = wasEmpty
+          ? "[Auto] " +
+            names[Math.floor(Math.random() * names.length)] +
+            "_" +
+            Math.floor(Math.random() * 100)
+          : name + "_" + Math.floor(Math.random() * 100);
         tries++;
       } while (players.find((p) => p.name === name) && tries < 50);
     }
@@ -232,11 +250,17 @@ function renderPreparationSection() {
     .join("");
 }
 
-function regenerate() {
-  generePlanning().then(() => {
-    renderStats();
-    showSection("tournament");
-  });
+function regenerate(hasConfirm = false) {
+  if (
+    !hasConfirm ||
+    confirm("Un tournoi existe déjà, il va être perdu, voulez vous-continuer ?")
+  ) {
+    generePlanning().then(() => {
+      renderTournament();
+      renderStats();
+      showSection("tournament");
+    });
+  }
 }
 
 // -- RENDER TOURNAMENT SECTION --
@@ -261,24 +285,34 @@ function renderTournament() {
                         <div class="flex flex-col mx-2">
                           <h4>Match ${indexMatch} - Terrain ${index + 1}</h4>
                           <div class="flex items-center border p-2 rounded">
-                              <div class="flex flex-col mx-2">
-                                  ${match.team1
-                                    .map((player) => {
-                                      return `
-                                          <span>${player.name}</span>
-                                      `;
-                                    })
-                                    .join("")}
+                              <div class="flex mx-2">
+                              <input type="number" min="-32" max="32" value="${
+                                match.score?.[0] ?? ""
+                              }" onchange="onInputScore(event, 0)" />
+                                <div class="flex flex-col mx-2">
+                                    ${match.team1
+                                      .map((player) => {
+                                        return `
+                                            <span>${player.name}</span>
+                                        `;
+                                      })
+                                      .join("")}
+                                </div>
                               </div>
                               🏸
-                              <div class="flex flex-col mx-2">
-                                  ${match.team2
-                                    .map((player) => {
-                                      return `
-                                          <span>${player.name}</span>
-                                      `;
-                                    })
-                                    .join("")}
+                              <div class="flex mx-2">
+                                <div class="flex flex-col mx-2">
+                                    ${match.team2
+                                      .map((player) => {
+                                        return `
+                                            <span>${player.name}</span>
+                                        `;
+                                      })
+                                      .join("")}
+                                </div>
+                                <input type="number" min="-32" max="32" value="${
+                                  match.score?.[0] ?? ""
+                                }" onchange="onInputScore(event, 1)" />
                               </div>
                           </div>
                         </div>
@@ -324,6 +358,19 @@ function onInputSlider(e, from, priority, refreshTournament) {
   }
 }
 
+function onInputScore(e, from, priority, refreshTournament) {
+  /*settings.priorities[priority] = parseInt(e.currentTarget.value);
+  document.getElementById(from + "_value_slider_" + priority).innerHTML =
+    e.currentTarget.value;
+  saveData();
+  if (refreshTournament) {
+    generePlanning().then(() => {
+      renderTournament();
+      renderStats();
+    });
+  }*/
+}
+
 function renderPanel() {
   const panel = document.getElementById("panel");
   panel.innerHTML = `
@@ -346,6 +393,8 @@ function renderStats() {
   const opponentsMap = {}; // { playerName: { opponentName: count } }
   const teammateMap = {}; // { playerName: { teammateName: count } }
   const waitCount = {};
+  const sexeIssues = [];
+  const niveauIssues = [];
 
   planning.forEach((matches, tourIdx) => {
     const playersInTour = new Set();
@@ -387,6 +436,29 @@ function renderStats() {
           )
         )
           invalids++;
+      }
+
+      const mixte = (team) => team.filter((p) => p.gender === "F").length === 1;
+      if (!mixte(match.team1) || !mixte(match.team2)) {
+        sexeIssues.push({
+          tour: tourIdx + 1,
+          terrain: matchIdx + 1,
+          team1: match.team1.map((p) => p.name).join(" & "),
+          team2: match.team2.map((p) => p.name).join(" & "),
+        });
+      }
+
+      const tous = [...match.team1, ...match.team2];
+      const ecart =
+        Math.max(...tous.map(getLevelScore)) -
+        Math.min(...tous.map(getLevelScore));
+      if (ecart > settings.ecartMax) {
+        niveauIssues.push({
+          tour: tourIdx + 1,
+          terrain: matchIdx + 1,
+          ecart,
+          joueurs: tous.map((p) => p.name).join(", "),
+        });
       }
     });
 
@@ -442,6 +514,46 @@ function renderStats() {
           ${coequipierContrainte}
         </div>
       </div>`
+  }
+
+  ${
+    sexeIssues.length == 0
+      ? `✅ Aucun problème de mixité</h4>`
+      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
+          sexeIssues.length
+        } problèmes de mixité</button> 
+    <div class="accordion-content">
+      <div class="flex flex-col w-full">
+      ${sexeIssues
+        .map((item) => {
+          return `<div>
+          Tour ${item.tour} - Terrain ${item.terrain} : ${item.team1} vs ${item.team2}
+        </div>
+        `;
+        })
+        .join("")}
+      </div>
+    </div>`
+  }
+
+  ${
+    niveauIssues.length == 0
+      ? `✅ Aucun problème d'écart de point</h4>`
+      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
+          niveauIssues.length
+        } problèmes d'écart de point</button> 
+    <div class="accordion-content">
+      <div class="flex flex-col w-full">
+      ${sexeIsniveauIssuessues
+        .map((item) => {
+          return `<div>
+          Tour ${item.tour} - Terrain ${item.terrain} : Ecart ${item.ecart} - ${item.joueurs}
+        </div>
+        `;
+        })
+        .join("")}
+      </div>
+    </div>`
   }
 
   ${
@@ -517,6 +629,11 @@ function sameOpponentCount(p1, p2, planning) {
     }
   }
   return count;
+}
+
+function getMatchStartScore(match) {
+  const joueurs = [...match.team1, ...match.team2];
+  return joueurs.reduce((acc, p) => acc + getLevelScore(p), 0);
 }
 
 function matchScore(team1, team2, planning, joueursAttente, params) {
