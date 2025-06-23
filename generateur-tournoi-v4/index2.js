@@ -148,23 +148,28 @@ function renderPreparationSection() {
     </div>
     <div class="flex-auto">
       <form id="form-add-player" class=" sous-header-secondary flex flex-wrap gap-1">
-          <input id="name-player" placeholder="Nouveau joueur" value="" />
-          <select id="gender-player" >
-              <option value="H" selected>H</option>
-              <option value="F">F</option>
-          </select>
-          <select id="level-player" >
-          ${levels
-            .map(
-              (l) =>
-                `<option value="${l}" ${
-                  "NC" === l ? "selected" : ""
-                }>${l}</option>`
-            )
-            .join("")}
-        </select>
-          <button class="btn-primary rounded" type="submit" id="addPlayer">+ Ajouter un joueur</button>
-
+          <div class="flex items-start gap-1 w-full" >
+            <div class="flex flex-auto flex-wrap gap-1" >
+              <input class="w-full" id="name-player" placeholder="Nouveau joueur" value="" />
+              <div class="flex flex-auto gap-1" >
+                <select id="gender-player" class="flex-auto" >
+                    <option value="H" selected>H</option>
+                    <option value="F">F</option>
+                </select>
+                <select id="level-player" >
+                ${levels
+                  .map(
+                    (l) =>
+                      `<option value="${l}" ${
+                        "NC" === l ? "selected" : ""
+                      }>${l}</option>`
+                  )
+                  .join("")}
+                </select>
+              </div>
+            </div>
+            <button class="btn-primary rounded" type="submit" id="addPlayer">+ Ajouter un joueur</button>
+          </div>
       </form>
       <div id="playerList" class="m-5"></div>
     </div>
@@ -177,7 +182,7 @@ function renderPreparationSection() {
       `
         : `
       <div class="flex justify-between w-full p-2">
-        <button class="btn-primary" onclick="prepareOptimise(); optimisePlanning();"> 🏆 Régénérer le tournoi</button>
+        <button class="btn-primary" onclick="regenerate();"> 🏆 Régénérer le tournoi</button>
         <button class="btn-secondary" onclick="showSection('tournament');"> Tournoi en cours ➜</button>
       </div>
       `
@@ -230,41 +235,43 @@ function renderPreparationSection() {
   list.innerHTML = players
     .map(
       (p, i) => `
-    <div class="mb-1">
-      <input id="name_${i}" value="${
+    <div class="mb-1 rounded border-purple-200">
+      <div class="flex items-start gap-1" >
+        <div class="flex flex-wrap gap-1 flex-auto w-full" >
+          <input class="w-full" id="name_${i}" value="${
         p.name
       }" onchange="players[${i}].name=this.value;saveData();renderPreparationSection()" />
-      <select onchange="players[${i}].gender=this.value;saveData();renderPreparationSection()">
-        <option value="H" ${p.gender === "H" ? "selected" : ""}>H</option>
-        <option value="F" ${p.gender === "F" ? "selected" : ""}>F</option>
-      </select>
-      <select onchange="players[${i}].level=this.value;saveData();renderPreparationSection()">
-        ${levels
-          .map(
-            (l) =>
-              `<option value="${l}" ${
-                p.level === l ? "selected" : ""
-              }>${l}</option>`
-          )
-          .join("")}
-      </select>
-      <button class="w-10" onclick="players.splice(${i},1);saveData();renderPreparationSection()"> 🗑 </button>
+          <div class="flex gap-1 w-full" >
+            <select class="flex-auto" onchange="players[${i}].gender=this.value;saveData();renderPreparationSection()">
+              <option value="H" ${p.gender === "H" ? "selected" : ""}>H</option>
+              <option value="F" ${p.gender === "F" ? "selected" : ""}>F</option>
+            </select>
+            <select onchange="players[${i}].level=this.value;saveData();renderPreparationSection()">
+              ${levels
+                .map(
+                  (l) =>
+                    `<option value="${l}" ${
+                      p.level === l ? "selected" : ""
+                    }>${l}</option>`
+                )
+                .join("")}
+            </select>
+          </div>
+        </div>
+          <button class="w-40" onclick="players.splice(${i},1);saveData();renderPreparationSection()"> 🗑 Supprimer </button>
+      </div>
     </div>
   `
     )
     .join("");
 }
 
-function regenerate(hasConfirm = false) {
+function regenerate() {
   if (
-    !hasConfirm ||
     confirm("Un tournoi existe déjà, il va être perdu, voulez vous-continuer ?")
   ) {
-    generePlanning().then(() => {
-      renderTournament();
-      renderStats();
-      showSection("tournament");
-    });
+    prepareOptimise();
+    optimisePlanning();
   }
 }
 
