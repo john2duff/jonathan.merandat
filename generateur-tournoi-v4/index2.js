@@ -727,84 +727,95 @@ function matchScore(team1, team2, planning, joueursAttente, params) {
   return score;
 }
 
+function permutations(arr) {
+  if (arr.length <= 1) return [arr];
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    const rest = [...arr.slice(0, i), ...arr.slice(i + 1)];
+    for (const p of permutations(rest)) {
+      result.push([arr[i], ...p]);
+    }
+  }
+  return result;
+}
+
 // -- GÉNÉRATION DU PLANNING --
 async function generePlanning() {
   return new Promise(async (resolve, reject) => {
     try {
-      //changer l'ordre ne sert à rien puisque l'on explore toutes les combinaisons
-      /*let disponibles = getOrder();
-      if (disponibles == null) {
-        resolve(false);
-        return;
-      }*/
-
-      //on fait varier les contraintes
-
       settings.priorities = getSettingsPriorities();
-      let disponibles = shuffle(players);
       let planning = [];
-      const joueursParTour = players.length / 4;
       let joueursAttente = {};
+      const maxTries = 100; // ou settings.maxTries si défini
+      permutationTotal = factorial(players.length);
+      permutationUsed = [];
 
       for (let tour = 0; tour < settings.tours; tour++) {
         const joueursUtilises = new Set();
-
         const tourMatches = [];
 
-        const combinaisons = [];
+        for (let terrain = 0; terrain < settings.terrains; terrain++) {
+          const combinaisons = [];
+          let permutationIndex = 0;
+          // Construire liste des joueurs disponibles
+          const disponibles = players.filter((p) => !joueursUtilises.has(p.id));
+          if (disponibles.length < 4) break;
+          permutationTotal = factorial(disponibles.length);
+          while (
+            tourMatches.length < settings.terrains &&
+            permutationIndex < maxTries
+          ) {
+            //const permutation = getNthPermutation(disponibles, permutationIndex);
+            //const groupe = permutation.slice(0, 4);
+            const groupe = getPermutationsJoueur(disponibles);
+            if (groupe == null) break;
 
-        // Générer toutes les combinaisons possibles
-        for (let i = 0; i < disponibles.length; i++) {
-          for (let j = i + 1; j < disponibles.length; j++) {
-            for (let k = j + 1; k < disponibles.length; k++) {
-              for (let l = k + 1; l < disponibles.length; l++) {
-                const groupe = [
-                  disponibles[i],
-                  disponibles[j],
-                  disponibles[k],
-                  disponibles[l],
-                ];
-                const team1 = [groupe[0], groupe[1]];
-                const team2 = [groupe[2], groupe[3]];
-                const score = matchScore(
-                  team1,
-                  team2,
-                  planning,
-                  joueursAttente,
-                  settings.priorities
-                );
-                combinaisons.push({ team1, team2, score, joueurs: groupe });
-              }
-            }
+            const team1 = [groupe[0], groupe[1]];
+            const team2 = [groupe[2], groupe[3]];
+            const score = matchScore(
+              team1,
+              team2,
+              planning,
+              joueursAttente,
+              settings.priorities
+            );
+            combinaisons.push({ team1, team2, score });
+            permutationIndex++;
           }
+
+          combinaisons.sort((a, b) => b.score - a.score);
+          for (const comb of combinaisons) {
+            //if (tourMatches.length >= settings.terrains) break;
+            //if (comb.joueurs.some((p) => joueursUtilises.has(p.id))) continue;
+            tourMatches.push({ team1: comb.team1, team2: comb.team2 });
+            comb.team1.forEach((p) => joueursUtilises.add(p.id));
+            comb.team2.forEach((p) => joueursUtilises.add(p.id));
+            break;
+            //on ne prend que le premier
+          }
+          permutationUsed = [];
         }
 
-        console.log(
-          `Tour ${tour + 1} - ${combinaisons.length} combinaisons trouvées`
-        );
+        // Vérifie qu'aucun joueur déjà utilisé
+        /*if (groupe.every((p) => !joueursUtilises.has(p.id))) {
+          tourMatches.push({ team1, team2 });
+          groupe.forEach((p) => joueursUtilises.add(p.id));
+          permutationUsed = [];
+        }*/
 
-        // Trier et sélectionner les meilleures combinaisons sans chevauchement
-        combinaisons.sort((a, b) => b.score - a.score);
-        const selectionnes = new Set();
-        for (const comb of combinaisons) {
-          if (tourMatches.length >= settings.terrains) break;
-          if (comb.joueurs.some((p) => selectionnes.has(p.id))) continue;
-          tourMatches.push({ team1: comb.team1, team2: comb.team2 });
-          comb.joueurs.forEach((p) => selectionnes.add(p.id));
-        }
-
-        // Marquer les joueurs qui n'ont pas joué pour les contraintes futures
+        // Marquer les joueurs qui n'ont pas joué
         players.forEach((p) => {
-          if (!selectionnes.has(p.id)) {
+          if (!joueursUtilises.has(p.id)) {
             joueursAttente[p.id] = (joueursAttente[p.id] || 0) + 1;
           }
         });
 
         planning.push(tourMatches);
       }
+
       resolve(planning);
-    } catch {
-      console.error("error generatePlanning");
+    } catch (e) {
+      console.error("error generatePlanning", e);
       reject();
     }
   });
@@ -819,18 +830,21 @@ let totalOrdersMessage = null;
 let totalOrders = null;
 let contraintesUsed = [];
 const rangeContraintes = {
-  equipier: [1, 2, 3, 4, 5],
-  adversaire: [1, 2, 3, 4, 5],
-  attente: [1, 2, 3, 4, 5],
-  sexe: [1, 2, 3, 4, 5],
-  niveau: [1, 2, 3, 4, 5],
+  equipier: [1, 2], //[1, 2, 3, 4, 5]
+  adversaire: [1, 2],
+  attente: [1, 2],
+  sexe: [1, 2],
+  niveau: [1, 2],
 };
 let contraintesPossible = null;
+let permutationUsed = [];
+let permutationTotal = null;
 
 function prepareOptimise() {
   //totalOrders = factorial(players.length);
   contraintesUsed = [];
   contraintesPossible = generateConstraintCombinations(rangeContraintes);
+  permutationTotal = factorial(players.length);
   //console.log(contraintesPossible.length); // total de combinaisons
   //console.log(contraintesPossible); // tableau de toutes les combinaisons possibles
   /*shuffledOrders = [];
@@ -877,6 +891,19 @@ function getSettingsPriorities() {
     }
   }
   return candidateSettingsPriorities;
+}
+
+function getPermutationsJoueur(disponibles) {
+  let candidatePermutation = null;
+  while (permutationUsed.length < permutationTotal) {
+    let random = Math.floor(Math.random() * permutationTotal);
+    if (!permutationUsed.includes(random)) {
+      candidatePermutation = getNthPermutation(disponibles, random);
+      permutationUsed.push(random);
+      break;
+    }
+  }
+  return candidatePermutation;
 }
 
 async function optimisePlanning() {
