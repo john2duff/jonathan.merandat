@@ -859,11 +859,11 @@ let totalOrdersMessage = null;
 let totalOrders = null;
 let contraintesUsed = [];
 const rangeContraintes = {
-  equipier: [2, 3],
-  adversaire: [3, 4],
-  attente: [9, 10],
-  sexe: [4, 5],
-  niveau: [1, 2],
+  equipier: [8],
+  adversaire: [4],
+  attente: [10],
+  sexe: [6],
+  niveau: [2],
 };
 let contraintesPossible = null;
 let permutationUsed = [];
