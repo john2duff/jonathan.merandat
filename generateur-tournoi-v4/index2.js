@@ -781,11 +781,11 @@ async function generePlanning() {
           // Construire liste des joueurs disponibles
           const disponibles = players
             .filter((p) => !joueursUtilises.has(p.id))
-            .sort((a, b) => {
+            /*.sort((a, b) => {
               const attenteA = joueursAttente[a.id] || 0;
               const attenteB = joueursAttente[b.id] || 0;
               return attenteB - attenteA; // ceux qui ont attendu le plus en premier
-            });
+            })*/;
           if (disponibles.length < 4) break;
           permutationTotal = factorial(disponibles.length);
           while (
@@ -793,9 +793,9 @@ async function generePlanning() {
             permutationIndex < maxTries
           ) {
             //const permutation = getNthPermutation(disponibles, permutationIndex);
-            const groupe = disponibles.slice(0, 4);
-            //const groupe = getPermutationsJoueur(disponibles);
-            //if (groupe == null) break;
+            //const groupe = disponibles.slice(0, 4);
+            const groupe = getPermutationsJoueur(disponibles);
+            if (groupe == null) break;
 
             const team1 = [groupe[0], groupe[1]];
             const team2 = [groupe[2], groupe[3]];
