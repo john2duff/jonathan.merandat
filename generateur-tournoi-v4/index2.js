@@ -140,7 +140,7 @@ function renderPreparationSection() {
         settings.tours
       }" onchange="settings.tours=parseInt(this.value);saveData()"></label>
       
-      ${renderContraintes("preparation", false)}
+      ${"" /*renderContraintes("preparation", false)*/}
     </div>
 
     <div class="sous-header justify-between">
@@ -384,8 +384,8 @@ function renderPanel() {
   📊 Statistiques
   <button onclick="togglePanel(true);">✖</button>
   </h3>
-  <div id="contrainte-panel">
-  ${renderContraintes("panel", true)}
+  ${"" /*<div id="contrainte-panel">*/}
+  ${"" /*renderContraintes("panel", true)*/}
   </div>
   <div id="stats-panel" class="flex flex-col">
   </div>
@@ -443,8 +443,24 @@ function evaluerPlanning() {
           invalids++;
       }
 
-      const mixte = (team) => team.filter((p) => p.gender === "F").length === 1;
-      if (!mixte(match.team1) || !mixte(match.team2)) {
+      const isMixte = (team) =>
+        team.filter((p) => p.gender === "F").length === 1;
+      const isDoubleHomme = (team) => team.every((p) => p.gender === "M");
+      const isDoubleFemme = (team) => team.every((p) => p.gender === "F");
+
+      const team1Mixte = isMixte(match.team1);
+      const team2Mixte = isMixte(match.team2);
+      const team1H = isDoubleHomme(match.team1);
+      const team2H = isDoubleHomme(match.team2);
+      const team1F = isDoubleFemme(match.team1);
+      const team2F = isDoubleFemme(match.team2);
+
+      if (
+        (team1Mixte && (team2H || team2F)) ||
+        (team2Mixte && (team1H || team1F)) ||
+        (team1H && team2F) ||
+        (team2H && team1F)
+      ) {
         sexeIssues.push({
           tour: tourIdx + 1,
           terrain: matchIdx + 1,
@@ -480,14 +496,14 @@ function evaluerPlanning() {
   // Adversaires rencontrés plusieurs fois
   let repeatOpponentCount = 0;
   for (const key in opponentsMap) {
-    if (opponentsMap[key] > 1) repeatOpponentCount += opponentsMap[key] - 1;
+    repeatOpponentCount += Object.entries(opponentsMap[key]).length;
   }
   score -= repeatOpponentCount * settings.priorities.adversaire;
 
   // Coéquipiers répétés
   let repeatTeammateCount = 0;
   for (const key in teammateMap) {
-    if (teammateMap[key] > 1) repeatTeammateCount += teammateMap[key] - 1;
+    repeatTeammateCount += Object.entries(teammateMap[key]).length;
   }
   score -= repeatTeammateCount * settings.priorities.equipier;
 
@@ -532,6 +548,8 @@ function renderStats() {
   const coequipierContrainte = renderAccordions(teammateMap, "");
 
   stats.innerHTML = `
+  <span>Respect des contraintes : ${bestScore / 10} %</span>
+
   ${
     adversaireContrainte == ""
       ? `<span>✅ Aucun adversaire identique</span>`
@@ -675,33 +693,36 @@ function getMatchStartScore(match) {
 
 function matchScore(team1, team2, planning, joueursAttente, params) {
   let score = 100;
-  const { equipe, adversaire, attente, sexe, niveau } = params;
+  const { equipier, adversaire, attente, sexe, niveau } = params;
 
   // Coéquipiers déjà ensemble
-  if (sameTeamCount(team1[0], team1[1], planning) > 0) score -= 10 * equipe;
-  if (sameTeamCount(team2[0], team2[1], planning) > 0) score -= 10 * equipe;
+  let sameCount1 = sameTeamCount(team1[0], team1[1], planning);
+  if (sameCount1 > 0) score -= sameCount1 * equipier;
+  let sameCount2 = sameTeamCount(team2[0], team2[1], planning);
+  if (sameCount2 > 0) score -= sameCount2 * equipier;
 
   // Adversaires déjà rencontrés
   for (const p1 of team1) {
     for (const p2 of team2) {
-      if (sameOpponentCount(p1, p2, planning) > 0) score -= 5 * adversaire;
+      let sameOpponent1 = sameOpponentCount(p1, p2, planning);
+      if (sameOpponent1 > 0) score -= sameOpponent1 * adversaire;
     }
   }
 
   // Attente minimisée
   for (const p of [...team1, ...team2]) {
-    if (joueursAttente[p.id]) score -= 2 * attente;
+    if (joueursAttente[p.id]) score -= 1 * attente;
   }
 
   // Mixité
   const mixte = (t) => t.filter((p) => p.gender === "F").length === 1;
-  if (!(mixte(team1) && mixte(team2))) score -= 5 * sexe;
+  if (!(mixte(team1) && mixte(team2))) score -= 1 * sexe;
 
   // Écart de niveau max autorisé
   const tous = [...team1, ...team2];
   const ecart =
     Math.max(...tous.map(getLevelScore)) - Math.min(...tous.map(getLevelScore));
-  if (ecart > settings.ecartMax) score -= (ecart - settings.ecartMax) * niveau;
+  if (ecart > settings.ecartMax) score -= 1 * niveau;
 
   return score;
 }
@@ -710,14 +731,17 @@ function matchScore(team1, team2, planning, joueursAttente, params) {
 async function generePlanning() {
   return new Promise(async (resolve, reject) => {
     try {
-      if (shuffledOrdersIndex > shuffledOrders.length - 1) {
+      //changer l'ordre ne sert à rien puisque l'on explore toutes les combinaisons
+      /*let disponibles = getOrder();
+      if (disponibles == null) {
         resolve(false);
         return;
-      }
+      }*/
 
-      let shuffled = shuffledOrders[shuffledOrdersIndex];
-      shuffledOrdersIndex++;
+      //on fait varier les contraintes
 
+      settings.priorities = getSettingsPriorities();
+      let disponibles = shuffle(players);
       let planning = [];
       const joueursParTour = players.length / 4;
       let joueursAttente = {};
@@ -726,7 +750,6 @@ async function generePlanning() {
         const joueursUtilises = new Set();
 
         const tourMatches = [];
-        let disponibles = shuffled.filter((p) => !joueursUtilises.has(p.id));
 
         const combinaisons = [];
 
@@ -779,11 +802,9 @@ async function generePlanning() {
 
         planning.push(tourMatches);
       }
-
-      saveData();
-      renderPreparationSection();
       resolve(planning);
     } catch {
+      console.error("error generatePlanning");
       reject();
     }
   });
@@ -795,10 +816,24 @@ let stopRequested = false;
 let shuffledOrders = null;
 let shuffledOrdersIndex = -1;
 let totalOrdersMessage = null;
+let totalOrders = null;
+let contraintesUsed = [];
+const rangeContraintes = {
+  equipier: [1, 2, 3, 4, 5],
+  adversaire: [1, 2, 3, 4, 5],
+  attente: [1, 2, 3, 4, 5],
+  sexe: [1, 2, 3, 4, 5],
+  niveau: [1, 2, 3, 4, 5],
+};
+let contraintesPossible = null;
 
 function prepareOptimise() {
-  const totalOrders = factorial(players.length);
-  shuffledOrders = [];
+  //totalOrders = factorial(players.length);
+  contraintesUsed = [];
+  contraintesPossible = generateConstraintCombinations(rangeContraintes);
+  //console.log(contraintesPossible.length); // total de combinaisons
+  //console.log(contraintesPossible); // tableau de toutes les combinaisons possibles
+  /*shuffledOrders = [];
   if (totalOrders > 100) {
     totalOrdersMessage =
       "Combinaisons possibles : " +
@@ -810,18 +845,48 @@ function prepareOptimise() {
     shuffledOrders.push(
       getNthPermutation(players, Math.floor(Math.random() * (totalOrders + 1)))
     );
-  }
+  }*/
   //shuffledOrders = generateShuffledOrders(100);
-  shuffledOrdersIndex = 0;
-  maxTries = shuffledOrders.length;
+  //shuffledOrdersIndex = 0;
+  //maxTries = shuffledOrders.length;
   addProgressBar();
+}
+
+/*function getOrder() {
+  let candidateOrder = null;
+  while (ordersUsed.length < totalOrders) {
+    let random = Math.floor(Math.random() * totalOrders);
+    if (!ordersUsed.includes(random)) {
+      candidateOrder = getNthPermutation(players, random);
+      ordersUsed.push(random);
+      break;
+    }
+  }
+  return candidateOrder;
+}
+*/
+
+function getSettingsPriorities() {
+  let candidateSettingsPriorities = null;
+  while (contraintesUsed.length < contraintesPossible.length) {
+    let random = Math.floor(Math.random() * contraintesPossible.length);
+    if (!contraintesUsed.includes(random)) {
+      candidateSettingsPriorities = contraintesPossible[random];
+      contraintesUsed.push(random);
+      break;
+    }
+  }
+  return candidateSettingsPriorities;
 }
 
 async function optimisePlanning() {
   showSection("tournament");
   togglePanel();
 
-  for (let i = 0; i < maxTries && !stopRequested; i++) {
+  let historyBestPlanning = [];
+  bestScore = -Infinity;
+
+  for (let i = 0; i < contraintesPossible.length && !stopRequested; i++) {
     planning = await generePlanning();
     //c'est que l'on n'a plus de set de joueurs
     if (planning === false) {
@@ -832,16 +897,17 @@ async function optimisePlanning() {
     if (score > bestScore) {
       bestScore = score;
       bestPlanning = planning;
+      historyBestPlanning.push(`${bestScore / 10} % `);
       renderTournament();
       renderStats();
     }
 
     document.getElementById(
       "label-progress-bar"
-    ).innerHTML = `Recherche de la meilleure distribution ${
-      i + 1
-    } / ${maxTries} </br>
-    Meilleur score : ${bestScore} / 1000 `;
+    ).innerHTML = `Recherche des contraintes ${i + 1} / ${
+      contraintesPossible.length
+    } </br>
+    Respect des contraintes : ${bestScore / 10} % `;
     document.getElementById("progress-bar").value = i + 1;
 
     if (score === 1000) break;
@@ -850,11 +916,15 @@ async function optimisePlanning() {
 
   if (bestPlanning) {
     planning = bestPlanning;
+    saveData();
+    renderPreparationSection();
     renderTournament();
     renderStats();
+    console.log(settings.priorities);
   }
   document.getElementById("global").removeChild(loader);
   stopRequested = false;
+  bestPlanning = null;
 }
 
 function stopRequest() {
@@ -877,14 +947,13 @@ function addProgressBar() {
   loader.style.zIndex = "1000";
   const progress = document.createElement("progress");
   progress.id = "progress-bar";
-  progress.max = maxTries;
+  progress.max = contraintesPossible.length;
   progress.value = 0;
   const label = document.createElement("div");
   label.style.marginTop = "1em";
   label.id = "label-progress-bar";
-  loader.innerHTML = `<span calss="flex w-80 justidy-between" >Génération du tournoi en cours... <button class="btn-secondary" onclick="stopRequest()"> Arrêter le traitement </button></span> </br> ${
-    totalOrdersMessage ? totalOrdersMessage : ""
-  }`;
+  loader.innerHTML = `<center><span calss="flex w-80 justidy-between" >Génération du tournoi en cours... </br> </br><button class="btn-secondary" onclick="stopRequest()"> Arrêter la recherche </button></span> </br>
+  <span style="font-size:0.8em; font-style:italic;">La meilleure distribution sera retenue</span> </br></br><center>`;
   loader.appendChild(progress);
   loader.appendChild(label);
   document.getElementById("global").append(loader);
@@ -923,5 +992,26 @@ function getNthPermutation(arr, n) {
     k = k % f;
   }
 
+  return result;
+}
+
+function generateConstraintCombinations(ranges) {
+  const keys = Object.keys(ranges);
+  const result = [];
+
+  function backtrack(index, current) {
+    if (index === keys.length) {
+      result.push({ ...current });
+      return;
+    }
+
+    const key = keys[index];
+    for (const value of ranges[key]) {
+      current[key] = value;
+      backtrack(index + 1, current);
+    }
+  }
+
+  backtrack(0, {});
   return result;
 }

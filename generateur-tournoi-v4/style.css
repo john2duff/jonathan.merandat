@@ -76,6 +76,20 @@ textarea:focus {
     display: block;
 }
 
+#stats-panel{
+    margin-top: 10px;;
+        margin-bottom: 10px;;
+}
+
+#stats-panel>*{
+    padding: 0.2em;
+    margin-top:0.2em;
+        margin-bottom: 0.2em ;
+    background: #eee;
+    border: none;
+    text-align: left;
+    width: 100%;
+}
 
 @media (max-width: 600px) {
     body{
