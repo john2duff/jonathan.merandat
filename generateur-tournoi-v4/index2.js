@@ -36,8 +36,8 @@ const levelValue = {
 };
 
 const defaultConfig = {
-  terrains: 2,
-  tours: 3,
+  terrains: 7,
+  tours: 8,
   ecartMax: 10,
   priorities: { equipier: 1, adversaire: 1, attente: 2, sexe: 2, niveau: 1 },
 };
@@ -492,12 +492,14 @@ function evaluerPlanning() {
   });
 
   let score = 1000;
+  let comptIssue = 0;
 
   // Adversaires rencontrés plusieurs fois
   let repeatOpponentCount = 0;
   for (const key in opponentsMap) {
     repeatOpponentCount += Object.entries(opponentsMap[key]).length;
   }
+  if (repeatOpponentCount > 0) comptIssue++;
   score -= repeatOpponentCount * settings.priorities.adversaire;
 
   // Coéquipiers répétés
@@ -505,18 +507,23 @@ function evaluerPlanning() {
   for (const key in teammateMap) {
     repeatTeammateCount += Object.entries(teammateMap[key]).length;
   }
+  if (repeatTeammateCount > 0) comptIssue++;
   score -= repeatTeammateCount * settings.priorities.equipier;
 
   // Nombre total d'attentes
   const totalWaits = Object.values(waitCount).reduce((a, b) => a + b.length, 0);
+  if (totalWaits > 0) comptIssue++;
   score -= totalWaits * settings.priorities.attente;
 
   // Problèmes d'équilibre des sexes
+  if (sexeIssues.length > 0) comptIssue++;
   score -= sexeIssues.length * settings.priorities.sexe;
 
   // Problèmes d'écart de niveau
+  if (niveauIssues.length > 0) comptIssue++;
   score -= niveauIssues.length * settings.priorities.niveau;
 
+  scoreStat = (comptIssue / 5) * 100;
   return Math.max(0, score); // Pour éviter un score négatif
 }
 
@@ -548,12 +555,14 @@ function renderStats() {
   const coequipierContrainte = renderAccordions(teammateMap, "");
 
   stats.innerHTML = `
-  <span>Respect des contraintes : ${bestScore / 10} %</span>
+  <span>Respect des contraintes : ${bestScoreStat} %</span>
 
   ${
     adversaireContrainte == ""
       ? `<span>✅ Aucun adversaire identique</span>`
-      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ Adversaire répétés</button>
+      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
+          Object.entries(opponentsMap).length
+        } adversaire répétés</button>
        <div class="accordion-content">
         <div class="flex flex-col w-full">
           ${adversaireContrainte}
@@ -563,7 +572,9 @@ function renderStats() {
   ${
     coequipierContrainte == ""
       ? `<span>✅ Aucun coéquipier identique</span>`
-      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ Coéquipiers répétés</button> 
+      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
+          Object.entries(teammateMap).length
+        } coéquipiers répétés</button> 
       <div class="accordion-content">
         <div class="flex flex-col w-full">
           ${coequipierContrainte}
@@ -656,6 +667,16 @@ function getLevelScore(p) {
   return levelValue[p.level] || 0;
 }
 
+function attentePenalty(joueurs, joueursAttente) {
+  let penalty = 0;
+  for (const joueur of joueurs) {
+    const attente = joueursAttente[joueur.id] || 0;
+    // pénalité exponentielle (2^n - 1) : 0, 1, 3, 7, 15...
+    penalty += Math.pow(2, attente) - 1;
+  }
+  return penalty;
+}
+
 function sameTeamCount(p1, p2, planning) {
   let count = 0;
   for (const tour of planning) {
@@ -710,9 +731,9 @@ function matchScore(team1, team2, planning, joueursAttente, params) {
   }
 
   // Attente minimisée
-  for (const p of [...team1, ...team2]) {
-    if (joueursAttente[p.id]) score -= 1 * attente;
-  }
+  const tousLesJoueurs = [...team1, ...team2];
+  const attentePen = attentePenalty(tousLesJoueurs, joueursAttente);
+  score -= attentePen * attente;
 
   // Mixité
   const mixte = (t) => t.filter((p) => p.gender === "F").length === 1;
@@ -758,7 +779,13 @@ async function generePlanning() {
           const combinaisons = [];
           let permutationIndex = 0;
           // Construire liste des joueurs disponibles
-          const disponibles = players.filter((p) => !joueursUtilises.has(p.id));
+          const disponibles = players
+            .filter((p) => !joueursUtilises.has(p.id))
+            .sort((a, b) => {
+              const attenteA = joueursAttente[a.id] || 0;
+              const attenteB = joueursAttente[b.id] || 0;
+              return attenteB - attenteA; // ceux qui ont attendu le plus en premier
+            });
           if (disponibles.length < 4) break;
           permutationTotal = factorial(disponibles.length);
           while (
@@ -766,9 +793,9 @@ async function generePlanning() {
             permutationIndex < maxTries
           ) {
             //const permutation = getNthPermutation(disponibles, permutationIndex);
-            //const groupe = permutation.slice(0, 4);
-            const groupe = getPermutationsJoueur(disponibles);
-            if (groupe == null) break;
+            const groupe = disponibles.slice(0, 4);
+            //const groupe = getPermutationsJoueur(disponibles);
+            //if (groupe == null) break;
 
             const team1 = [groupe[0], groupe[1]];
             const team2 = [groupe[2], groupe[3]];
@@ -823,6 +850,8 @@ async function generePlanning() {
 
 let bestPlanning = null;
 let bestScore = -Infinity;
+let bestScoreStat = -Infinity;
+let scoreStat = -Infinity;
 let stopRequested = false;
 let shuffledOrders = null;
 let shuffledOrdersIndex = -1;
@@ -830,10 +859,10 @@ let totalOrdersMessage = null;
 let totalOrders = null;
 let contraintesUsed = [];
 const rangeContraintes = {
-  equipier: [1, 2], //[1, 2, 3, 4, 5]
-  adversaire: [1, 2],
-  attente: [1, 2],
-  sexe: [1, 2],
+  equipier: [2, 3],
+  adversaire: [3, 4],
+  attente: [9, 10],
+  sexe: [4, 5],
   niveau: [1, 2],
 };
 let contraintesPossible = null;
@@ -912,6 +941,7 @@ async function optimisePlanning() {
 
   let historyBestPlanning = [];
   bestScore = -Infinity;
+  scoreStat = -Infinity;
 
   for (let i = 0; i < contraintesPossible.length && !stopRequested; i++) {
     planning = await generePlanning();
@@ -923,6 +953,7 @@ async function optimisePlanning() {
 
     if (score > bestScore) {
       bestScore = score;
+      bestScoreStat = scoreStat;
       bestPlanning = planning;
       historyBestPlanning.push(`${bestScore / 10} % `);
       renderTournament();
