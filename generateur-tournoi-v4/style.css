@@ -193,3 +193,12 @@ textarea:focus {
     border-radius: var(--radius);
     padding: 10px;
 }
+
+#label-progress-bar {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#label-progress-bar.visible {
+    opacity: 1; 
+}

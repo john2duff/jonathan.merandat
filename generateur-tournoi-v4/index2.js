@@ -53,7 +53,6 @@ let teammateMap = {}; // { playerName: { teammateName: count } }
 let waitCount = {};
 let sexeIssues = [];
 let niveauIssues = [];
-let maxTries = 0;
 
 // -- DOM CREATION --
 window.addEventListener("DOMContentLoaded", () => {
@@ -133,10 +132,10 @@ function renderPreparationSection() {
       <h2> ⚙️Paramètres</h2>
     </div>
     <div class="flex flex-wrap gap-4 m-5">
-      <label>Nombre de terrains : <input type="number" min="1" value="${
+      <label>Nombre de terrains : <input type="number" min="1" max="15" value="${
         settings.terrains
       }" onchange="settings.terrains=parseInt(this.value);saveData()"></label> 
-      <label>Nombre de tours : <input type="number" min="1" value="${
+      <label>Nombre de tours : <input type="number" min="1" max="10" value="${
         settings.tours
       }" onchange="settings.tours=parseInt(this.value);saveData()"></label>
       
@@ -555,20 +554,6 @@ function renderStats() {
   const coequipierContrainte = renderAccordions(teammateMap, "");
 
   stats.innerHTML = `
-  <span>Respect des contraintes : ${bestScoreStat} %</span>
-
-  ${
-    adversaireContrainte == ""
-      ? `<span>✅ Aucun adversaire identique</span>`
-      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
-          Object.entries(opponentsMap).length
-        } adversaire répétés</button>
-       <div class="accordion-content">
-        <div class="flex flex-col w-full">
-          ${adversaireContrainte}
-        </div>
-      </div>`
-  }
   ${
     coequipierContrainte == ""
       ? `<span>✅ Aucun coéquipier identique</span>`
@@ -583,49 +568,22 @@ function renderStats() {
   }
 
   ${
-    sexeIssues.length == 0
-      ? `<span>✅ Aucun problème de mixité</span>`
-      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
-          sexeIssues.length
-        } problèmes de mixité</button> 
-    <div class="accordion-content">
-      <div class="flex flex-col w-full">
-      ${sexeIssues
-        .map((item) => {
-          return `<div>
-          Tour ${item.tour} - Terrain ${item.terrain} : ${item.team1} vs ${item.team2}
+    adversaireContrainte == ""
+      ? `<span>✅ Aucun adversaire identique</span>`
+      : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${
+          Object.entries(opponentsMap).length
+        } adversaire répétés</button>
+       <div class="accordion-content">
+        <div class="flex flex-col w-full">
+          ${adversaireContrainte}
         </div>
-        `;
-        })
-        .join("")}
-      </div>
-    </div>`
-  }
-
-  ${
-    niveauIssues.length == 0
-      ? `<span>✅ Aucun problème d'écart de point</span>`
-      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
-          niveauIssues.length
-        } problèmes d'écart de point</button> 
-    <div class="accordion-content">
-      <div class="flex flex-col w-full">
-      ${sexeIsniveauIssuessues
-        .map((item) => {
-          return `<div>
-          Tour ${item.tour} - Terrain ${item.terrain} : Ecart ${item.ecart} - ${item.joueurs}
-        </div>
-        `;
-        })
-        .join("")}
-      </div>
-    </div>`
+      </div>`
   }
 
   ${
     waitList.length == 0
       ? `<span>✅ Aucun joueur en attente</span>`
-      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
+      : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${
           waitList.length
         } joueurs en attente</button> 
         <div class="accordion-content">
@@ -649,9 +607,50 @@ function renderStats() {
              )
              .join("")}
         </div>
-      </div>
-       `
+      </div>`
   }
+
+  ${
+    sexeIssues.length == 0
+      ? `<span>✅ Aucun problème de mixité</span>`
+      : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${
+          sexeIssues.length
+        } problèmes de mixité</button> 
+    <div class="accordion-content">
+      <div class="flex flex-col w-full">
+      ${sexeIssues
+        .map((item) => {
+          return `<div>
+          Tour ${item.tour} - Terrain ${item.terrain} : ${item.team1} vs ${item.team2}
+        </div>
+        `;
+        })
+        .join("")}
+      </div>
+    </div>`
+  }
+
+  ${
+    niveauIssues.length == 0
+      ? `<span>✅ Aucun problème d'écart de point</span>`
+      : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${
+          niveauIssues.length
+        } problèmes d'écart de point</button> 
+    <div class="accordion-content">
+      <div class="flex flex-col w-full">
+      ${sexeIsniveauIssuessues
+        .map((item) => {
+          return `<div>
+          Tour ${item.tour} - Terrain ${item.terrain} : Ecart ${item.ecart} - ${item.joueurs}
+        </div>
+        `;
+        })
+        .join("")}
+      </div>
+    </div>`
+  }
+
+  
 `;
 }
 
@@ -713,6 +712,7 @@ function getMatchStartScore(match) {
 }
 
 function matchScore(team1, team2, planning, joueursAttente, params) {
+  combinaisonsTeste++;
   let score = 100;
   const { equipier, adversaire, attente, sexe, niveau } = params;
 
@@ -732,8 +732,10 @@ function matchScore(team1, team2, planning, joueursAttente, params) {
 
   // Attente minimisée
   const tousLesJoueurs = [...team1, ...team2];
-  const attentePen = attentePenalty(tousLesJoueurs, joueursAttente);
-  score -= attentePen * attente;
+  tousLesJoueurs.forEach((p) => {
+    const attente = joueursAttente[p.id] || 0;
+    score -= Math.pow(attente, 2); // ou Math.pow(attente + 1, 1.5)
+  });
 
   // Mixité
   const mixte = (t) => t.filter((p) => p.gender === "F").length === 1;
@@ -760,6 +762,18 @@ function permutations(arr) {
   return result;
 }
 
+function compositeScore(team1, team2, planning, joueursAttente, priorities) {
+  let score = matchScore(team1, team2, planning, joueursAttente, priorities);
+
+  // Bonus pour joueurs ayant attendu
+  const bonusAttente = [...team1, ...team2].reduce((acc, p) => {
+    const attente = joueursAttente[p.id] || 0;
+    return acc + Math.pow(attente, 3); // exponentiel
+  }, 0);
+
+  return score + bonusAttente;
+}
+
 // -- GÉNÉRATION DU PLANNING --
 async function generePlanning() {
   return new Promise(async (resolve, reject) => {
@@ -767,8 +781,7 @@ async function generePlanning() {
       settings.priorities = getSettingsPriorities();
       let planning = [];
       let joueursAttente = {};
-      const maxTries = 100; // ou settings.maxTries si défini
-      permutationTotal = factorial(players.length);
+      const maxTries = 3000; // ou settings.maxTries si défini
       permutationUsed = [];
 
       for (let tour = 0; tour < settings.tours; tour++) {
@@ -779,16 +792,35 @@ async function generePlanning() {
           const combinaisons = [];
           let permutationIndex = 0;
           // Construire liste des joueurs disponibles
-          const disponibles = players
-            .filter((p) => !joueursUtilises.has(p.id))
-            /*.sort((a, b) => {
+          const disponibles = players.filter((p) => !joueursUtilises.has(p.id));
+          /*.sort((a, b) => {
               const attenteA = joueursAttente[a.id] || 0;
               const attenteB = joueursAttente[b.id] || 0;
               return attenteB - attenteA; // ceux qui ont attendu le plus en premier
-            })*/;
-          if (disponibles.length < 4) break;
+            })*/ if (disponibles.length < 4) break;
           permutationTotal = factorial(disponibles.length);
-          while (
+
+          for (let t = 0; t < maxTries; t++) {
+            /*const candidats = [...disponibles];
+            shuffle(candidats);
+            const groupe = candidats.slice(0, 4);*/
+            const groupe = getPermutationsJoueur(disponibles);
+            if (groupe == null) break;
+
+            const team1 = [groupe[0], groupe[1]];
+            const team2 = [groupe[2], groupe[3]];
+            const score = compositeScore(
+              team1,
+              team2,
+              planning,
+              joueursAttente,
+              settings.priorities
+            );
+
+            combinaisons.push({ team1, team2, score });
+          }
+
+          /*while (
             tourMatches.length < settings.terrains &&
             permutationIndex < maxTries
           ) {
@@ -799,16 +831,24 @@ async function generePlanning() {
 
             const team1 = [groupe[0], groupe[1]];
             const team2 = [groupe[2], groupe[3]];
-            const score = matchScore(
+            const score = compositeScore(
               team1,
               team2,
               planning,
               joueursAttente,
               settings.priorities
-            );
-            combinaisons.push({ team1, team2, score });
-            permutationIndex++;
-          }
+            );*/
+
+          /*const score = matchScore(
+              team1,
+              team2,
+              planning,
+              joueursAttente,
+              settings.priorities
+            );*/
+          //combinaisons.push({ team1, team2, score });
+          // permutationIndex++;
+          //}
 
           combinaisons.sort((a, b) => b.score - a.score);
           for (const comb of combinaisons) {
@@ -859,21 +899,23 @@ let totalOrdersMessage = null;
 let totalOrders = null;
 let contraintesUsed = [];
 const rangeContraintes = {
-  equipier: [8],
-  adversaire: [4],
-  attente: [10],
-  sexe: [6],
-  niveau: [2],
+  attente: [10, 20],
+  equipier: [8, 10],
+  sexe: [6, 8],
+  adversaire: [4, 6],
+  niveau: [2, 4],
 };
 let contraintesPossible = null;
 let permutationUsed = [];
 let permutationTotal = null;
+let permutationInitiale = null;
+let combinaisonsTeste = null;
 
 function prepareOptimise() {
   //totalOrders = factorial(players.length);
   contraintesUsed = [];
   contraintesPossible = generateConstraintCombinations(rangeContraintes);
-  permutationTotal = factorial(players.length);
+  permutationInitiale = factorial(players.length);
   //console.log(contraintesPossible.length); // total de combinaisons
   //console.log(contraintesPossible); // tableau de toutes les combinaisons possibles
   /*shuffledOrders = [];
@@ -942,6 +984,8 @@ async function optimisePlanning() {
   let historyBestPlanning = [];
   bestScore = -Infinity;
   scoreStat = -Infinity;
+  permutationTotal = factorial(players.length);
+  combinaisonsTeste = 0;
 
   for (let i = 0; i < contraintesPossible.length && !stopRequested; i++) {
     planning = await generePlanning();
@@ -960,12 +1004,17 @@ async function optimisePlanning() {
       renderStats();
     }
 
-    document.getElementById(
+    /*document.getElementById(
       "label-progress-bar"
     ).innerHTML = `Recherche des contraintes ${i + 1} / ${
       contraintesPossible.length
     } </br>
-    Respect des contraintes : ${bestScore / 10} % `;
+    Respect des contraintes : ${bestScore / 10} % `;*/
+    await updateProgressBar(
+      combinaisonsTeste,
+      permutationInitiale,
+      contraintesPossible
+    );
     document.getElementById("progress-bar").value = i + 1;
 
     if (score === 1000) break;
@@ -1072,4 +1121,143 @@ function generateConstraintCombinations(ranges) {
 
   backtrack(0, {});
   return result;
+}
+
+let lastUpdateTime = 0;
+
+async function updateProgressBar(
+  combinaisonsTeste,
+  permutationInitiale,
+  contraintesPossible
+) {
+  const now = Date.now();
+  if (now - lastUpdateTime < 5000) return;
+  lastUpdateTime = now;
+
+  const container = document.getElementById("label-progress-bar");
+  container.classList.remove("visible");
+
+  await new Promise((resolve) => setTimeout(resolve, 500)); // fondu sortant
+  await new Promise(requestAnimationFrame); // libère le thread UI
+
+  container.innerHTML = `
+    <center><span style="text-align: center; width: 100px;">
+      Combinaisons testées : ${combinaisonsTeste} </br> </br>
+      seulement ${
+        (combinaisonsTeste / permutationInitiale) *
+        contraintesPossible.length *
+        100
+      } % </br> 
+      sur  </br>${simplifierNombre(
+        permutationInitiale * contraintesPossible.length
+      )}
+    </span></center>
+  `;
+
+  container.classList.add("visible");
+}
+
+function simplifierNombre(nombre) {
+  const suffixes = [
+    {
+      seuil: 1e36,
+      suffixe: "undécillions",
+      metaphors: [
+        "le nombre d’univers dans le multivers selon certaines théories",
+        "le nombre de notes de musique jouées si chaque particule vibrait",
+        "le nombre d’univers que pourrait simuler un ordinateur divin",
+        "le nombre de moments vécus si le temps était fractal",
+        "le nombre d’étoiles dans toutes les galaxies de 1000 univers",
+      ],
+    },
+    {
+      seuil: 1e33,
+      suffixe: "décillions",
+      metaphors: [
+        "le nombre d’atomes dans un petit astéroïde",
+        "le nombre de scénarios de parties d’échecs possibles en 1 siècle",
+        "le nombre de respirations qu’un humain pourrait prendre en 1 milliard d’années",
+        "le nombre de livres imaginables en combinant tous les mots du dictionnaire",
+        "le nombre d’émotions ressenties par une civilisation immortelle",
+      ],
+    },
+    {
+      seuil: 1e30,
+      suffixe: "nonillions",
+      metaphors: [
+        "le nombre de planètes qu’on pourrait imaginer dans des univers parallèles",
+        "le nombre de rêves faits par toute l'humanité depuis l'aube du temps",
+        "le nombre de permutations possibles d’une bibliothèque infinie",
+        "le nombre de grains de poussière dans tous les déserts de toutes les galaxies",
+        "le nombre de combinaisons possibles d’une vie humaine au choix près",
+      ],
+    },
+    {
+      seuil: 1e27,
+      suffixe: "octillions",
+      metaphors: [
+        "le nombre d’atomes dans une cuillère d’hélium",
+        "le nombre de combinaisons de parties de Tetris sur 100 planètes",
+        "le nombre de gouttelettes dans toutes les pluies de l'histoire",
+        "le nombre de variations possibles d'une symphonie de Beethoven",
+        "le nombre de microbes dans 1 milliard d’écosystèmes",
+      ],
+    },
+    {
+      seuil: 1e24,
+      suffixe: "septillions",
+      metaphors: [
+        "le nombre d'atomes dans un grain de sel multiplié par toute la Voie Lactée",
+        "le nombre de brins d’herbe si chaque planète était un champ",
+        "le nombre de secondes dans 100 milliards d’années",
+        "le nombre de pixels si chaque centimètre de la Terre était un écran 8K",
+        "le nombre de pensées que pourrait avoir une intelligence artificielle éternelle",
+      ],
+    },
+    {
+      seuil: 1e21,
+      suffixe: "sextillions",
+      metaphors: [
+        "le nombre de bactéries dans tous les océans de la Terre",
+        "le nombre d’empreintes digitales sur toutes les planètes d'une galaxie",
+        "le nombre de clics de souris possibles en 10 vies humaines",
+        "le nombre de flocons de neige tombés depuis le début de l'humanité",
+        "le nombre de neurones simulés dans un superordinateur infini",
+      ],
+    },
+    {
+      seuil: 1e18,
+      suffixe: "quintillions",
+      metaphors: [
+        "le nombre d’atomes dans une goutte d’eau",
+        "le nombre de mots prononcés par l’humanité en 1 000 ans",
+        "le nombre de plumes que 1 milliard d'oies pourraient perdre",
+        "le nombre de photos qu’on pourrait prendre chaque jour pendant des millénaires",
+        "le nombre d’étoiles dans 1 million de galaxies",
+      ],
+    },
+    {
+      seuil: 1e15,
+      suffixe: "quadrillions",
+      metaphors: [
+        "le nombre de fourmis sur Terre pendant 1 million d'années",
+        "le nombre de grains de sable sur toutes les plages du monde",
+        "le nombre de cellules dans 10 000 corps humains",
+        "le nombre de battements de cœur de l’humanité en une semaine",
+        "le nombre de secondes écoulées depuis la naissance de la Terre",
+      ],
+    },
+  ];
+
+  for (let i = 0; i < suffixes.length; i++) {
+    if (nombre >= suffixes[i].seuil) {
+      const val = (nombre / suffixes[i].seuil).toFixed(2);
+      const metaphor =
+        suffixes[i].metaphors[
+          Math.floor(Math.random() * suffixes[i].metaphors.length)
+        ];
+      return `${val} ${suffixes[i].suffixe} <br/><i>≈ ${metaphor}</i>`;
+    }
+  }
+  return nombre.toLocaleString();
 }
