@@ -77,7 +77,7 @@ window.addEventListener("DOMContentLoaded", () => {
   renderTournament();
   renderPanel();
   renderStats();
-  if (currentTour != -1) {
+  if (currentTour != -1 && currentTour != null) {
     showSection("tournament");
     currentStopTimer = afficherTempsEcoule(
       planning[currentTour].startDate,
@@ -165,7 +165,9 @@ function renderPreparationSection() {
 
     <div class="sous-header justify-between">
       <h2>👥 Liste des joueurs</h2>
-      <span>${players.length == 0 ? "Aucun joueur" : " joueurs"}</span>
+      <span>${
+        players.length == 0 ? "Aucun joueur" : ` ${players.length} joueurs`
+      }</span>
     </div>
     <div class="flex-auto">
       <form id="form-add-player" class=" sous-header-secondary flex flex-wrap gap-1">
@@ -294,13 +296,22 @@ function renderTournament() {
   el.innerHTML = `
       <div class="sous-header flex justify-between">
         <button onclick="togglePanel(true);showSection('preparation');"> <div style="transform:rotate(180deg)">➜<div>  </button>
-        <div class="flex flex-auto mx-3 gap-4">
-          <span>${players.length == 0 ? "Aucun joueur" : " joueurs"}</span>
+        <div class="flex flex-auto justify-between mx-3 gap-4">
+          ${
+            "" /*<span>${
+            players.length == 0 ? "Aucun joueur" : ` ${players.length} joueurs`
+          }</span>
+          */
+          }
+
           <span>${
-            currentTour == -1
+            currentTour == null
+              ? "Tournoi terminé"
+              : currentTour == -1
               ? "Prêt à lancer !"
               : `Tour ${currentTour + 1} en cours`
           }</span>
+          
           ${
             currentTour != -1
               ? `<span id="tps-ecoule-${currentTour}"> </span>`
@@ -308,7 +319,11 @@ function renderTournament() {
           }
           
         </div>
-        <button onclick="togglePanel()">📊 Statistiques</button>
+        ${
+          currentTour == -1 || currentTour === null
+            ? `<button onclick="togglePanel()">📊 Statistiques</button>`
+            : ""
+        }
       </div>
       ${planning
         .map((tour, index) => {
@@ -324,7 +339,7 @@ function renderTournament() {
               : "à venir"
           }</h3>
                 <div class="flex justify-center flex-wrap gap-4">
-                  ${tour
+                  ${tour.matchs
                     .map((match, index) => {
                       indexMatch++;
                       return `
@@ -374,7 +389,7 @@ function renderTournament() {
       <footer class="footer flex justify-end">
       ${
         currentTour === null
-          ? `<button class="btn-secondary" onclick="renderResults(); showSection('results');"> Accès aux résultats</button>`
+          ? `<button class="btn-secondary" onclick="renderResults(); showSection('results');">Résultats ➜</button>`
           : currentTour == -1
           ? `<button class="btn-primary" onclick="launchTournoi();"> 🏆 Lancer le tournoi</button>`
           : `${
@@ -423,6 +438,7 @@ function afficherTempsEcoule(dateDepart, currentTour) {
 }
 
 function launchTournoi() {
+  togglePanel(true);
   currentTour = 0;
   planning[currentTour].startDate = Date.now();
   renderTournament();
@@ -528,9 +544,9 @@ function evaluerPlanning() {
   sexeIssues = [];
   niveauIssues = [];
 
-  planning.forEach((matches, tourIdx) => {
+  planning.forEach((tour, tourIdx) => {
     const playersInTour = new Set();
-    matches.forEach((match, matchIdx) => {
+    tour.matchs.forEach((match, matchIdx) => {
       const allPlayers = [...match.team1, ...match.team2];
       allPlayers.forEach((p) => playersInTour.add(p.name));
 
@@ -807,7 +823,7 @@ function attentePenalty(joueurs, joueursAttente) {
 function sameTeamCount(p1, p2, planning) {
   let count = 0;
   for (const tour of planning) {
-    for (const match of tour) {
+    for (const match of tour.matchs) {
       if (
         (match.team1.includes(p1) && match.team1.includes(p2)) ||
         (match.team2.includes(p1) && match.team2.includes(p2))
@@ -822,7 +838,7 @@ function sameTeamCount(p1, p2, planning) {
 function sameOpponentCount(p1, p2, planning) {
   let count = 0;
   for (const tour of planning) {
-    for (const match of tour) {
+    for (const match of tour.matchs) {
       if (
         (match.team1.includes(p1) && match.team2.includes(p2)) ||
         (match.team2.includes(p1) && match.team1.includes(p2))
@@ -909,7 +925,7 @@ async function generePlanning() {
       settings.priorities = getSettingsPriorities();
       let planning = [];
       let joueursAttente = {};
-      const maxTries = 3000; // ou settings.maxTries si défini
+      maxTries = 3000; // ou settings.maxTries si défini
       permutationUsed = [];
 
       for (let tour = 0; tour < settings.tours; tour++) {
@@ -985,7 +1001,6 @@ async function generePlanning() {
             tourMatches.push({
               team1: comb.team1,
               team2: comb.team2,
-              startDate: null,
             });
             comb.team1.forEach((p) => joueursUtilises.add(p.id));
             comb.team2.forEach((p) => joueursUtilises.add(p.id));
@@ -1009,7 +1024,7 @@ async function generePlanning() {
           }
         });
 
-        planning.push(tourMatches);
+        planning.push({ startDate: null, endDate: null, matchs: tourMatches });
       }
 
       resolve(planning);
@@ -1121,6 +1136,7 @@ async function optimisePlanning() {
 
   for (let i = 0; i < contraintesPossible.length && !stopRequested; i++) {
     planning = await generePlanning();
+
     //c'est que l'on n'a plus de set de joueurs
     if (planning === false) {
       break;
@@ -1136,18 +1152,30 @@ async function optimisePlanning() {
       renderStats();
     }
 
+    document.getElementById("progress-bar").value = i + 1;
+    const container = document.getElementById("label-progress-bar");
+    container.innerHTML = `
+      <center>
+        <span>${Math.round(
+          (i / contraintesPossible.length) * 100
+        )} %</span> </br>
+        <span>Combinaisons testées : ${combinaisonsTeste}
+      </span></center>
+    `;
+    await new Promise((r) => requestAnimationFrame(r));
+
     /*document.getElementById(
       "label-progress-bar"
     ).innerHTML = `Recherche des contraintes ${i + 1} / ${
       contraintesPossible.length
     } </br>
     Respect des contraintes : ${bestScore / 10} % `;*/
-    await updateProgressBar(
+    /*updateProgressBar(
       combinaisonsTeste,
       permutationInitiale,
-      contraintesPossible
-    );
-    document.getElementById("progress-bar").value = i + 1;
+      contraintesPossible,
+      i
+    );*/
 
     if (score === 1000) break;
     await new Promise((r) => requestAnimationFrame(r));
@@ -1255,26 +1283,35 @@ function generateConstraintCombinations(ranges) {
   return result;
 }
 
-let lastUpdateTime = 0;
+//let lastUpdateTime = 0;
 
 async function updateProgressBar(
   combinaisonsTeste,
   permutationInitiale,
-  contraintesPossible
+  contraintesPossible,
+  i
 ) {
   const now = Date.now();
-  if (now - lastUpdateTime < 5000) return;
-  lastUpdateTime = now;
+  //if (now - lastUpdateTime < 5000) return;
+  //lastUpdateTime = now;
 
   const container = document.getElementById("label-progress-bar");
-  container.classList.remove("visible");
+  //container.classList.remove("visible");
 
-  await new Promise((resolve) => setTimeout(resolve, 500)); // fondu sortant
-  await new Promise(requestAnimationFrame); // libère le thread UI
+  //await new Promise((resolve) => setTimeout(resolve, 500)); // fondu sortant
+  await new Promise((r) => requestAnimationFrame(r));
+  //await new Promise(requestAnimationFrame); // libère le thread UI
 
   container.innerHTML = `
+    <center>
+      <span>${Math.round((i / contraintesPossible.length) * 100)} %</span> </br>
+      <span>Combinaisons testées : ${combinaisonsTeste}
+    </span></center>
+  `;
+
+  /*container.innerHTML = `
     <center><span style="text-align: center; width: 100px;">
-      Combinaisons testées : ${combinaisonsTeste} </br> </br>
+      Combinaisons testées : ${combinaisonsTeste} </br>
       seulement ${
         (combinaisonsTeste / permutationInitiale) *
         contraintesPossible.length *
@@ -1284,9 +1321,9 @@ async function updateProgressBar(
         permutationInitiale * contraintesPossible.length
       )}
     </span></center>
-  `;
+  `;*/
 
-  container.classList.add("visible");
+  //container.classList.add("visible");
 }
 
 function simplifierNombre(nombre) {
