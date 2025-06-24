@@ -46,7 +46,9 @@ let players = tournoi.players || [];
 let settings = tournoi.settings || defaultConfig;
 let scores = tournoi.scores || {};
 let planning = tournoi.planning || [];
-let manualMode = false;
+let currentTour = tournoi.currentTour === undefined ? -1 : tournoi.currentTour;
+
+let currentStopTimer = null;
 
 let opponentsMap = {}; // { playerName: { opponentName: count } }
 let teammateMap = {}; // { playerName: { teammateName: count } }
@@ -65,6 +67,7 @@ window.addEventListener("DOMContentLoaded", () => {
     <div id="main" class="flex flex-auto">
       <section id="preparation" class="flex flex-col flex-auto"></section>
       <section id="tournament" class="flex flex-col flex-auto" style="display:none"></section>
+      <section id="results" class="flex flex-col flex-auto" style="display:none"></section>
     </div>
   </div>
   <aside id="panel" class="h-screen overflow-auto"></aside>
@@ -74,6 +77,13 @@ window.addEventListener("DOMContentLoaded", () => {
   renderTournament();
   renderPanel();
   renderStats();
+  if (currentTour != -1) {
+    showSection("tournament");
+    currentStopTimer = afficherTempsEcoule(
+      planning[currentTour].startDate,
+      currentTour
+    );
+  }
 });
 
 // -- UI FUNCTIONS --
@@ -105,6 +115,7 @@ function reset() {
     settings = defaultConfig;
     scores = {};
     planning = [];
+    currentTour = -1;
     saveData();
     renderPreparationSection();
     renderTournament();
@@ -120,8 +131,18 @@ function saveData() {
       settings,
       scores,
       planning,
+      currentTour,
     })
   );
+}
+
+function regenerate() {
+  if (
+    confirm("Un tournoi existe déjà, il va être perdu, voulez vous-continuer ?")
+  ) {
+    prepareOptimise();
+    optimisePlanning();
+  }
 }
 
 // -- RENDER PLAYERS SECTION --
@@ -144,7 +165,7 @@ function renderPreparationSection() {
 
     <div class="sous-header justify-between">
       <h2>👥 Liste des joueurs</h2>
-      <span>${players.length} joueurs enregistrés</span>
+      <span>${players.length == 0 ? "Aucun joueur" : " joueurs"}</span>
     </div>
     <div class="flex-auto">
       <form id="form-add-player" class=" sous-header-secondary flex flex-wrap gap-1">
@@ -258,21 +279,12 @@ function renderPreparationSection() {
             </select>
           </div>
         </div>
-          <button class="w-40" onclick="players.splice(${i},1);saveData();renderPreparationSection()"> 🗑 Supprimer </button>
+          <button class="btn-secondary w-40" onclick="players.splice(${i},1);saveData();renderPreparationSection()"> 🗑 Supprimer </button>
       </div>
     </div>
   `
     )
     .join("");
-}
-
-function regenerate() {
-  if (
-    confirm("Un tournoi existe déjà, il va être perdu, voulez vous-continuer ?")
-  ) {
-    prepareOptimise();
-    optimisePlanning();
-  }
 }
 
 // -- RENDER TOURNAMENT SECTION --
@@ -282,13 +294,35 @@ function renderTournament() {
   el.innerHTML = `
       <div class="sous-header flex justify-between">
         <button onclick="togglePanel(true);showSection('preparation');"> <div style="transform:rotate(180deg)">➜<div>  </button>
+        <div class="flex flex-auto mx-3 gap-4">
+          <span>${players.length == 0 ? "Aucun joueur" : " joueurs"}</span>
+          <span>${
+            currentTour == -1
+              ? "Prêt à lancer !"
+              : `Tour ${currentTour + 1} en cours`
+          }</span>
+          ${
+            currentTour != -1
+              ? `<span id="tps-ecoule-${currentTour}"> </span>`
+              : ``
+          }
+          
+        </div>
         <button onclick="togglePanel()">📊 Statistiques</button>
       </div>
       ${planning
         .map((tour, index) => {
           return `
             <div class="">
-                <h3 class="sous-header-secondary">Tour ${index + 1}</h3>
+                <h3 class="sous-header-secondary ${
+                  currentTour == index && "bg-green-100"
+                }">Tour ${index + 1} ${
+            currentTour == index
+              ? "en cours"
+              : tour.closed
+              ? "terminé"
+              : "à venir"
+          }</h3>
                 <div class="flex justify-center flex-wrap gap-4">
                   ${tour
                     .map((match, index) => {
@@ -336,7 +370,94 @@ function renderTournament() {
         `;
         })
         .join("")}
+      
+      <footer class="footer flex justify-end">
+      ${
+        currentTour === null
+          ? `<button class="btn-secondary" onclick="renderResults(); showSection('results');"> Accès aux résultats</button>`
+          : currentTour == -1
+          ? `<button class="btn-primary" onclick="launchTournoi();"> 🏆 Lancer le tournoi</button>`
+          : `${
+              currentTour < planning.length - 1
+                ? `
+            <div class="flex justify-between w-full p-2">
+              <button class="btn-secondary" onclick="clotureTournoi();"> Clotûrer le tournoi</button>
+              <button class="btn-primary" onclick="clotureTour();"> Clotûrer le tour</button>
+            </div>`
+                : `<button class="btn-primary" onclick="clotureTournoi();"> Clotûrer le tournoi</button>`
+            }
+          `
+      }
+      </footer>
     `;
+}
+
+function renderResults() {
+  const el = document.getElementById("results");
+  el.innerHTML = `
+  <h1>Résultats</h1>
+    ${Object.entries(scores).map((score) => {
+      return `${score}`;
+    })}
+  `;
+}
+
+function afficherTempsEcoule(dateDepart, currentTour) {
+  let frameId;
+
+  function update() {
+    const maintenant = new Date();
+    const ecoule = Math.floor((maintenant - dateDepart) / 1000);
+    const minutes = Math.floor(ecoule / 60);
+    const secondes = ecoule % 60;
+    let tps =
+      ecoule > 59 ? `${minutes} min. ${secondes} sec.` : `${secondes} sec.`;
+    document.getElementById(
+      "tps-ecoule-" + currentTour
+    ).textContent = `Temps écoulé : ${tps}`;
+    frameId = requestAnimationFrame(update);
+  }
+
+  frameId = requestAnimationFrame(update);
+  return () => cancelAnimationFrame(frameId); // retourne une fonction pour stopper
+}
+
+function launchTournoi() {
+  currentTour = 0;
+  planning[currentTour].startDate = Date.now();
+  renderTournament();
+  currentStopTimer = afficherTempsEcoule(
+    planning[currentTour].startDate,
+    currentTour
+  );
+  saveData();
+}
+
+function clotureTournoi() {
+  planning[currentTour].endDate = Date.now();
+  planning[currentTour].closed = true;
+  currentTour = null;
+  currentStopTimer();
+  renderTournament();
+  saveData();
+}
+
+function clotureTour() {
+  currentStopTimer();
+  planning[currentTour].endDate = Date.now();
+  planning[currentTour].closed = true;
+  if (currentTour < planning.length) {
+    currentTour++;
+    renderTournament();
+    planning[currentTour].startDate = Date.now();
+    currentStopTimer = afficherTempsEcoule(
+      planning[currentTour].startDate,
+      currentTour
+    );
+  } else {
+    currentTour = -1;
+  }
+  saveData();
 }
 
 function renderContraintes(from, refreshTournament) {
@@ -861,7 +982,11 @@ async function generePlanning() {
           for (const comb of combinaisons) {
             //if (tourMatches.length >= settings.terrains) break;
             //if (comb.joueurs.some((p) => joueursUtilises.has(p.id))) continue;
-            tourMatches.push({ team1: comb.team1, team2: comb.team2 });
+            tourMatches.push({
+              team1: comb.team1,
+              team2: comb.team2,
+              startDate: null,
+            });
             comb.team1.forEach((p) => joueursUtilises.add(p.id));
             comb.team2.forEach((p) => joueursUtilises.add(p.id));
             break;
