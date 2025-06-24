@@ -205,8 +205,8 @@ function renderPreparationSection() {
       `
         : `
       <div class="flex justify-between w-full p-2">
-        <button class="btn-primary" onclick="regenerate();"> 🏆 Régénérer le tournoi</button>
-        <button class="btn-secondary" onclick="showSection('tournament');"> Tournoi en cours ➜</button>
+        <button class="btn-secondary" onclick="regenerate();"> ↺ Régénérer le tournoi</button>
+        <button class="btn-primary" onclick="showSection('tournament');"> Tournoi en cours ➜</button>
       </div>
       `
     }
@@ -321,7 +321,7 @@ function renderTournament() {
         </div>
         ${
           currentTour == -1 || currentTour === null
-            ? `<button onclick="togglePanel()">📊 Statistiques</button>`
+            ? `<button onclick="togglePanel()">📊 Contraintes</button>`
             : ""
         }
       </div>
@@ -389,7 +389,7 @@ function renderTournament() {
       <footer class="footer flex justify-end">
       ${
         currentTour === null
-          ? `<button class="btn-secondary" onclick="renderResults(); showSection('results');">Résultats ➜</button>`
+          ? `<button class="btn-primary" onclick="renderResults(); showSection('results');">Résultats ➜</button>`
           : currentTour == -1
           ? `<button class="btn-primary" onclick="launchTournoi();"> 🏆 Lancer le tournoi</button>`
           : `${
@@ -524,7 +524,7 @@ function renderPanel() {
   const panel = document.getElementById("panel");
   panel.innerHTML = `
   <h3 class="sous-header flex justify-between">
-  📊 Statistiques
+  📊 Contraintes
   <button onclick="togglePanel(true);">✖</button>
   </h3>
   ${"" /*<div id="contrainte-panel">*/}
