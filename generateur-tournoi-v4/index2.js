@@ -171,7 +171,7 @@ function renderPreparationSection() {
     </div>
     <div class="flex-auto">
       <form id="form-add-player" class=" sous-header-secondary flex flex-wrap gap-1">
-          <div class="flex items-start gap-1 w-full" >
+          <div class="flex items-start gap-1" >
             <div class="flex flex-auto flex-wrap gap-1" >
               <input class="w-full" id="name-player" placeholder="Nouveau joueur" value="" />
               <div class="flex flex-auto gap-1" >
@@ -194,7 +194,7 @@ function renderPreparationSection() {
             <button class="btn-primary rounded" type="submit" id="addPlayer">+ Ajouter un joueur</button>
           </div>
       </form>
-      <div id="playerList" class="m-5"></div>
+      <div id="playerList" class="m-5 flex flex-wrap gap-4"></div>
     </div>
 
     <footer class="footer flex justify-end">
@@ -215,34 +215,34 @@ function renderPreparationSection() {
 
   el.querySelector("#form-add-player").onsubmit = () => {
     let name = el.querySelector("#name-player").value.trim();
+    let gender = el.querySelector("#gender-player").value;
     const wasEmpty = name == "";
     if (name == "" || players.find((p) => p.name === name)) {
       const names = [
-        "Paul",
-        "Robin",
-        "Celine",
-        "John",
-        "Olivier",
-        "Fabien",
-        "Marie",
-        "Ludivine",
-        "Audrey",
-        "Katy",
+        ["Paul", "H"],
+        ["Robin", "H"],
+        ["Celine", "F"],
+        ["John", "H"],
+        ["Olivier", "H"],
+        ["Fabien", "H"],
+        ["Marie", "F"],
+        ["Ludivine", "F"],
+        ["Audrey", "F"],
+        ["Katy", "F"],
       ];
       let tries = 0;
       do {
+        const rdm = Math.floor(Math.random() * names.length);
         name = wasEmpty
-          ? "[Auto] " +
-            names[Math.floor(Math.random() * names.length)] +
-            "_" +
-            Math.floor(Math.random() * 100)
+          ? "[Auto] " + names[rdm][0] + "_" + Math.floor(Math.random() * 100)
           : name + "_" + Math.floor(Math.random() * 100);
+        gender = names[rdm][1];
         tries++;
       } while (players.find((p) => p.name === name) && tries < 50);
     }
     const newPlayer = {
       name,
-      gender: el.querySelector("#gender-player").value,
+      gender,
       level: el.querySelector("#level-player").value,
       id: crypto.randomUUID?.(),
     };
@@ -258,13 +258,14 @@ function renderPreparationSection() {
   list.innerHTML = players
     .map(
       (p, i) => `
-    <div class="mb-1 rounded border-purple-200">
-      <div class="flex items-start gap-1" >
-        <div class="flex flex-wrap gap-1 flex-auto w-full" >
+      <div class="player w-96 flex items-start gap-1 p-2 border rounded-lg ${
+        p.gender === "H" ? "bg-blue-100" : "bg-pink-100"
+      }" >
+        <div class="flex flex-col flex-auto" >
           <input class="w-full" id="name_${i}" value="${
         p.name
       }" onchange="players[${i}].name=this.value;saveData();renderPreparationSection()" />
-          <div class="flex gap-1 w-full" >
+          <div class="flex" >
             <select class="flex-auto" onchange="players[${i}].gender=this.value;saveData();renderPreparationSection()">
               <option value="H" ${p.gender === "H" ? "selected" : ""}>H</option>
               <option value="F" ${p.gender === "F" ? "selected" : ""}>F</option>
@@ -281,12 +282,34 @@ function renderPreparationSection() {
             </select>
           </div>
         </div>
-          <button class="btn-secondary w-40" onclick="players.splice(${i},1);saveData();renderPreparationSection()"> 🗑 Supprimer </button>
+          <button class="h-full text-2xl" onclick="requestDeletePlayer(event, ${i});"> ⛔ </button>
       </div>
-    </div>
   `
     )
     .join("");
+}
+
+function requestDeletePlayer(event, i) {
+  event.preventDefault();
+  event.stopPropagation();
+  event.currentTarget.innerHTML = "⛔ Supprimer";
+  event.currentTarget.setAttribute("class", "h-full text-base btn-warning");
+  const listener = (event) => {
+    event.preventDefault();
+    players.splice(i, 1);
+    saveData();
+    renderPreparationSection();
+  };
+  event.currentTarget.addEventListener("click", listener, { once: true });
+  document.body.addEventListener(
+    "click",
+    ((target, listener, evt) => {
+      target.innerHTML = "⛔";
+      target.setAttribute("class", "h-full text-2xl");
+      target.removeEventListener("click", listener);
+    }).bind(this, event.currentTarget, listener),
+    { once: true }
+  );
 }
 
 // -- RENDER TOURNAMENT SECTION --

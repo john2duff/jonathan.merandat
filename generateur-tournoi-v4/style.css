@@ -7,6 +7,8 @@
     --text3-color: #000000;
     --bg4-color: #c8c8c8;
     --text4-color: #000000;
+    --bg5-color: #e6e6e6;
+    --text5-color: #000000;
     --radius: 5px;
     --padding-button: 5px;
 }
@@ -197,6 +199,18 @@ textarea:focus {
     padding: 10px;
 }
 
+.btn-warning {
+    background: var(--bg5-color);
+    color: var(--text5-color);
+    border-radius: var(--radius);
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 14rem;
+    border: solid 2px #e77c7c;
+}
+
 #label-progress-bar {
     /*opacity: 0;*/
     transition: opacity 0.5s ease-in-out;
@@ -204,4 +218,9 @@ textarea:focus {
 
 #label-progress-bar.visible {
     opacity: 1; 
+}
+
+.player{
+    box-shadow: 5px 5px 20px 5px lightgray;
+
 }

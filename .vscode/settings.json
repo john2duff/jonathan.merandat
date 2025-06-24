@@ -4,5 +4,11 @@
     "deno.unstable": true,
     "deno.suggest.imports.hosts": {
         "https://deno.land": true
+    },
+    "tailwindCSS.includeLanguages": {
+        "plaintext": "javascript"
+    },
+    "editor.quickSuggestions": {
+        "strings": "on"
     }
 }
