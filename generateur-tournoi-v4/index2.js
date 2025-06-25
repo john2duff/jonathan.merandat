@@ -20,19 +20,19 @@ const levels = [
 ];
 
 const levelValue = {
-  NC: 0,
-  P12: 1,
-  P11: 2,
-  P10: 3,
-  D9: 4,
-  D8: 5,
+  NC: 12,
+  P12: 11,
+  P11: 10,
+  P10: 9,
+  D9: 8,
+  D8: 7,
   D7: 6,
-  R6: 7,
-  R5: 8,
-  R4: 9,
-  N3: 10,
-  N2: 11,
-  N1: 12,
+  R6: 5,
+  R5: 4,
+  R4: 3,
+  N3: 2,
+  N2: 1,
+  N1: 0,
 };
 
 const defaultConfig = {
@@ -111,6 +111,9 @@ function togglePanel(forceHide = null) {
 
 function reset() {
   if (confirm("Reset ?")) {
+    if (currentStopTimer) {
+      currentStopTimer();
+    }
     players = [];
     settings = defaultConfig;
     scores = {};
@@ -206,7 +209,9 @@ function renderPreparationSection() {
         : `
       <div class="flex justify-between w-full p-2">
         <button class="btn-secondary" onclick="regenerate();"> ↺ Régénérer le tournoi</button>
-        <button class="btn-primary" onclick="showSection('tournament');"> Tournoi en cours ➜</button>
+        <button class="btn-primary" onclick="showSection('tournament');"> Tournoi ${
+          currentTour == null ? "terminé" : "en cours"
+        } ➜</button>
       </div>
       `
     }
@@ -329,7 +334,7 @@ function renderTournament() {
 
           <span>${
             currentTour == null
-              ? "Tournoi terminé"
+              ? `Temps total du tournoi : ${getTpsTotal()}`
               : currentTour == -1
               ? "Prêt à lancer !"
               : `Tour ${currentTour + 1} en cours`
@@ -337,7 +342,7 @@ function renderTournament() {
           
           ${
             currentTour != -1
-              ? `<span id="tps-ecoule-${currentTour}"> </span>`
+              ? `<span class="justify-center w-16 inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset" id="tps-ecoule-${currentTour}"> </span>`
               : ``
           }
           
@@ -349,13 +354,13 @@ function renderTournament() {
         }
       </div>
       ${planning
-        .map((tour, index) => {
+        .map((tour, indexTour) => {
           return `
             <div class="">
                 <h3 class="sous-header-secondary ${
-                  currentTour == index && "bg-green-100"
-                }">Tour ${index + 1} ${
-            currentTour == index
+                  currentTour == indexTour && "bg-green-100"
+                }">Tour ${indexTour + 1} ${
+            currentTour == indexTour
               ? "en cours"
               : tour.closed
               ? "terminé"
@@ -366,38 +371,58 @@ function renderTournament() {
                     .map((match, index) => {
                       indexMatch++;
                       return `
-                        <div class="flex flex-col mx-2">
+                        <div class="flex flex-col mx-2 w-full max-w-lg">
                           <h4>Match ${indexMatch} - Terrain ${index + 1}</h4>
-                          <div class="flex items-center border p-2 rounded">
-                              <div class="flex mx-2">
-                              <input type="number" min="-32" max="32" value="${
-                                match.score?.[0] ?? ""
-                              }" onchange="onInputScore(event, 0)" />
-                                <div class="flex flex-col mx-2">
-                                    ${match.team1
-                                      .map((player) => {
-                                        return `
-                                            <span>${player.name}</span>
-                                        `;
-                                      })
-                                      .join("")}
+                          <div class="flex flex-col items-center border p-2 rounded w-full">
+                              <div class="flex mx-2 w-full justify-center text-lg">
+                                ${match.scoreTeam1} - ${match.scoreTeam2}
+                              </div>
+                              <div class="flex mx-2 w-full items-center">
+                                <div class="flex justify-between items-center mx-2 w-1/2">
+                                  <div class="flex flex-col ">
+                                        ${match.team1
+                                          .map((player) => {
+                                            return `
+                                                <span>${player.name}</span>
+                                            `;
+                                          })
+                                          .join("")}
+                                  </div>
+                                  ${
+                                    currentTour === indexTour
+                                      ? `
+                                      <div style="display: flex; align-items: center;">
+                                        <input type="range" id="sliderVertical" min="-24" max="32" value="${match.scoreTeam1}" class="vertical-slider" onchange="onInputScore(event, 0)">
+                                      </div>
+                                  `
+                                      : ""
+                                  }
+                                </div>
+
+                                🏸
+                                
+                                <div class="flex justify-between items-center mx-2 w-1/2" >
+                                  <div class="flex justify-between items-center w-full">
+                                  ${
+                                    currentTour === indexTour
+                                      ? `<div style="display: flex; align-items: center;">
+                                      <input type="range" id="sliderVertical" min="-24" max="32" value="${match.scoreTeam2}" class="vertical-slider" onchange="onInputScore(event, 0)">
+                                    </div>`
+                                      : ""
+                                  }
+                                  <div class="flex flex-col mx-2 w-full justify-end items-end">
+                                      ${match.team2
+                                        .map((player) => {
+                                          return `
+                                              <span>${player.name}</span>
+                                          `;
+                                        })
+                                        .join("")}
+                                  </div>
+                                    
                                 </div>
                               </div>
-                              🏸
-                              <div class="flex mx-2">
-                                <div class="flex flex-col mx-2">
-                                    ${match.team2
-                                      .map((player) => {
-                                        return `
-                                            <span>${player.name}</span>
-                                        `;
-                                      })
-                                      .join("")}
-                                </div>
-                                <input type="number" min="-32" max="32" value="${
-                                  match.score?.[0] ?? ""
-                                }" onchange="onInputScore(event, 1)" />
-                              </div>
+                            </div>
                           </div>
                         </div>
                       `;
@@ -430,6 +455,17 @@ function renderTournament() {
     `;
 }
 
+function getTpsTotal() {
+  const timeTotal = planning.reduce((acc, tour) =>
+    acc + tour ? getTempsEcoule(tour.startDate, tour.endDate, true) : 0
+  );
+  const minutes = Math.floor(timeTotal / 60);
+  const secondes = timeTotal % 60;
+  return timeTotal > 59
+    ? `${minutes} min. ${secondes} sec.`
+    : `${secondes} sec.`;
+}
+
 function renderResults() {
   const el = document.getElementById("results");
   el.innerHTML = `
@@ -444,20 +480,29 @@ function afficherTempsEcoule(dateDepart, currentTour) {
   let frameId;
 
   function update() {
-    const maintenant = new Date();
-    const ecoule = Math.floor((maintenant - dateDepart) / 1000);
-    const minutes = Math.floor(ecoule / 60);
-    const secondes = ecoule % 60;
-    let tps =
-      ecoule > 59 ? `${minutes} min. ${secondes} sec.` : `${secondes} sec.`;
     document.getElementById(
       "tps-ecoule-" + currentTour
-    ).textContent = `Temps écoulé : ${tps}`;
+    ).textContent = `${getTempsEcoule(dateDepart)}`;
     frameId = requestAnimationFrame(update);
   }
 
   frameId = requestAnimationFrame(update);
   return () => cancelAnimationFrame(frameId); // retourne une fonction pour stopper
+}
+
+function getTempsEcoule(dateDepart, dateFin = null, formatInteger = false) {
+  const maintenant = dateFin ? dateFin : new Date();
+  const ecoule = Math.floor((maintenant - dateDepart) / 1000);
+  if (formatInteger) return ecoule;
+  const hours = Math.floor(ecoule / 3600);
+  const minutes = Math.floor(ecoule / 60);
+  const secondes = ecoule % 60;
+  return ecoule > 3600
+    ? `${hours}h ${minutes}' ${secondes}''`
+    : ecoule > 59
+    ? `${minutes}' ${secondes}''`
+    : `${secondes}'`;
+  //return ecoule > 59 ? `${minutes} min. ${secondes} sec.` : `${secondes} sec.`;
 }
 
 function launchTournoi() {
@@ -1021,9 +1066,34 @@ async function generePlanning() {
           for (const comb of combinaisons) {
             //if (tourMatches.length >= settings.terrains) break;
             //if (comb.joueurs.some((p) => joueursUtilises.has(p.id))) continue;
+            const scoreTeam1 = comb.team1.reduce(
+              (acc, p) => acc + getLevelScore(p),
+              0
+            );
+            const scoreTeam2 = comb.team2.reduce(
+              (acc, p) => acc + getLevelScore(p),
+              0
+            );
+
+            let finalTeam1, finalTeam2;
+
+            if (settings.isScoreNegatif) {
+              // On prend la différence, la team avec le plus petit score devient 0
+              const diff = scoreTeam1 - scoreTeam2;
+              finalTeam1 = diff;
+              finalTeam2 = 0;
+            } else {
+              // Score relatif à la plus faible équipe qui devient 0
+              const minScore = Math.min(scoreTeam1, scoreTeam2);
+              finalTeam1 = scoreTeam1 - minScore;
+              finalTeam2 = scoreTeam2 - minScore;
+            }
+
             tourMatches.push({
               team1: comb.team1,
               team2: comb.team2,
+              scoreTeam1: finalTeam1,
+              scoreTeam2: finalTeam2,
             });
             comb.team1.forEach((p) => joueursUtilises.add(p.id));
             comb.team2.forEach((p) => joueursUtilises.add(p.id));

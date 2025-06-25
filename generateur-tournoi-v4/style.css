@@ -224,3 +224,10 @@ textarea:focus {
     box-shadow: 5px 5px 20px 5px lightgray;
 
 }
+.vertical-slider {
+    writing-mode: bt-lr;
+    /* vertical */
+    -webkit-appearance: slider-vertical;
+    width: 8px;
+    height: 100px;
+}
