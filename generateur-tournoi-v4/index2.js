@@ -72,10 +72,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   renderPreparationSection();
   renderTournament();
-  renderPanel();
-  renderStats();
   if (currentTour != -1 && currentTour != null) {
     showSection("tournament");
+    renderPanelTournament();
     currentStopTimer = afficherTempsEcoule(
       planning[currentTour].startDate,
       currentTour
@@ -213,7 +212,7 @@ function renderPreparationSection() {
         : `
       <div class="flex justify-between w-full p-2">
         <button class="btn-secondary" onclick="regenerate();"> ↺ Régénérer le tournoi</button>
-        <button class="btn-primary" onclick="showSection('tournament');"> Tournoi ${
+        <button class="btn-primary" onclick="showSection('tournament');renderPanelTournament();"> Tournoi ${
           currentTour == null ? "terminé" : "en cours"
         } ➜</button>
       </div>
@@ -385,7 +384,7 @@ function renderTournament() {
         </div>
         ${
           currentTour == -1 || currentTour === null
-            ? `<button onclick="togglePanel()">📊 Contraintes</button>`
+            ? `<button onclick="togglePanel()">⚙️ Paramètres</button>`
             : ""
         }
       </div>
@@ -407,13 +406,16 @@ function renderTournament() {
                     .map((match, index) => {
                       indexMatch++;
                       return `
-                        <div class="flex flex-col mx-2 w-full max-w-lg">
-                          <h4>Match ${indexMatch} - Terrain ${index + 1}</h4>
-                          <div class="flex flex-col items-center border p-2 rounded w-full">
-                              <div class="flex flex-auto w-full items-center ${
+                        <div class="flex flex-col mx-2">
+                          <div class="flex justify-between items-center w-full">
+                            <h3>Match ${indexMatch}</h3>
+                            <h3>Terrain ${index + 1}</h3>
+                          </div>
+                          <div class="flex flex-col items-center border p-2 rounded">
+                              <div class="flex flex-auto items-center ${
                                 currentTour === indexTour && "h-48"
                               }">
-                                <div class="flex w-1/2 justify-between items-center h-full">
+                                <div class="flex justify-between items-center h-full">
                                   <div class="flex flex-col ">
                                         ${match.team1
                                           .map((player) => {
@@ -435,15 +437,15 @@ function renderTournament() {
                                           "-" +
                                           index +
                                           "-scoreTeam1"
-                                        }" class="slider-score flex-auto my-4"> </div>
+                                        }" class="slider-score flex-auto my-4"> 
+                                        </div>
                                       </div>`
                                       : ``
                                   }
-                                </div>
 
                                 <span class="text-4xl mx-2">🏸</span>
                                 
-                                <div class="flex w-1/2 justify-between items-center h-full">
+                                <div class="flex justify-end items-center h-full">
                                 ${
                                   currentTour === indexTour
                                     ? `
@@ -456,7 +458,8 @@ function renderTournament() {
                                           "-" +
                                           index +
                                           "-scoreTeam2"
-                                        }"class="slider-score flex-auto my-4"> </div>
+                                        }"class="slider-score flex-auto my-4"> 
+                                        </div>
                                     </div>`
                                     : ``
                                 }
@@ -488,7 +491,7 @@ function renderTournament() {
       <footer class="footer flex justify-end">
       ${
         currentTour === null
-          ? `<button class="btn-primary" onclick="renderResults(); showSection('results');">Résultats ➜</button>`
+          ? `<button class="btn-primary" onclick="renderResults(); showSection('results');renderPanelResults();">Résultats ➜</button>`
           : currentTour == -1
           ? `<button class="btn-primary" onclick="launchTournoi();"> 🏆 Lancer le tournoi</button>`
           : `${
@@ -667,19 +670,27 @@ function onInputScore(e, from, priority, refreshTournament) {
   }*/
 }
 
-function renderPanel() {
+function renderPanelTournament() {
   const panel = document.getElementById("panel");
   panel.innerHTML = `
-  <h3 class="sous-header flex justify-between">
-  📊 Contraintes
+  <h3 class="header flex justify-between items-center">
+  ⚙️ Paramètres
   <button onclick="togglePanel(true);">✖</button>
   </h3>
   ${"" /*<div id="contrainte-panel">*/}
   ${"" /*renderContraintes("panel", true)*/}
   </div>
-  <div id="stats-panel" class="flex flex-col">
-  </div>
+  <h3 class="sous-header flex justify-between">
+  📊 Contraintes
+  </h3>
+  <div id="stats-tournament-panel" class="flex flex-col"></div>
+  <h3 class="sous-header flex justify-between">
+  📊 Handicaps et avantages
+  </h3>
+  <div id="misc-tournament-panel" class="flex flex-col"></div>
   `;
+  renderStats();
+  renderMiscTournament();
 }
 
 function evaluerPlanning() {
@@ -817,42 +828,74 @@ function evaluerPlanning() {
   return Math.max(0, score); // Pour éviter un score négatif
 }
 
-function renderStats() {
-  const stats = document.getElementById("stats-panel");
-
-  function renderAccordions(map, label) {
-    return Object.entries(map)
-      .map(([p, data]) => {
-        const repeated = Object.entries(data).filter(([, count]) => count > 1);
-        if (!repeated.length) return "";
-        return `
-        <button class="accordion" onclick="this.classList.toggle('open')">${p} ${label}</button>
-        <div class="accordion-content">
+function renderAccordions(map, label) {
+  return Object.entries(map)
+    .map(([p, data]) => {
+      const repeated = Object.entries(data).filter(([, count]) => count > 1);
+      if (!repeated.length) return "";
+      return `
+      <button class="accordion" onclick="this.classList.toggle('open')">
+        <span class="w-full">+ ${p} ${label}</span>
+      </button>
+      <div class="accordion-content  pl-4">
+        <div class="flex flex-col">
           ${repeated
-            .map(([other, count]) => `<div>${other} (${count} fois)</div>`)
+            .map(
+              ([other, count]) =>
+                `<div class="flex justify-between w-full">
+              <div class="">${other}</div>
+              <div class="justify-center inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset">x${count}</div>
+              </div>`
+            )
             .join("")}
-        </div>
-      `;
-      })
-      .join("");
-  }
+          </div>
+      </div>
+    `;
+    })
+    .join("");
+}
+
+function renderMiscTournament() {
+  const miscTournament = document.getElementById("misc-tournament-panel");
+  miscTournament.innerHTML = `
+  `;
+}
+
+function renderStats() {
+  const stats = document.getElementById("stats-tournament-panel");
 
   const waitList = Object.entries(waitCount).sort(
     (a, b) => b[1].length - a[1].length
   );
 
-  const adversaireContrainte = renderAccordions(opponentsMap, "");
   const coequipierContrainte = renderAccordions(teammateMap, "");
+  const nbCoequipierContrainte = Object.entries(teammateMap).reduce(
+    (acc, [p, data]) =>
+      acc +
+      Object.entries(data).reduce(
+        (acc2, [p2, data2]) => acc2 + (data2 > 1 ? data2 - 1 : 0),
+        0
+      ),
+    0
+  );
+  const adversaireContrainte = renderAccordions(opponentsMap, "");
+  const nbAdversaireContrainte = Object.entries(opponentsMap).reduce(
+    (acc, [p, data]) =>
+      acc +
+      Object.entries(data).reduce(
+        (acc2, [p2, data2]) => acc2 + (data2 > 1 ? data2 - 1 : 0),
+        0
+      ),
+    0
+  );
 
   stats.innerHTML = `
   ${
     coequipierContrainte == ""
-      ? `<span>✅ Aucun coéquipier identique</span>`
-      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${
-          Object.entries(teammateMap).length
-        } coéquipiers répétés</button> 
+      ? `<span class="p-2">✅ Aucun coéquipier identique</span>`
+      : `<button class="accordion" onclick="this.classList.toggle('open')">❌ ${nbCoequipierContrainte} coéquipiers répétés</button> 
       <div class="accordion-content">
-        <div class="flex flex-col w-full">
+        <div class="flex flex-col w-full pl-4">
           ${coequipierContrainte}
         </div>
       </div>`
@@ -860,12 +903,10 @@ function renderStats() {
 
   ${
     adversaireContrainte == ""
-      ? `<span>✅ Aucun adversaire identique</span>`
-      : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${
-          Object.entries(opponentsMap).length
-        } adversaire répétés</button>
+      ? `<span class="p-2">✅ Aucun adversaire identique</span>`
+      : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${nbAdversaireContrainte} adversaire répétés</button>
        <div class="accordion-content">
-        <div class="flex flex-col w-full">
+        <div class="flex flex-col w-full pl-4">
           ${adversaireContrainte}
         </div>
       </div>`
@@ -873,20 +914,24 @@ function renderStats() {
 
   ${
     waitList.length == 0
-      ? `<span>✅ Aucun joueur en attente</span>`
+      ? `<span class="p-2">✅ Aucun joueur en attente</span>`
       : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${
           waitList.length
         } joueurs en attente</button> 
-        <div class="accordion-content">
+        <div class="accordion-content pl-4">
         <div class="flex flex-col w-full">
            ${waitList
              .map(
                ([name, tours]) => `
-                <button class="accordion" onclick="this.classList.toggle('open')">${name} - ${
-                 tours.length
-               } attente(s)</button>
+                <button class="accordion" onclick="this.classList.toggle('open')">
+                  <div class="flex pl-4">
+                    <span class="w-full">+ ${name}</span>
+                    <span class="justify-center inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset">x${
+                      tours.length
+                    }</span>
+                  </div></button>
                 <div class="accordion-content">
-                  <div class="flex flex-wrap">
+                  <div class="flex flex-col">
                     ${tours
                       .map(
                         (t) => `<div class="border-purple-200" >Tour ${t}</div>`
@@ -903,7 +948,7 @@ function renderStats() {
 
   ${
     sexeIssues.length == 0
-      ? `<span>✅ Aucun problème de mixité</span>`
+      ? `<span class="p-2">✅ Aucun problème de mixité</span>`
       : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${
           sexeIssues.length
         } problèmes de mixité</button> 
@@ -923,7 +968,7 @@ function renderStats() {
 
   ${
     niveauIssues.length == 0
-      ? `<span>✅ Aucun problème d'écart de point</span>`
+      ? `<span class="p-2">✅ Aucun problème d'écart de point</span>`
       : `<button class="accordion" onclick="this.classList.toggle('open')">⚠ ${
           niveauIssues.length
         } problèmes d'écart de point</button> 
@@ -1298,6 +1343,7 @@ function getPermutationsJoueur(disponibles) {
 
 async function optimisePlanning() {
   showSection("tournament");
+  renderPanelTournament();
   togglePanel();
 
   let historyBestPlanning = [];
