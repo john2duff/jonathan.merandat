@@ -63,6 +63,7 @@ window.addEventListener("DOMContentLoaded", () => {
     <header class="header flex justify-between items-center">
         <span>🏸 Générateur de tournoi de Badminton</span>
       <button class="btn-primary" onclick="reset();">Reset</button>
+      <span>v0.1</span>
     </header>
     <div id="main" class="flex flex-auto">
       <section id="preparation" class="flex flex-col flex-auto"></section>
@@ -84,6 +85,25 @@ window.addEventListener("DOMContentLoaded", () => {
       currentTour
     );
   }
+
+  document.body.querySelectorAll(".slider-container").forEach((slider) => {
+    const obj = slider.id.split("-");
+    const start = planning[obj[0]].matchs[obj[1]][obj[2]];
+    noUiSlider.create(slider, {
+      start: start,
+      connect: [true, false],
+      direction: "rtl",
+      step: 1,
+      orientation: "vertical",
+      range: {
+        min: start,
+        max: 32,
+      },
+    });
+    slider.noUiSlider.on("update", (values, handle) => {
+      console.log("Valeur :", values[handle]);
+    });
+  });
 });
 
 // -- UI FUNCTIONS --
@@ -452,25 +472,6 @@ function renderTournament() {
       }
       </footer>
     `;
-
-  document.body.querySelectorAll(".slider-container").forEach((slider) => {
-    const obj = slider.id.split("-");
-    const start = planning[obj[0]].matchs[obj[1]][obj[2]];
-    noUiSlider.create(slider, {
-      start: start,
-      connect: [true, false],
-      direction: "rtl",
-      step: 1,
-      orientation: "vertical",
-      range: {
-        min: start,
-        max: 32,
-      },
-    });
-    slider.noUiSlider.on("update", (values, handle) => {
-      console.log("Valeur :", values[handle]);
-    });
-  });
 }
 
 function getTpsTotal() {
