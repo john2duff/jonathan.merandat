@@ -225,10 +225,6 @@ body.withPanel .footer{
 
 }
 
-.slider-score{
-    height: calc(100% - 20px);
-}
-
 .noUi-touch-area{
     background-color: var(--bg4-color);
 }

@@ -1,7 +1,7 @@
 // Ce fichier JavaScript contient l'ensemble de l'interface pour gérer
 // un tournoi de badminton en double avec des contraintes complexes
 // et une interface utilisateur complète responsive et interactive.
-
+const version = 0.2;
 // -- SETUP GLOBAL DATA --
 const levels = [
   "NC",
@@ -62,7 +62,7 @@ window.addEventListener("DOMContentLoaded", () => {
   <header class="header flex justify-between items-center">
     <span>🏸 Générateur de tournoi de Badminton</span>
     <button class="btn-primary" onclick="reset();">Reset</button>
-    <span>v0.1</span>
+    <span>v${version}</span>
   </header>
   <section id="preparation" class="flex flex-col flex-auto"></section>
   <section id="tournament" class="flex flex-col flex-auto" style="display:none"></section>
@@ -410,14 +410,10 @@ function renderTournament() {
                         <div class="flex flex-col mx-2 w-full max-w-lg">
                           <h4>Match ${indexMatch} - Terrain ${index + 1}</h4>
                           <div class="flex flex-col items-center border p-2 rounded w-full">
-                              <div class="flex mx-2 w-full justify-center text-lg">
-                                ${match.scoreTeam1} - ${match.scoreTeam2}
-                              </div>
-
                               <div class="flex flex-auto w-full items-center ${
                                 currentTour === indexTour && "h-48"
                               }">
-                                <div class="flex flex-auto justify-between items-center h-full">
+                                <div class="flex w-1/2 justify-between items-center h-full">
                                   <div class="flex flex-col ">
                                         ${match.team1
                                           .map((player) => {
@@ -429,24 +425,39 @@ function renderTournament() {
                                   </div>
                                   ${
                                     currentTour === indexTour
-                                      ? `<div id="${
+                                      ? `
+                                      <div class="flex flex-col justify-between h-full items-center">
+                                        <span class="text-2xl">${
+                                          match.scoreTeam1
+                                        }</span>
+                                        <div id="${
                                           indexTour +
                                           "-" +
                                           index +
                                           "-scoreTeam1"
-                                        }" class="slider-score ml-2"> </div>`
+                                        }" class="slider-score flex-auto my-4"> </div>
+                                      </div>`
                                       : ``
                                   }
                                 </div>
 
                                 <span class="text-4xl mx-2">🏸</span>
                                 
-                                <div class="flex flex-auto justify-between items-center h-full">
+                                <div class="flex w-1/2 justify-between items-center h-full">
                                 ${
                                   currentTour === indexTour
-                                    ? `<div id="${
-                                        indexTour + "-" + index + "-scoreTeam2"
-                                      }"class="slider-score mr-2"> </div>`
+                                    ? `
+                                     <div class="flex flex-col justify-between h-full items-center">
+                                        <span class="text-2xl">${
+                                          match.scoreTeam2
+                                        }</span>
+                                        <div id="${
+                                          indexTour +
+                                          "-" +
+                                          index +
+                                          "-scoreTeam2"
+                                        }"class="slider-score flex-auto my-4"> </div>
+                                    </div>`
                                     : ``
                                 }
                                   <div class="flex flex-col ">
