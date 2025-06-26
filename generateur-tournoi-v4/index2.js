@@ -1,7 +1,7 @@
 // Ce fichier JavaScript contient l'ensemble de l'interface pour gérer
 // un tournoi de badminton en double avec des contraintes complexes
 // et une interface utilisateur complète responsive et interactive.
-const version = 0.2;
+const version = 0.3;
 // -- SETUP GLOBAL DATA --
 const levels = [
   "NC",
@@ -154,16 +154,16 @@ function renderPreparationSection() {
     <div class="flex flex-wrap gap-4 m-5">
       <div class="flex flex-col flex-auto">
         <label class="mb-2">Nombre de terrains</label> 
-          <div class="flex ">
+          <div class="flex items-center justify-between">
             <div class="slider-param-terrains flex-auto mr-6"> </div>
-            <span id="terrains-value">${settings.terrains} </span>
+            <span id="terrains-value" class="w-8">${settings.terrains} </span>
           </div>
       </div>
       <div class="flex flex-col flex-auto">
         <label class="mb-2">Nombre de tour</label> 
-        <div class="flex ">
+        <div class="flex items-center justify-between">
             <div class="slider-param-tours flex-auto mr-6"> </div>
-            <span id="tours-value">${settings.tours} </span>
+            <span id="tours-value" class="w-8">${settings.tours} </span>
           </div>
       </div>
       
@@ -198,7 +198,7 @@ function renderPreparationSection() {
                 </select>
               </div>
             </div>
-            <button class="btn-primary rounded" type="submit" id="addPlayer">+ Ajouter un joueur</button>
+            <button class="btn-primary rounded min-w-12" type="submit" id="addPlayer">Ajouter</button>
           </div>
       </form>
       <div id="playerList" class="m-5 flex flex-wrap gap-4"></div>
@@ -243,7 +243,7 @@ function renderPreparationSection() {
       do {
         const rdm = Math.floor(Math.random() * names.length);
         name = wasEmpty
-          ? "[Auto] " + names[rdm][0] + "_" + Math.floor(Math.random() * 100)
+          ? names[rdm][0] + "_" + Math.floor(Math.random() * 100)
           : name + "_" + Math.floor(Math.random() * 100);
         gender = names[rdm][1];
         tries++;
@@ -291,7 +291,7 @@ function renderPreparationSection() {
             </select>
           </div>
         </div>
-          <button class="h-full text-2xl" onclick="requestDeletePlayer(event, ${i});"> ⛔ </button>
+          <button class="text-2xl" onclick="requestDeletePlayer(event, ${i});"> ⛔ </button>
       </div>
   `
     )
@@ -307,7 +307,7 @@ function renderPreparationSection() {
       max: 20,
     },
   });
-  sliderTerrains.noUiSlider.on("change", (values, handle) => {
+  sliderTerrains.noUiSlider.on("slide", (values, handle) => {
     settings.terrains = parseInt(values[handle]);
     saveData();
     renderPreparationSection();
@@ -323,7 +323,7 @@ function renderPreparationSection() {
       max: 20,
     },
   });
-  sliderTours.noUiSlider.on("change", (values, handle) => {
+  sliderTours.noUiSlider.on("slide", (values, handle) => {
     settings.tours = parseInt(values[handle]);
     saveData();
     renderPreparationSection();
@@ -334,7 +334,7 @@ function requestDeletePlayer(event, i) {
   event.preventDefault();
   event.stopPropagation();
   event.currentTarget.innerHTML = "⛔ Supprimer";
-  event.currentTarget.setAttribute("class", "h-full text-base btn-warning");
+  event.currentTarget.setAttribute("class", "text-base btn-warning");
   const listener = (event) => {
     event.preventDefault();
     players.splice(i, 1);
@@ -346,7 +346,7 @@ function requestDeletePlayer(event, i) {
     "click",
     ((target, listener, evt) => {
       target.innerHTML = "⛔";
-      target.setAttribute("class", "h-full text-2xl");
+      target.setAttribute("class", "text-2xl");
       target.removeEventListener("click", listener);
     }).bind(this, event.currentTarget, listener),
     { once: true }
@@ -519,7 +519,7 @@ function renderTournament() {
         max: 32,
       },
     });
-    slider.noUiSlider.on("update", (values, handle) => {
+    slider.noUiSlider.on("slide", (values, handle) => {
       /*settings.priorities[priority] = parseInt(e.currentTarget.value);
         document.getElementById(from + "_value_slider_" + priority).innerHTML =
           e.currentTarget.value;

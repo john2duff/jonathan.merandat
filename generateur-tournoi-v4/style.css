@@ -200,15 +200,12 @@ body.withPanel .footer{
 }
 
 .btn-warning {
-    background: var(--bg5-color);
     color: var(--text5-color);
     border-radius: var(--radius);
     padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 14rem;
-    border: solid 2px #e77c7c;
 }
 
 #label-progress-bar {
