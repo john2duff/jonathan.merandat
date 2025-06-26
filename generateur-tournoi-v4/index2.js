@@ -59,18 +59,14 @@ let niveauIssues = [];
 // -- DOM CREATION --
 window.addEventListener("DOMContentLoaded", () => {
   document.body.innerHTML = `
-  <div id="global" class="flex flex-col">
-    <header class="header flex justify-between items-center">
-        <span>🏸 Générateur de tournoi de Badminton</span>
-      <button class="btn-primary" onclick="reset();">Reset</button>
-      <span>v0.1</span>
-    </header>
-    <div id="main" class="flex flex-auto">
-      <section id="preparation" class="flex flex-col flex-auto"></section>
-      <section id="tournament" class="flex flex-col flex-auto" style="display:none"></section>
-      <section id="results" class="flex flex-col flex-auto" style="display:none"></section>
-    </div>
-  </div>
+  <header class="header flex justify-between items-center">
+    <span>🏸 Générateur de tournoi de Badminton</span>
+    <button class="btn-primary" onclick="reset();">Reset</button>
+    <span>v0.1</span>
+  </header>
+  <section id="preparation" class="flex flex-col flex-auto"></section>
+  <section id="tournament" class="flex flex-col flex-auto" style="display:none"></section>
+  <section id="results" class="flex flex-col flex-auto" style="display:none"></section>
   <aside id="panel" class="h-screen overflow-auto"></aside>
 `;
 
@@ -85,25 +81,6 @@ window.addEventListener("DOMContentLoaded", () => {
       currentTour
     );
   }
-
-  document.body.querySelectorAll(".slider-score").forEach((slider) => {
-    const obj = slider.id.split("-");
-    const start = planning[obj[0]].matchs[obj[1]][obj[2]];
-    noUiSlider.create(slider, {
-      start: start,
-      connect: [true, false],
-      direction: "rtl",
-      step: 1,
-      orientation: "vertical",
-      range: {
-        min: start,
-        max: 32,
-      },
-    });
-    slider.noUiSlider.on("update", (values, handle) => {
-      console.log("Valeur :", values[handle]);
-    });
-  });
 });
 
 // -- UI FUNCTIONS --
@@ -121,11 +98,10 @@ function togglePanel(forceHide = null) {
   } else {
     panel.classList.toggle("open");
   }
-  const global = document.getElementById("global");
   if (panel.classList.contains("open")) {
-    global.classList.add("withPanel");
+    document.body.classList.add("withPanel");
   } else {
-    global.classList.remove("withPanel");
+    document.body.classList.remove("withPanel");
   }
 }
 
@@ -176,12 +152,20 @@ function renderPreparationSection() {
       <h2> ⚙️Paramètres</h2>
     </div>
     <div class="flex flex-wrap gap-4 m-5">
-      <label>Nombre de terrains : <input type="number" min="1" max="15" value="${
-        settings.terrains
-      }" onchange="settings.terrains=parseInt(this.value);saveData()"></label> 
-      <label>Nombre de tours : <input type="number" min="1" max="10" value="${
-        settings.tours
-      }" onchange="settings.tours=parseInt(this.value);saveData()"></label>
+      <div class="flex flex-col flex-auto">
+        <label class="mb-2">Nombre de terrains</label> 
+          <div class="flex ">
+            <div class="slider-param-terrains flex-auto mr-6"> </div>
+            <span id="terrains-value">${settings.terrains} </span>
+          </div>
+      </div>
+      <div class="flex flex-col flex-auto">
+        <label class="mb-2">Nombre de tour</label> 
+        <div class="flex ">
+            <div class="slider-param-tours flex-auto mr-6"> </div>
+            <span id="tours-value">${settings.tours} </span>
+          </div>
+      </div>
       
       ${"" /*renderContraintes("preparation", false)*/}
     </div>
@@ -312,6 +296,38 @@ function renderPreparationSection() {
   `
     )
     .join("");
+
+  const sliderTerrains = document.body.querySelector(".slider-param-terrains");
+  noUiSlider.create(sliderTerrains, {
+    start: parseInt(settings.terrains),
+    connect: [true, false],
+    step: 1,
+    range: {
+      min: 0,
+      max: 20,
+    },
+  });
+  sliderTerrains.noUiSlider.on("change", (values, handle) => {
+    settings.terrains = parseInt(values[handle]);
+    saveData();
+    renderPreparationSection();
+  });
+
+  const sliderTours = document.body.querySelector(".slider-param-tours");
+  noUiSlider.create(sliderTours, {
+    start: parseInt(settings.tours),
+    connect: [true, false],
+    step: 1,
+    range: {
+      min: 0,
+      max: 20,
+    },
+  });
+  sliderTours.noUiSlider.on("change", (values, handle) => {
+    settings.tours = parseInt(values[handle]);
+    saveData();
+    renderPreparationSection();
+  });
 }
 
 function requestDeletePlayer(event, i) {
@@ -362,7 +378,7 @@ function renderTournament() {
           
           ${
             currentTour != -1
-              ? `<span class="justify-center w-16 inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset" id="tps-ecoule-${currentTour}"> </span>`
+              ? `<span class="justify-center inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset" id="tps-ecoule-${currentTour}"> </span>`
               : ``
           }
           
@@ -477,6 +493,34 @@ function renderTournament() {
       }
       </footer>
     `;
+
+  document.body.querySelectorAll(".slider-score").forEach((slider) => {
+    const obj = slider.id.split("-");
+    const start = planning[obj[0]].matchs[obj[1]][obj[2]];
+    noUiSlider.create(slider, {
+      start: start,
+      connect: [true, false],
+      direction: "rtl",
+      step: 1,
+      orientation: "vertical",
+      range: {
+        min: start,
+        max: 32,
+      },
+    });
+    slider.noUiSlider.on("update", (values, handle) => {
+      /*settings.priorities[priority] = parseInt(e.currentTarget.value);
+        document.getElementById(from + "_value_slider_" + priority).innerHTML =
+          e.currentTarget.value;
+        saveData();
+        if (refreshTournament) {
+          generePlanning().then(() => {
+            renderTournament();
+            renderStats();
+          });
+        }*/
+    });
+  });
 }
 
 function getTpsTotal() {
@@ -1306,7 +1350,7 @@ async function optimisePlanning() {
     renderStats();
     console.log(settings.priorities);
   }
-  document.getElementById("global").removeChild(loader);
+  document.body.removeChild(loader);
   stopRequested = false;
   bestPlanning = null;
 }
@@ -1340,7 +1384,7 @@ function addProgressBar() {
   <span style="font-size:0.8em; font-style:italic;">La meilleure distribution sera retenue</span> </br></br><center>`;
   loader.appendChild(progress);
   loader.appendChild(label);
-  document.getElementById("global").append(loader);
+  document.body.append(loader);
 }
 
 /*function generateShuffledOrders(maxTries) {

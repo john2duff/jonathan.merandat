@@ -26,9 +26,9 @@
 }
 
 body {
-    background: var(--bg1-color);
-    color: var(--text1-color);
-    margin-bottom: 50px;
+    background: var(--bg1-color) !important;
+    color: var(--text1-color) !important;
+    margin-bottom: 100px !important;
 }
 
 input,
@@ -57,11 +57,11 @@ textarea:focus {
     width: 100%;
 }
 
-#global.withPanel {
+body.withPanel {
     padding-right: 300px;
 }
 
-#global.withPanel .footer{
+body.withPanel .footer{
     right: 300px;
 }
 
@@ -101,7 +101,7 @@ textarea:focus {
     body{
         flex-direction: column;
     }
-    #global.withPanel{
+    body.withPanel{
         padding-right: 0px;
         padding-bottom:300px;
     }
@@ -225,7 +225,7 @@ textarea:focus {
 
 }
 
-.slider-container{
+.slider-score{
     height: calc(100% - 20px);
 }
 
@@ -240,4 +240,8 @@ textarea:focus {
 .noUi-vertical .noUi-handle:after,
 .noUi-vertical .noUi-handle:before{
     background-color: var(--text4-color);
+}
+
+#form-add-player{
+    box-shadow: 0px 8px 11px 0px gray;
 }
