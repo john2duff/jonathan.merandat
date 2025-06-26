@@ -224,10 +224,20 @@ textarea:focus {
     box-shadow: 5px 5px 20px 5px lightgray;
 
 }
-.vertical-slider {
-    writing-mode: bt-lr;
-    /* vertical */
-    -webkit-appearance: slider-vertical;
-    width: 8px;
-    height: 100px;
+
+.slider-container{
+    height: calc(100% - 20px);
+}
+
+.noUi-touch-area{
+    background-color: var(--bg4-color);
+}
+
+.noUi-connect{
+    background-color: var(--bg2-color);
+}
+
+.noUi-vertical .noUi-handle:after,
+.noUi-vertical .noUi-handle:before{
+    background-color: var(--text4-color);
 }

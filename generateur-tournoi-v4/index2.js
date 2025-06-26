@@ -377,8 +377,11 @@ function renderTournament() {
                               <div class="flex mx-2 w-full justify-center text-lg">
                                 ${match.scoreTeam1} - ${match.scoreTeam2}
                               </div>
-                              <div class="flex mx-2 w-full items-center">
-                                <div class="flex justify-between items-center mx-2 w-1/2">
+
+                              <div class="flex flex-auto w-full items-center ${
+                                currentTour === indexTour && "h-48"
+                              }">
+                                <div class="flex flex-auto justify-between items-center h-full">
                                   <div class="flex flex-col ">
                                         ${match.team1
                                           .map((player) => {
@@ -389,38 +392,34 @@ function renderTournament() {
                                           .join("")}
                                   </div>
                                   ${
-                                    currentTour === indexTour
-                                      ? `
-                                      <div style="display: flex; align-items: center;">
-                                        <input type="range" id="sliderVertical" min="-24" max="32" value="${match.scoreTeam1}" class="vertical-slider" onchange="onInputScore(event, 0)">
-                                      </div>
-                                  `
-                                      : ""
+                                    currentTour === indexTour &&
+                                    `<div id="${
+                                      indexTour + "-" + index + "-scoreTeam1"
+                                    }" class="slider-container ml-2"> </div>`
                                   }
                                 </div>
 
-                                🏸
+                                <span class="text-4xl mx-2">🏸</span>
                                 
-                                <div class="flex justify-between items-center mx-2 w-1/2" >
-                                  <div class="flex justify-between items-center w-full">
-                                  ${
-                                    currentTour === indexTour
-                                      ? `<div style="display: flex; align-items: center;">
-                                      <input type="range" id="sliderVertical" min="-24" max="32" value="${match.scoreTeam2}" class="vertical-slider" onchange="onInputScore(event, 0)">
-                                    </div>`
-                                      : ""
-                                  }
-                                  <div class="flex flex-col mx-2 w-full justify-end items-end">
-                                      ${match.team2
-                                        .map((player) => {
-                                          return `
-                                              <span>${player.name}</span>
-                                          `;
-                                        })
-                                        .join("")}
+                                <div class="flex flex-auto justify-between items-center h-full">
+                                ${
+                                  currentTour === indexTour &&
+                                  `<div id="${
+                                    indexTour + "-" + index + "-scoreTeam2"
+                                  }"class="slider-container mr-2"> </div>`
+                                }
+                                  <div class="flex flex-col ">
+                                        ${match.team2
+                                          .map((player) => {
+                                            return `
+                                                <span>${player.name}</span>
+                                            `;
+                                          })
+                                          .join("")}
                                   </div>
-                                    
+                                  
                                 </div>
+
                               </div>
                             </div>
                           </div>
@@ -453,6 +452,25 @@ function renderTournament() {
       }
       </footer>
     `;
+
+  document.body.querySelectorAll(".slider-container").forEach((slider) => {
+    const obj = slider.id.split("-");
+    const start = planning[obj[0]].matchs[obj[1]][obj[2]];
+    noUiSlider.create(slider, {
+      start: start,
+      connect: [true, false],
+      direction: "rtl",
+      step: 1,
+      orientation: "vertical",
+      range: {
+        min: start,
+        max: 32,
+      },
+    });
+    slider.noUiSlider.on("update", (values, handle) => {
+      console.log("Valeur :", values[handle]);
+    });
+  });
 }
 
 function getTpsTotal() {
@@ -494,15 +512,15 @@ function getTempsEcoule(dateDepart, dateFin = null, formatInteger = false) {
   const maintenant = dateFin ? dateFin : new Date();
   const ecoule = Math.floor((maintenant - dateDepart) / 1000);
   if (formatInteger) return ecoule;
-  const hours = Math.floor(ecoule / 3600);
-  const minutes = Math.floor(ecoule / 60);
+
+  const jours = Math.floor(ecoule / 86400);
+  const heures = Math.floor((ecoule % 86400) / 3600);
+  const minutes = Math.floor((ecoule % 3600) / 60);
   const secondes = ecoule % 60;
-  return ecoule > 3600
-    ? `${hours}h ${minutes}' ${secondes}''`
-    : ecoule > 59
-    ? `${minutes}' ${secondes}''`
-    : `${secondes}'`;
-  //return ecoule > 59 ? `${minutes} min. ${secondes} sec.` : `${secondes} sec.`;
+  if (jours >= 1) return `+ de ${jours} jour${jours > 1 ? "s" : ""}`;
+  if (heures > 0) return `${heures}h ${minutes}' ${secondes}''`;
+  if (minutes > 0) return `${minutes}' ${secondes}''`;
+  return `${secondes}''`;
 }
 
 function launchTournoi() {
