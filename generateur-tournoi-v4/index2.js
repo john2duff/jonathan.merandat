@@ -86,7 +86,7 @@ window.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  document.body.querySelectorAll(".slider-container").forEach((slider) => {
+  document.body.querySelectorAll(".slider-score").forEach((slider) => {
     const obj = slider.id.split("-");
     const start = planning[obj[0]].matchs[obj[1]][obj[2]];
     noUiSlider.create(slider, {
@@ -412,10 +412,14 @@ function renderTournament() {
                                           .join("")}
                                   </div>
                                   ${
-                                    currentTour === indexTour &&
-                                    `<div id="${
-                                      indexTour + "-" + index + "-scoreTeam1"
-                                    }" class="slider-container ml-2"> </div>`
+                                    currentTour === indexTour
+                                      ? `<div id="${
+                                          indexTour +
+                                          "-" +
+                                          index +
+                                          "-scoreTeam1"
+                                        }" class="slider-score ml-2"> </div>`
+                                      : ``
                                   }
                                 </div>
 
@@ -423,10 +427,11 @@ function renderTournament() {
                                 
                                 <div class="flex flex-auto justify-between items-center h-full">
                                 ${
-                                  currentTour === indexTour &&
-                                  `<div id="${
-                                    indexTour + "-" + index + "-scoreTeam2"
-                                  }"class="slider-container mr-2"> </div>`
+                                  currentTour === indexTour
+                                    ? `<div id="${
+                                        indexTour + "-" + index + "-scoreTeam2"
+                                      }"class="slider-score mr-2"> </div>`
+                                    : ``
                                 }
                                   <div class="flex flex-col ">
                                         ${match.team2
