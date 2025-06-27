@@ -47,7 +47,7 @@ let settings = tournoi.settings || defaultConfig;
 let scores = tournoi.scores || {};
 let planning = tournoi.planning || [];
 let currentTour = tournoi.currentTour === undefined ? -1 : tournoi.currentTour;
-
+let currentEditMatchIndex = -1;
 let currentStopTimer = null;
 
 let opponentsMap = {}; // { playerName: { opponentName: count } }
@@ -138,6 +138,7 @@ function regenerate() {
   if (
     confirm("Un tournoi existe déjà, il va être perdu, voulez vous-continuer ?")
   ) {
+    currentTour = -1;
     prepareOptimise();
     optimisePlanning();
   }
@@ -159,7 +160,7 @@ function renderPreparationSection() {
           </div>
       </div>
       <div class="flex flex-col flex-auto">
-        <label class="mb-2">Nombre de tour</label> 
+        <label class="mb-2">Nombre de tours</label> 
         <div class="flex items-center justify-between">
             <div class="slider-param-tours flex-auto mr-6"> </div>
             <span id="tours-value" class="w-8">${settings.tours} </span>
@@ -213,7 +214,11 @@ function renderPreparationSection() {
       <div class="flex justify-between w-full p-2">
         <button class="btn-secondary" onclick="regenerate();"> ↺ Régénérer le tournoi</button>
         <button class="btn-primary" onclick="showSection('tournament');renderPanelTournament();"> Tournoi ${
-          currentTour == null ? "terminé" : "en cours"
+          currentTour == null
+            ? "terminé"
+            : currentTour == -1
+            ? "prêt"
+            : "en cours"
         } ➜</button>
       </div>
       `
@@ -359,7 +364,7 @@ function renderTournament() {
   let indexMatch = 0;
   el.innerHTML = `
       <div class="sous-header flex justify-between">
-        <button onclick="togglePanel(true);showSection('preparation');"> <div style="transform:rotate(180deg)">➜<div>  </button>
+        <button onclick="togglePanel(true);showSection('preparation');"> <div style="transform:rotate(180deg)">➜<div> </button>
         <div class="flex flex-auto justify-between mx-3 gap-4">
           ${
             "" /*<span>${
@@ -406,83 +411,92 @@ function renderTournament() {
                   ${tour.matchs
                     .map((match, index) => {
                       indexMatch++;
+
                       return `
                         <div class="flex flex-col mx-2">
-                          <div class="flex justify-between items-center w-full">
+                          <div class="flex justify-between items-center w-full p-2 ">
                             <h3>Match ${indexMatch}</h3>
                             <h3>Terrain ${index + 1}</h3>
                           </div>
-                          <div class="flex flex-col items-center border p-2 rounded">
-                              <div class="flex flex-auto items-center ${
-                                currentTour === indexTour && "h-48"
-                              }">
+
+                          ${
+                            currentTour == indexTour
+                              ? ` 
+                              <div class="flex flex-col items-center border p-2 rounded">
+                                <span class="text-2xl gap-4">
+                                  <span ${
+                                    currentEditMatchIndex == index
+                                      ? 'id="currentScoreIndex1"'
+                                      : ""
+                                  }>${match.scoreTeam1}</span>
+                                  <span>-</span>
+                                  <span ${
+                                    currentEditMatchIndex == index
+                                      ? 'id="currentScoreIndex2"'
+                                      : ""
+                                  }>${match.scoreTeam2}</span>
+                                </span>
                                 <div class="flex justify-between items-center h-full">
-                                  <div class="flex flex-col ">
-                                        ${match.team1
-                                          .map((player) => {
-                                            return `
-                                                <span class="player-tournament player-tournament-${
-                                                  player.gender
-                                                }">${player.name}</span>
-                                                ${getLevelTournament()}
-                                            `;
-                                          })
-                                          .join("")}
-                                  </div>
-                                  ${
-                                    currentTour === indexTour
-                                      ? `
-                                      <div class="flex flex-col justify-between h-full items-center">
-                                        <span class="text-2xl">${
-                                          match.scoreTeam1
-                                        }</span>
-                                        <div id="${
-                                          indexTour +
-                                          "-" +
-                                          index +
-                                          "-scoreTeam1"
-                                        }" class="slider-score flex-auto my-4"> 
-                                        </div>
-                                      </div>`
-                                      : ``
-                                  }
-
-                                <span class="text-4xl mx-2">🏸</span>
-                                
-                                <div class="flex justify-end items-center h-full">
-                                ${
-                                  currentTour === indexTour
-                                    ? `
-                                     <div class="flex flex-col justify-between h-full items-center">
-                                        <span class="text-2xl">${
-                                          match.scoreTeam2
-                                        }</span>
-                                        <div id="${
-                                          indexTour +
-                                          "-" +
-                                          index +
-                                          "-scoreTeam2"
-                                        }"class="slider-score flex-auto my-4"> 
-                                        </div>
-                                    </div>`
-                                    : ``
-                                }
-                                  <div class="flex flex-col ">
-                                        ${match.team2
-                                          .map((player) => {
-                                            return `
-                                                <span class="player-tournament player-tournament-${player.gender}">${player.name}</span>
-                                            `;
-                                          })
-                                          .join("")}
-                                  </div>
+                                  <div class="flex justify-between items-center h-full">
+                                    ${renderTeam(match.team1)}
+                                    ${
+                                      currentEditMatchIndex == index
+                                        ? `<div class="flex flex-col justify-between items-center h-full">
+                                          ${renderSliderScore(
+                                            indexTour +
+                                              "-" +
+                                              index +
+                                              "-scoreTeam1"
+                                          )}
+                                        </div>`
+                                        : ``
+                                    }
                                   
-                                </div>
+                                  </div>
 
+                                  ${
+                                    currentEditMatchIndex == index
+                                      ? `<button class="text-4xl" onclick="currentEditMatchIndex=-1;renderTournament();"> ✔️ </button>`
+                                      : `<button class="text-4xl" onclick="currentEditMatchIndex=${index};renderTournament();"> ✏️ </button>`
+                                  }
+                                  
+                                  <div class="flex justify-end items-center h-full">
+                                    <div class="flex justify-between items-center h-full ">
+                                    ${
+                                      currentEditMatchIndex == index
+                                        ? `<div class="flex flex-col justify-between items-center h-full">
+                                          ${renderSliderScore(
+                                            indexTour +
+                                              "-" +
+                                              index +
+                                              "-scoreTeam2"
+                                          )}
+                                        </div>`
+                                        : ``
+                                    }
+                        
+                                      ${renderTeam(match.team2)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>`
+                              : `
+                              <div class="flex flex-col items-center border p-2 rounded">
+                                  <span class="text-2xl">${
+                                    match.scoreTeam1
+                                  } - ${match.scoreTeam2}</span>
+                                  <div class="flex justify-between items-center">
+                                    ${renderTeam(match.team1)}
+                                    <span class="text-4xl ${
+                                      currentTour === indexTour ? "mx-2" : ""
+                                    }">🏸</span>
+                                    ${renderTeam(match.team2)}
+                                  </div>
                               </div>
-                            </div>
-                          </div>
-                        </div>
+                              `
+                          }
+
+                         </div>
                       `;
                     })
                     .join("")}
@@ -514,9 +528,14 @@ function renderTournament() {
 
   document.body.querySelectorAll(".slider-score").forEach((slider) => {
     const obj = slider.id.split("-");
-    const start = planning[obj[0]].matchs[obj[1]][obj[2]];
+    const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
+      planning[obj[0]].matchs[obj[1]].team1,
+      planning[obj[0]].matchs[obj[1]].team2
+    );
+    const start =
+      obj[2] == "scoreTeam1" ? initialScoreTeam1 : initialScoreTeam2;
     noUiSlider.create(slider, {
-      start: start,
+      start: planning[obj[0]].matchs[obj[1]][obj[2]],
       connect: [true, false],
       direction: "rtl",
       step: 1,
@@ -527,18 +546,35 @@ function renderTournament() {
       },
     });
     slider.noUiSlider.on("slide", (values, handle) => {
-      /*settings.priorities[priority] = parseInt(e.currentTarget.value);
-        document.getElementById(from + "_value_slider_" + priority).innerHTML =
-          e.currentTarget.value;
-        saveData();
-        if (refreshTournament) {
-          generePlanning().then(() => {
-            renderTournament();
-            renderStats();
-          });
-        }*/
+      planning[obj[0]].matchs[obj[1]][obj[2]] = parseInt(values[handle]);
+      document.getElementById(
+        obj[2] == "scoreTeam1" ? "currentScoreIndex1" : "currentScoreIndex2"
+      ).innerHTML = parseInt(values[handle]);
+    });
+    slider.noUiSlider.on("end", (values, handle) => {
+      saveData();
+      renderTournament();
     });
   });
+}
+
+function renderTeam(team) {
+  return `<div class="flex flex-col ">
+    ${team
+      .map((player) => {
+        return `
+          <span class="player-tournament player-tournament-${player.gender}">${
+          player.name
+        }</span>
+          ${getLevelTournament()}
+        `;
+      })
+      .join("")}
+  </div>`;
+}
+
+function renderSliderScore(id) {
+  return `<div id="${id}" class="slider-score flex-auto m-4 h-24"> </div>`;
 }
 
 function getLevelTournament(p) {
@@ -684,7 +720,7 @@ function renderPanelTournament() {
   const panel = document.getElementById("panel");
   panel.innerHTML = `
   <h3 class="header flex justify-between items-center">
-  ⚙️ Paramètres
+  ⚙️ Préparation
   <button onclick="togglePanel(true);">✖</button>
   </h3>
   ${"" /*<div id="contrainte-panel">*/}
@@ -1224,34 +1260,14 @@ async function generePlanning() {
           for (const comb of combinaisons) {
             //if (tourMatches.length >= settings.terrains) break;
             //if (comb.joueurs.some((p) => joueursUtilises.has(p.id))) continue;
-            const scoreTeam1 = comb.team1.reduce(
-              (acc, p) => acc + getLevelScore(p),
-              0
-            );
-            const scoreTeam2 = comb.team2.reduce(
-              (acc, p) => acc + getLevelScore(p),
-              0
-            );
-
-            let finalTeam1, finalTeam2;
-
-            if (settings.isScoreNegatif) {
-              // On prend la différence, la team avec le plus petit score devient 0
-              const diff = scoreTeam1 - scoreTeam2;
-              finalTeam1 = diff;
-              finalTeam2 = 0;
-            } else {
-              // Score relatif à la plus faible équipe qui devient 0
-              const minScore = Math.min(scoreTeam1, scoreTeam2);
-              finalTeam1 = scoreTeam1 - minScore;
-              finalTeam2 = scoreTeam2 - minScore;
-            }
 
             tourMatches.push({
               team1: comb.team1,
               team2: comb.team2,
-              scoreTeam1: finalTeam1,
-              scoreTeam2: finalTeam2,
+              scoreTeam1: 0,
+              scoreTeam2: 0,
+              initialScoreTeam1: 0,
+              initialScoreTeam2: 0,
             });
             comb.team1.forEach((p) => joueursUtilises.add(p.id));
             comb.team2.forEach((p) => joueursUtilises.add(p.id));
@@ -1284,6 +1300,23 @@ async function generePlanning() {
       reject();
     }
   });
+}
+
+function getInitialScore(team1, team2) {
+  let scoreTeam1 = team1.reduce((acc, p) => acc + getLevelScore(p), 0);
+  let scoreTeam2 = team2.reduce((acc, p) => acc + getLevelScore(p), 0);
+  if (settings.isScoreNegatif) {
+    // On prend la différence, la team avec le plus petit score devient 0
+    const diff = scoreTeam1 - scoreTeam2;
+    scoreTeam1 = diff;
+    scoreTeam2 = 0;
+  } else {
+    // Score relatif à la plus faible équipe qui devient 0
+    const minScore = Math.min(scoreTeam1, scoreTeam2);
+    scoreTeam1 = scoreTeam1 - minScore;
+    scoreTeam2 = scoreTeam2 - minScore;
+  }
+  return [scoreTeam1, scoreTeam2];
 }
 
 let bestPlanning = null;
