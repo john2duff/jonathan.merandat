@@ -488,7 +488,11 @@ function renderTournament() {
                                 </span>
                                 <div class="flex justify-between items-center h-full w-full">
                                     <div class="flex flex-col flex-1 overflow-hidden">
-                                      ${renderTeam(match.team1)}
+                                      ${renderTeam(
+                                        match.team1,
+                                        "",
+                                        "float: right;"
+                                      )}
                                     </div>
                                     ${
                                       currentEditMatchIndex == index
@@ -526,7 +530,11 @@ function renderTournament() {
                                   }
 
                                   <div class="flex flex-col flex-1 overflow-hidden items-end">
-                                    ${renderTeam(match.team2, "text-right")}
+                                    ${renderTeam(
+                                      match.team2,
+                                      "text-right",
+                                      "float: left;"
+                                    )}
                                   </div>
                                     
                                 </div>
@@ -540,13 +548,21 @@ function renderTournament() {
                                   </span>
                                   <div class="flex justify-between items-center w-full">
                                     <div class="flex flex-col flex-1 overflow-hidden ">
-                                        ${renderTeam(match.team1)}
+                                        ${renderTeam(
+                                          match.team1,
+                                          "",
+                                          "float: right;"
+                                        )}
                                     </div>
                                     <div class="separator-vertical ${
                                       currentTour === indexTour ? "mx-2" : ""
                                     }"></div>
                                     <div class="flex flex-col flex-1 overflow-hidden items-end">
-                                        ${renderTeam(match.team2, "text-right")}
+                                        ${renderTeam(
+                                          match.team2,
+                                          "text-right",
+                                          "float: left;"
+                                        )}
                                     </div>
                                   </div>
                               </div>
@@ -618,15 +634,18 @@ function renderTournament() {
 
 function renderTour() {}
 
-function renderTeam(team, customClass) {
+function renderTeam(team, customClass, customStyle) {
   return `
     ${team
       .map((player) => {
         return `
-          <span class="block truncate player-tournament player-tournament-${
-            player.gender
-          } ${customClass}">${player.name}</span>
-          ${getLevelTournament()}
+          <div style="${customStyle}" class="block truncate player-tournament player-tournament-${
+          player.gender
+        } ${customClass}">
+          <span>${player.name}</span>
+          ${getLevelTournament(player)}
+          </div>
+          
         `;
       })
       .join("")}`;
@@ -637,9 +656,36 @@ function renderSliderScore(id) {
 }
 
 function getLevelTournament(p) {
-  return `
-  
-  `;
+  return `<div class="
+    ${
+      p.level == "NC"
+        ? `inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset`
+        : p.level == "P12"
+        ? `inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset`
+        : p.level == `P11`
+        ? `inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset`
+        : p.level == `P10`
+        ? `inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset`
+        : p.level == `D9`
+        ? `inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset`
+        : p.level == `D8`
+        ? `inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset`
+        : p.level == `D7`
+        ? `inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset`
+        : p.level == `R6`
+        ? `inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset`
+        : p.level == `R5`
+        ? `inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset`
+        : p.level == `R4`
+        ? `inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset`
+        : p.level == `N3`
+        ? `inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset`
+        : p.level == `N2`
+        ? `inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset`
+        : p.level == `N1`
+        ? `inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset`
+        : `<div></div>`
+    } ">${p.level}</div>`;
 }
 
 function getTpsTotal() {
