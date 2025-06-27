@@ -11,6 +11,8 @@
     --text5-color: #000000;
     --radius: 5px;
     --padding-button: 5px;
+    --bg-homme: #cee4e7;
+    --bg-femme: #f0ddf0;
 }
 
 .theme-dark {
@@ -219,6 +221,30 @@ body.withPanel .footer{
 .player{
     box-shadow: 5px 5px 20px 5px lightgray;
 
+}
+
+.player-preparation {
+    background-color: var(--bg-homme);
+}
+.player-preparation-H {
+    background-color: var(--bg-homme);
+}
+.player-preparation-F {
+    background-color: var(--bg-femme);
+}
+
+.player-tournament{
+    border-radius: 5px;
+    padding: 2px 3px;
+    margin: 2px;
+}
+
+.player-tournament-H{
+    background-color: var(--bg-homme);
+}
+
+.player-tournament-F {
+    background-color: var(--bg-femme);
 }
 
 .noUi-touch-area{
