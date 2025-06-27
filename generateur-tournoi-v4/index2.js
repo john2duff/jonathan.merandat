@@ -639,11 +639,11 @@ function renderTeam(team, customClass, customStyle) {
     ${team
       .map((player) => {
         return `
-          <div style="${customStyle}" class="block truncate player-tournament player-tournament-${
-          player.gender
-        } ${customClass}">
+          <div class="block truncate player-tournament player-tournament-${
+            player.gender
+          } ${customClass}">
           <span>${player.name}</span>
-          ${getLevelTournament(player)}
+          ${getLevelTournament(player, customStyle)}
           </div>
           
         `;
@@ -655,8 +655,8 @@ function renderSliderScore(id) {
   return `<div id="${id}" class="slider-score flex-auto m-4 h-24"> </div>`;
 }
 
-function getLevelTournament(p) {
-  return `<div class="
+function getLevelTournament(p, customStyle) {
+  return `<div style="${customStyle}" class="
     ${
       p.level == "NC"
         ? `inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset`
