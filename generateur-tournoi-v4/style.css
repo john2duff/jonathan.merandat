@@ -31,6 +31,7 @@ body {
     background: var(--bg1-color) !important;
     color: var(--text1-color) !important;
     margin-bottom: 100px !important;
+    user-select: none;
 }
 
 input,
@@ -235,8 +236,10 @@ body.withPanel .footer{
 
 .player-tournament{
     border-radius: 5px;
-    padding: 2px 3px;
+    padding: 2px 6px;
     margin: 2px;
+    /*width: fit-content;*/
+    width: 100%;
 }
 
 .player-tournament-H{
@@ -263,3 +266,35 @@ body.withPanel .footer{
 #form-add-player{
     box-shadow: 0px 8px 11px 0px gray;
 }
+
+.separator-vertical{
+    border: 1px solid lightgray;
+    /*box-shadow: 0px 0px 20px 2px gray;*/
+    margin: 16px ;
+    border-radius: 50%;
+    width:0px;
+    height: 100%;
+}
+
+.menu-context {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    min-width: 150px;
+}
+
+.menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: var(--bg5-color);
+    color: var(--text5-color);
+}
+
+.menu-item:hover {
+    background: #f0f0f0; }

@@ -40,6 +40,7 @@ const defaultConfig = {
   tours: 8,
   ecartMax: 10,
   priorities: { equipier: 1, adversaire: 1, attente: 2, sexe: 2, niveau: 1 },
+  isScoreNegatif: false,
 };
 let tournoi = JSON.parse(localStorage.getItem("gen-tournoi") || "{}");
 let players = tournoi.players || [];
@@ -61,25 +62,40 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.innerHTML = `
   <header class="header flex justify-between items-center">
     <span>🏸 Générateur de tournoi de Badminton</span>
-    <button class="btn-primary" onclick="reset();">Reset</button>
-    <span>v${version}</span>
+    ${renderMenuGlobal()}
   </header>
-  <section id="preparation" class="flex flex-col flex-auto"></section>
+  <section id="chargement" class="flex flex-col flex-auto" style="">Chargement ... </section>
+  <section id="preparation" class="flex flex-col flex-auto" style="display:none"></section>
   <section id="tournament" class="flex flex-col flex-auto" style="display:none"></section>
   <section id="results" class="flex flex-col flex-auto" style="display:none"></section>
   <aside id="panel" class="h-screen overflow-auto"></aside>
 `;
 
-  renderPreparationSection();
-  renderTournament();
-  if (currentTour != -1 && currentTour != null) {
-    showSection("tournament");
+  if (planning.length > 0 && currentTour != null) {
+    renderTournament();
     renderPanelTournament();
-    currentStopTimer = afficherTempsEcoule(
-      planning[currentTour].startDate,
-      currentTour
-    );
+    if (currentTour != -1) {
+      currentStopTimer = afficherTempsEcoule(
+        planning[currentTour].startDate,
+        currentTour
+      );
+    }
+    showSection("tournament");
+  } else if (currentTour == null) {
+    renderPanelResults();
+    showSection("results");
+  } else {
+    renderPreparationSection();
+    showSection("preparation");
   }
+
+  document.addEventListener("click", (e) => {
+    const btnMenu = document.getElementById("btn-menu");
+    const menu = document.getElementById("menu-contextuel");
+    if (!btnMenu.contains(e.target) && !menu.contains(e.target)) {
+      menu.style.display = "none";
+    }
+  });
 });
 
 // -- UI FUNCTIONS --
@@ -149,18 +165,18 @@ function renderPreparationSection() {
   const el = document.getElementById("preparation");
   el.innerHTML = `
     <div class="sous-header">
-      <h2> ⚙️Paramètres</h2>
+      <h2>🛠️ Préparation</h2>
     </div>
     <div class="flex flex-wrap gap-4 m-5">
-      <div class="flex flex-col flex-auto">
-        <label class="mb-2">Nombre de terrains</label> 
+      <div class="flex flex-col flex-auto min-w-96">
+        <label for="terrains-value" class="mb-2">Nombre de terrains</label> 
           <div class="flex items-center justify-between">
             <div class="slider-param-terrains flex-auto mr-6"> </div>
             <span id="terrains-value" class="w-8">${settings.terrains} </span>
           </div>
       </div>
-      <div class="flex flex-col flex-auto">
-        <label class="mb-2">Nombre de tours</label> 
+      <div class="flex flex-col flex-auto min-w-96">
+        <label for="tours-value" class="mb-2">Nombre de tours</label> 
         <div class="flex items-center justify-between">
             <div class="slider-param-tours flex-auto mr-6"> </div>
             <span id="tours-value" class="w-8">${settings.tours} </span>
@@ -170,7 +186,7 @@ function renderPreparationSection() {
       ${"" /*renderContraintes("preparation", false)*/}
     </div>
 
-    <div class="sous-header justify-between">
+    <div class="sous-header justify-between items-center">
       <h2>👥 Liste des joueurs</h2>
       <span>${
         players.length == 0 ? "Aucun joueur" : ` ${players.length} joueurs`
@@ -206,6 +222,7 @@ function renderPreparationSection() {
 
     <footer class="footer flex justify-end">
     ${
+      /*➜*/
       planning.length == 0
         ? `
       <button class="btn-primary" onclick="prepareOptimise(); optimisePlanning();"> 🏆 Générer le tournoi</button>
@@ -219,7 +236,7 @@ function renderPreparationSection() {
             : currentTour == -1
             ? "prêt"
             : "en cours"
-        } ➜</button>
+        } ⭢ </button>
       </div>
       `
     }
@@ -229,19 +246,20 @@ function renderPreparationSection() {
   el.querySelector("#form-add-player").onsubmit = () => {
     let name = el.querySelector("#name-player").value.trim();
     let gender = el.querySelector("#gender-player").value;
+    let level = el.querySelector("#level-player").value;
     const wasEmpty = name == "";
     if (name == "" || players.find((p) => p.name === name)) {
       const names = [
-        ["Paul", "H"],
-        ["Robin", "H"],
-        ["Celine", "F"],
-        ["John", "H"],
-        ["Olivier", "H"],
-        ["Fabien", "H"],
-        ["Marie", "F"],
-        ["Ludivine", "F"],
-        ["Audrey", "F"],
-        ["Katy", "F"],
+        ["Paul", "H", "D9"],
+        ["Robin", "H", "P10"],
+        ["Celine", "F", "P11"],
+        ["John", "H", "D8"],
+        ["Olivier", "H", "P11"],
+        ["Fabien", "H", "P10"],
+        ["Marie", "F", "D9"],
+        ["Ludivine", "F", "P12"],
+        ["Audrey", "F", "P11"],
+        ["Katy", "F", "NC"],
       ];
       let tries = 0;
       do {
@@ -250,13 +268,14 @@ function renderPreparationSection() {
           ? names[rdm][0] + "_" + Math.floor(Math.random() * 100)
           : name + "_" + Math.floor(Math.random() * 100);
         gender = names[rdm][1];
+        level = names[rdm][2];
         tries++;
       } while (players.find((p) => p.name === name) && tries < 50);
     }
     const newPlayer = {
       name,
       gender,
-      level: el.querySelector("#level-player").value,
+      level: level,
       id: crypto.randomUUID?.(),
     };
     players.splice(0, 0, newPlayer);
@@ -303,36 +322,50 @@ function renderPreparationSection() {
     .join("");
 
   const sliderTerrains = document.body.querySelector(".slider-param-terrains");
-  noUiSlider.create(sliderTerrains, {
-    start: parseInt(settings.terrains),
-    connect: [true, false],
-    step: 1,
-    range: {
-      min: 0,
-      max: 20,
-    },
-  });
-  sliderTerrains.noUiSlider.on("slide", (values, handle) => {
-    settings.terrains = parseInt(values[handle]);
-    saveData();
-    renderPreparationSection();
-  });
+  if (sliderTerrains) {
+    noUiSlider.create(sliderTerrains, {
+      start: parseInt(settings.terrains),
+      connect: [true, false],
+      step: 1,
+      range: {
+        min: 0,
+        max: 20,
+      },
+    });
+    sliderTerrains.noUiSlider.on("slide", (values, handle) => {
+      settings.terrains = parseInt(values[handle]);
+      document.getElementById("terrains-value").innerHTML = parseInt(
+        values[handle]
+      );
+      saveData();
+    });
+    sliderTerrains.noUiSlider.on("end", (values, handle) => {
+      renderPreparationSection();
+    });
+  }
 
   const sliderTours = document.body.querySelector(".slider-param-tours");
-  noUiSlider.create(sliderTours, {
-    start: parseInt(settings.tours),
-    connect: [true, false],
-    step: 1,
-    range: {
-      min: 0,
-      max: 20,
-    },
-  });
-  sliderTours.noUiSlider.on("slide", (values, handle) => {
-    settings.tours = parseInt(values[handle]);
-    saveData();
-    renderPreparationSection();
-  });
+  if (sliderTours) {
+    noUiSlider.create(sliderTours, {
+      start: parseInt(settings.tours),
+      connect: [true, false],
+      step: 1,
+      range: {
+        min: 0,
+        max: 20,
+      },
+    });
+    sliderTours.noUiSlider.on("slide", (values, handle) => {
+      settings.tours = parseInt(values[handle]);
+      document.getElementById("tours-value").innerHTML = parseInt(
+        values[handle]
+      );
+      saveData();
+    });
+    sliderTours.noUiSlider.on("end", (values, handle) => {
+      renderPreparationSection();
+    });
+  }
 }
 
 function requestDeletePlayer(event, i) {
@@ -361,11 +394,11 @@ function requestDeletePlayer(event, i) {
 // -- RENDER TOURNAMENT SECTION --
 function renderTournament() {
   const el = document.getElementById("tournament");
-  let indexMatch = 0;
+  let indexMatch = 0; /*➜*/
   el.innerHTML = `
-      <div class="sous-header flex justify-between">
-        <button onclick="togglePanel(true);showSection('preparation');"> <div style="transform:rotate(180deg)">➜<div> </button>
-        <div class="flex flex-auto justify-between mx-3 gap-4">
+      <div class="sous-header flex justify-between items-center w-full">
+        <button onclick="togglePanel(true);renderPreparationSection();showSection('preparation');"> ⭠ Retour<div> </button>
+        <div class="flex justify-between mx-3 gap-4 ">
           ${
             "" /*<span>${
             players.length == 0 ? "Aucun joueur" : ` ${players.length} joueurs`
@@ -375,21 +408,21 @@ function renderTournament() {
 
           <span>${
             currentTour == null
-              ? `Temps total du tournoi : ${getTpsTotal()}`
+              ? `Tournoi terminé - durée : ${getTpsTotal()}`
               : currentTour == -1
               ? "Prêt à lancer !"
-              : `Tour ${currentTour + 1} en cours`
+              : `Tour ${currentTour + 1}`
           }</span>
           
           ${
-            currentTour != -1
+            currentTour != -1 && currentTour != null
               ? `<span class="justify-center inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset" id="tps-ecoule-${currentTour}"> </span>`
               : ``
           }
           
         </div>
         ${
-          currentTour == -1 || currentTour === null
+          true /*currentTour == -1 || currentTour === null*/
             ? `<button onclick="togglePanel()">⚙️ Paramètres</button>`
             : ""
         }
@@ -398,22 +431,35 @@ function renderTournament() {
         .map((tour, indexTour) => {
           return `
             <div class="">
-                <h3 class="sous-header-secondary ${
-                  currentTour == indexTour && "bg-green-100"
-                }">Tour ${indexTour + 1} ${
+              <button id="tour-${
+                indexTour + 1
+              }" class="accordion sous-header-secondary justify-between ${
+            currentTour == -1 || currentTour == null || currentTour == indexTour
+              ? "open"
+              : ""
+          } ${
+            currentTour == indexTour && "bg-green-100"
+          }" onclick="this.classList.toggle('open')">
+                <h3 class="">
+                Tour ${indexTour + 1} ${
             currentTour == indexTour
               ? "en cours"
               : tour.closed
               ? "terminé"
               : "à venir"
           }</h3>
-                <div class="flex justify-center flex-wrap gap-4">
+
+                <span>▼</span>
+         
+              </button>
+              <div class="accordion-content w-full"> 
+                <div class="flex justify-center flex-wrap gap-4 w-full">
                   ${tour.matchs
                     .map((match, index) => {
                       indexMatch++;
 
                       return `
-                        <div class="flex flex-col mx-2">
+                        <div class="flex flex-col mx-2 max-w-96 w-full">
                           <div class="flex justify-between items-center w-full p-2 ">
                             <h3>Match ${indexMatch}</h3>
                             <h3>Terrain ${index + 1}</h3>
@@ -423,74 +469,85 @@ function renderTournament() {
                             currentTour == indexTour
                               ? ` 
                               <div class="flex flex-col items-center border p-2 rounded">
-                                <span class="text-2xl gap-4">
+                                <span class="flex justify-center items-center text-2xl gap-4 w-full">
                                   <span ${
                                     currentEditMatchIndex == index
                                       ? 'id="currentScoreIndex1"'
                                       : ""
                                   }>${match.scoreTeam1}</span>
-                                  <span>-</span>
+                                  ${
+                                    currentEditMatchIndex == index
+                                      ? `<button class="text-xl" onclick="currentEditMatchIndex=-1;renderTournament();"> ✔️ </button>`
+                                      : `<button class="text-xl" onclick="currentEditMatchIndex=${index};renderTournament();"> ✏️ </button>`
+                                  }
                                   <span ${
                                     currentEditMatchIndex == index
                                       ? 'id="currentScoreIndex2"'
                                       : ""
                                   }>${match.scoreTeam2}</span>
                                 </span>
-                                <div class="flex justify-between items-center h-full">
-                                  <div class="flex justify-between items-center h-full">
-                                    ${renderTeam(match.team1)}
+                                <div class="flex justify-between items-center h-full w-full">
+                                    <div class="flex flex-col flex-1 overflow-hidden">
+                                      ${renderTeam(match.team1)}
+                                    </div>
                                     ${
                                       currentEditMatchIndex == index
-                                        ? `<div class="flex flex-col justify-between items-center h-full">
-                                          ${renderSliderScore(
-                                            indexTour +
-                                              "-" +
-                                              index +
-                                              "-scoreTeam1"
-                                          )}
-                                        </div>`
+                                        ? `<div class="flex justify-between items-center h-full">
+                                          <div class="flex flex-col justify-between items-center h-full">
+                                            ${renderSliderScore(
+                                              indexTour +
+                                                "-" +
+                                                index +
+                                                "-scoreTeam1"
+                                            )}
+                                          </div>
+                                    </div>
+                                        `
                                         : ``
                                     }
                                   
-                                  </div>
-
+                                  <div class="separator-vertical ${
+                                    currentTour === indexTour ? "mx-2" : ""
+                                  }"></div>
+                                  
                                   ${
                                     currentEditMatchIndex == index
-                                      ? `<button class="text-4xl" onclick="currentEditMatchIndex=-1;renderTournament();"> ✔️ </button>`
-                                      : `<button class="text-4xl" onclick="currentEditMatchIndex=${index};renderTournament();"> ✏️ </button>`
+                                      ? `<div class="flex justify-between items-center h-full ">
+                                          <div class="flex flex-col justify-between items-center h-full">
+                                            ${renderSliderScore(
+                                              indexTour +
+                                                "-" +
+                                                index +
+                                                "-scoreTeam2"
+                                            )}
+                                          </div>
+                                      </div>`
+                                      : ``
                                   }
-                                  
-                                  <div class="flex justify-end items-center h-full">
-                                    <div class="flex justify-between items-center h-full ">
-                                    ${
-                                      currentEditMatchIndex == index
-                                        ? `<div class="flex flex-col justify-between items-center h-full">
-                                          ${renderSliderScore(
-                                            indexTour +
-                                              "-" +
-                                              index +
-                                              "-scoreTeam2"
-                                          )}
-                                        </div>`
-                                        : ``
-                                    }
-                        
-                                      ${renderTeam(match.team2)}
-                                    </div>
+
+                                  <div class="flex flex-col flex-1 overflow-hidden items-end">
+                                    ${renderTeam(match.team2, "text-right")}
                                   </div>
+                                    
                                 </div>
                               </div>`
                               : `
-                              <div class="flex flex-col items-center border p-2 rounded">
-                                  <span class="text-2xl">${
-                                    match.scoreTeam1
-                                  } - ${match.scoreTeam2}</span>
-                                  <div class="flex justify-between items-center">
-                                    ${renderTeam(match.team1)}
-                                    <span class="text-4xl ${
+                              <div class="flex flex-col items-center border p-2 rounded w-full">
+                                  <span class="text-2xl gap-4 h-full flex justify-content items-center">
+                                    <span>${match.scoreTeam1}</span>
+                                    <span>-</span>
+                                    <span >${match.scoreTeam2}</span>
+                                  </span>
+                                  <div class="flex justify-between items-center w-full">
+                                    <div class="flex flex-col flex-1 overflow-hidden ">
+                                        ${renderTeam(match.team1)}
+                                    </div>
+                                    <div class="separator-vertical ${
                                       currentTour === indexTour ? "mx-2" : ""
-                                    }">🏸</span>
-                                    ${renderTeam(match.team2)}
+                                    }"></div>
+                                    <div class="flex flex-col flex-1 overflow-hidden items-end">
+                                        ${renderTeam(match.team2, "text-right")}
+                                    </div>
                                   </div>
                               </div>
                               `
@@ -501,6 +558,7 @@ function renderTournament() {
                     })
                     .join("")}
                 </div>
+              </div>
             </div>
         `;
         })
@@ -558,19 +616,20 @@ function renderTournament() {
   });
 }
 
-function renderTeam(team) {
-  return `<div class="flex flex-col ">
+function renderTour() {}
+
+function renderTeam(team, customClass) {
+  return `
     ${team
       .map((player) => {
         return `
-          <span class="player-tournament player-tournament-${player.gender}">${
-          player.name
-        }</span>
+          <span class="block truncate player-tournament player-tournament-${
+            player.gender
+          } ${customClass}">${player.name}</span>
           ${getLevelTournament()}
         `;
       })
-      .join("")}
-  </div>`;
+      .join("")}`;
 }
 
 function renderSliderScore(id) {
@@ -584,24 +643,55 @@ function getLevelTournament(p) {
 }
 
 function getTpsTotal() {
-  const timeTotal = planning.reduce((acc, tour) =>
-    acc + tour ? getTempsEcoule(tour.startDate, tour.endDate, true) : 0
+  const timeTotal = planning.reduce(
+    (acc, tour) =>
+      acc + (tour ? getTempsEcoule(tour.startDate, tour.endDate, true) : 0),
+    0
   );
-  const minutes = Math.floor(timeTotal / 60);
+
+  if (timeTotal >= 86400) return "plus de 24h";
+
+  const heures = Math.floor(timeTotal / 3600);
+  const minutes = Math.floor((timeTotal % 3600) / 60);
   const secondes = timeTotal % 60;
-  return timeTotal > 59
-    ? `${minutes} min. ${secondes} sec.`
-    : `${secondes} sec.`;
+
+  if (heures > 0) return `${heures}h ${minutes}' ${secondes}''`;
+  if (minutes > 0) return `${minutes}' ${secondes}''`;
+  return `${secondes}''`;
 }
 
 function renderResults() {
   const el = document.getElementById("results");
   el.innerHTML = `
-  <h1>Résultats</h1>
-    ${Object.entries(scores).map((score) => {
-      return `${score}`;
-    })}
+    <div class="sous-header flex justify-between items-center w-full">
+      <button onclick="togglePanel(true);showSection('tournament');"> ⭠ Retour<div> </button>
+      <span>Tournoi terminé - durée : ${getTpsTotal()}</span>
+      <button onclick="togglePanel()">⚙️ Paramètres</button>
+    </div>
+    <div>
+    <h1>Résultats</h1>
+        ${Object.entries(scores).map((score) => {
+          return `${score}`;
+        })}
+    </div>
+  
   `;
+}
+
+function renderMenuGlobal() {
+  return `<div style="position: relative; display: inline-block;">
+    <button id="btn-menu" class="text-2xl" onclick="toggleMenu(event);">☰</button>
+    <div id="menu-contextuel" class="menu-context" style="display:none;">
+      <div class="menu-item" onclick="reset()">↺ Reset</div>  
+      <div class="menu-item" onclick="action1()">❓ Aides</div>
+      <div class="menu-item" onclick="action2()">A propos</div>
+    </div>
+  </div>`;
+}
+
+function toggleMenu() {
+  const menu = document.getElementById("menu-contextuel");
+  menu.style.display = menu.style.display === "none" ? "block" : "none";
 }
 
 function afficherTempsEcoule(dateDepart, currentTour) {
@@ -636,6 +726,9 @@ function getTempsEcoule(dateDepart, dateFin = null, formatInteger = false) {
 function launchTournoi() {
   togglePanel(true);
   currentTour = 0;
+  document
+    .getElementById("tour-" + (currentTour + 1))
+    .scrollIntoView({ behavior: "smooth", block: "start" });
   planning[currentTour].startDate = Date.now();
   renderTournament();
   currentStopTimer = afficherTempsEcoule(
@@ -660,6 +753,9 @@ function clotureTour() {
   planning[currentTour].closed = true;
   if (currentTour < planning.length) {
     currentTour++;
+    document
+      .getElementById("tour-" + (currentTour + 1))
+      .scrollIntoView({ behavior: "smooth", block: "start" });
     renderTournament();
     planning[currentTour].startDate = Date.now();
     currentStopTimer = afficherTempsEcoule(
@@ -720,7 +816,7 @@ function renderPanelTournament() {
   const panel = document.getElementById("panel");
   panel.innerHTML = `
   <h3 class="header flex justify-between items-center">
-  ⚙️ Préparation
+  ⚙️ Paramètres
   <button onclick="togglePanel(true);">✖</button>
   </h3>
   ${"" /*<div id="contrainte-panel">*/}
@@ -731,13 +827,31 @@ function renderPanelTournament() {
   </h3>
   <div id="stats-tournament-panel" class="flex flex-col"></div>
   <h3 class="sous-header flex justify-between">
-  📊 Handicaps et avantages
+  ⚙️ Handicaps et avantages
   </h3>
-  <div id="misc-tournament-panel" class="flex flex-col"></div>
+  <div id="handicap-tournament-panel" class="flex flex-col"></div>
   `;
   evaluerPlanning();
   renderStats();
-  renderMiscTournament();
+  renderHandicapTournament();
+}
+
+function renderPanelResults() {
+  const panel = document.getElementById("panel");
+  panel.innerHTML = `
+  <h3 class="header flex justify-between items-center">
+  ⚙️ Paramètres
+  <button onclick="togglePanel(true);">✖</button>
+  </h3>
+  ${"" /*<div id="contrainte-panel">*/}
+  ${"" /*renderContraintes("panel", true)*/}
+  </div>
+  <h3 class="sous-header flex justify-between">
+  ⚙️ Attribution des points <button onclick="renderResults();">↺</button>
+  </h3>
+  <div id="results-panel" class="flex flex-col"></div>
+  `;
+  renderResults();
 }
 
 function evaluerPlanning() {
@@ -909,10 +1023,52 @@ function renderAccordions(map, label) {
     .join("");
 }
 
-function renderMiscTournament() {
-  const miscTournament = document.getElementById("misc-tournament-panel");
-  miscTournament.innerHTML = `
+function renderHandicapTournament() {
+  const handicapTournament = document.getElementById(
+    "handicap-tournament-panel"
+  );
+  handicapTournament.innerHTML = `
+    <label class="flex w-full gap-4 p-4 m-4">
+      <input type="checkbox" onchange="(event) => settings.isScoreNegatif = event.currentTarget.checked; saveData(); renderTournament();" ${
+        settings.isScoreNegatif ? "checked" : ""
+      } />
+      <span class="">Score négatif</span>
+    </label>
+    <h3>Point bonus</h3>
+    ${Object.entries(levelValue)
+      .map(
+        ([key, level]) =>
+          `<label class="flex justify-between items-center">
+            <span class="w-4">${key}</span>
+            <div id="slider-level-${key}" class="slider-level flex-auto mx-6 my-2"> </div>
+            <span id="slider-level-label-${key}" class="w-8">${level}</span>
+          </label>
+        `
+      )
+      .join("")}
   `;
+
+  document.body.querySelectorAll(".slider-level").forEach((slider) => {
+    const obj = slider.id.split("-");
+    noUiSlider.create(slider, {
+      start: levelValue[obj[2]],
+      connect: [true, false],
+      step: 1,
+      range: {
+        min: 0,
+        max: 12,
+      },
+    });
+    slider.noUiSlider.on("slide", (values, handle) => {
+      levelValue[obj[2]] = parseInt(values[handle]);
+      document.getElementById(`slider-level-label-${obj[2]}`).innerHTML =
+        parseInt(values[handle]);
+    });
+    slider.noUiSlider.on("end", (values, handle) => {
+      saveData();
+      renderTournament();
+    });
+  });
 }
 
 function renderStats() {
