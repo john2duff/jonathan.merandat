@@ -395,6 +395,11 @@ function requestDeletePlayer(event, i) {
 function renderTournament() {
   const el = document.getElementById("tournament");
   let indexMatch = 0; /*➜*/
+  const nbMatchRestant = getNombreMatchRestant();
+  let intervalIdTopLeft,
+    intervalIdTopRight,
+    intervalIdBottomLeft,
+    intervalIdBottomRight;
   el.innerHTML = `
       <div class="sous-header flex justify-between items-center w-full">
         <button onclick="togglePanel(true);renderPreparationSection();showSection('preparation');"> ⭠ Retour<div> </button>
@@ -457,7 +462,6 @@ function renderTournament() {
                   ${tour.matchs
                     .map((match, index) => {
                       indexMatch++;
-
                       return `
                         <div class="flex flex-col mx-2 max-w-96 w-full">
                           <div class="flex justify-between items-center w-full p-2 ">
@@ -468,7 +472,8 @@ function renderTournament() {
                           ${
                             currentTour == indexTour
                               ? ` 
-                              <div class="flex flex-col items-center border p-2 rounded">
+                              <div class="relative flex flex-col items-center border p-2 rounded">
+                              
                                 <span class="flex justify-center items-center text-2xl gap-4 w-full">
                                   <span ${
                                     currentEditMatchIndex == index
@@ -497,15 +502,25 @@ function renderTournament() {
                                     ${
                                       currentEditMatchIndex == index
                                         ? `<div class="flex justify-between items-center h-full">
-                                          <div class="flex flex-col justify-between items-center h-full">
-                                            ${renderSliderScore(
-                                              indexTour +
-                                                "-" +
-                                                index +
-                                                "-scoreTeam1"
-                                            )}
+                                                <div class="flex flex-col justify-between items-center h-full">
+                                                  ${renderSliderScore(
+                                                    indexTour +
+                                                      "-" +
+                                                      index +
+                                                      "-scoreTeam1"
+                                                  )}
+                                                </div>
                                           </div>
-                                    </div>
+                                          <div id="plus-top-left" class="absolute flex justify-center items-center left-0 top-0 w-16 h-16 bg-red-100 rounded opacity-50 cursor-pointer" onmousedown="
+                                          touchScore(true, ${
+                                            indexTour +
+                                            "-" +
+                                            index +
+                                            "-scoreTeam1"
+                                          });intervalIdTopLeft = setInterval(touchScore, 100);"
+                                          onmouseup="() => clearInterval(intervalIdTopLeft);" onmouseleave="() => clearInterval(intervalIdTopLeft);">
+                                              +
+                                          </div>
                                         `
                                         : ``
                                     }
@@ -591,7 +606,12 @@ function renderTournament() {
                 ? `
             <div class="flex justify-between w-full p-2">
               <button class="btn-secondary" onclick="clotureTournoi();"> Clotûrer le tournoi</button>
-              <button class="btn-primary" onclick="clotureTour();"> Clotûrer le tour</button>
+              <div class="flex items-center">
+                <span class="text-sm mr-2" id="label-match-restant">${nbMatchRestant} </span>
+                <button id="button-cloture" ${
+                  nbMatchRestant && "disabled"
+                } class="btn-primary" onclick="clotureTour();"> Clotûrer le tour</button>
+              </div>
             </div>`
                 : `<button class="btn-primary" onclick="clotureTournoi();"> Clotûrer le tournoi</button>`
             }
@@ -632,7 +652,30 @@ function renderTournament() {
   });
 }
 
-function renderTour() {}
+function touchScore(isPlus, idSlider) {
+  const slider = document.getElementById(idSlider);
+  slider.noUiSlider;
+}
+
+function getNombreMatchRestant() {
+  if (currentTour != -1 && currentTour != null) {
+    let nbMatchTotal = planning[currentTour].matchs.length;
+    let matchClosed = 0;
+    planning[currentTour].matchs.forEach((match) => {
+      if (match.scoreTeam1 >= 21 || match.scoreTeam2 >= 21) {
+        matchClosed++;
+      }
+    });
+    if (nbMatchTotal - matchClosed == 0) {
+      return "";
+    } else {
+      const s = nbMatchTotal - matchClosed > 1 ? "s" : "";
+      return nbMatchTotal - matchClosed + ` match${s} restant${s}`;
+    }
+  } else {
+    return "";
+  }
+}
 
 function renderTeam(team, customClass, customStyle) {
   return `
