@@ -575,12 +575,12 @@ function renderTournament() {
                                           }', intervals, 'topLeft');"
                                           onmouseup="stopTouchScore(intervals, 'topLeft');" 
                                           onmouseleave="stopTouchScore(intervals, 'topLeft');"
-                                          ontouchstart="startTouchScore(true, '${
+                                          ontouchstart="(e) => { e.preventDefault(); startTouchScore(true, '${
                                             indexTour +
                                             "-" +
                                             index +
                                             "-scoreTeam1"
-                                          }', intervals, 'topLeft');" 
+                                          }', intervals, 'topLeft');}" 
                                           ontouchend="stopTouchScore(intervals, 'topLeft');">
                                               +
                                           </div>
@@ -592,12 +592,12 @@ function renderTournament() {
                                           }', intervals, 'bottomLeft');"
                                            onmouseup="stopTouchScore(intervals, 'bottomLeft');" 
                                            onmouseleave="stopTouchScore(intervals, 'bottomLeft');"
-                                            ontouchstart="startTouchScore(false, '${
+                                            ontouchstart="(e) => { e.preventDefault(); startTouchScore(false, '${
                                               indexTour +
                                               "-" +
                                               index +
                                               "-scoreTeam1"
-                                            }', intervals, 'bottomLeft');" 
+                                            }', intervals, 'bottomLeft');}" 
                                           ontouchend="stopTouchScore(intervals, 'bottomLeft');">
                                               -
                                           </div>
@@ -626,12 +626,12 @@ function renderTournament() {
                                       }', intervals, 'topRight');"
                                            onmouseup="stopTouchScore(intervals, 'topRight');" 
                                            onmouseleave="stopTouchScore(intervals, 'topRight');"
-                                           ontouchstart="startTouchScore(true, '${
+                                           ontouchstart="(e) => { e.preventDefault(); startTouchScore(true, '${
                                              indexTour +
                                              "-" +
                                              index +
                                              "-scoreTeam2"
-                                           }', intervals, 'topRight');" 
+                                           }', intervals, 'topRight');}" 
                                           ontouchend="stopTouchScore(intervals, 'topRight');">
                                               +
                                           </div>
@@ -643,12 +643,12 @@ function renderTournament() {
                                           }', intervals, 'bottomRight');"
                                            onmouseup="stopTouchScore(intervals, 'bottomRight');" 
                                            onmouseleave="stopTouchScore(intervals, 'bottomRight');"
-                                           ontouchstart="startTouchScore(false, '${
+                                           ontouchstart="(e) => { e.preventDefault(); startTouchScore(false, '${
                                              indexTour +
                                              "-" +
                                              index +
                                              "-scoreTeam2"
-                                           }', intervals, 'bottomRight');" 
+                                           }', intervals, 'bottomRight');}" 
                                           ontouchend="stopTouchScore(intervals, 'bottomRight');">
                                               -
                                           </div>
@@ -670,7 +670,9 @@ function renderTournament() {
                               <div class="flex flex-col items-center border p-2 rounded w-full">
                                   <span class="text-2xl gap-2 h-full flex justify-content items-center">
                                     <span class="w-8 text-right">${
-                                      currentTour == -1
+                                      currentTour == -1 ||
+                                      (currentTour != null &&
+                                        indexTour >= currentTour)
                                         ? match.initialScoreTeam1
                                         : match.scoreTeam1
                                     }</span>
@@ -678,7 +680,9 @@ function renderTournament() {
                                       currentTour === indexTour ? "mx-1" : ""
                                     }"></div>
                                     <span class="w-8 text-left">${
-                                      currentTour == -1
+                                      currentTour == -1 ||
+                                      (currentTour != null &&
+                                        indexTour >= currentTour)
                                         ? match.initialScoreTeam2
                                         : match.scoreTeam2
                                     }</span>
