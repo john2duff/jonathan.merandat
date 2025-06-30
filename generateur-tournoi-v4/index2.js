@@ -140,7 +140,7 @@ function reset() {
     saveData();
     renderPreparationSection();
     renderTournament();
-    renderStats();
+    renderPanelTournament();
   }
 }
 
@@ -601,9 +601,9 @@ function renderTournament() {
                               : `
                               <div class="flex flex-col items-center border p-2 rounded w-full">
                                   <span class="text-2xl gap-4 h-full flex justify-content items-center">
-                                    <span>${match.scoreTeam1}</span>
+                                    <span>${match.initialScoreTeam1}</span>
                                     <span>-</span>
-                                    <span >${match.scoreTeam2}</span>
+                                    <span >${match.initialScoreTeam2}</span>
                                   </span>
                                   <div class="flex justify-between items-center w-full">
                                     <div class="flex flex-col flex-1 overflow-hidden ">
@@ -868,11 +868,11 @@ function renderResults() {
 
 function renderMenuGlobal() {
   return `<div style="position: relative; display: inline-block;">
-    <button id="btn-menu" class="text-2xl" onclick="toggleMenu(event);">☰</button>
+    <button id="btn-menu" class="text-2xl" onclick="toggleMenu();">☰</button>
     <div id="menu-contextuel" class="menu-context" style="display:none;">
-      <div class="menu-item" onclick="reset()">↺ Reset</div>  
-      <div class="menu-item" onclick="action1()">❓ Aides</div>
-      <div class="menu-item" onclick="action2()">A propos</div>
+      <div class="menu-item" onclick="reset(); toggleMenu();">↺ Reset</div>  
+      <div class="menu-item" onclick="">❓ Aides</div>
+      <div class="menu-item" onclick="">A propos</div>
     </div>
   </div>`;
 }
@@ -1122,8 +1122,8 @@ function evaluerPlanning() {
 
       const tous = [...match.team1, ...match.team2];
       const ecart =
-        Math.max(...tous.map(getLevelScore)) -
-        Math.min(...tous.map(getLevelScore));
+        Math.max(...tous.map((p) => getLevelScore(p))) -
+        Math.min(...tous.map((p) => getLevelScore(p)));
       if (ecart > settings.ecartMax) {
         niveauIssues.push({
           tour: tourIdx + 1,
@@ -1222,6 +1222,15 @@ function renderHandicapTournament() {
       } />
       <span class="">Score négatif</span>
     </label>
+
+    <label class="flex flex flex-col w-full gap-4 p-4">
+      <span class="">Ecart de point max</span>
+      <div class="flex">
+        <div class="slider-ecart-max flex-auto mx-6 my-2"> </div>
+        <span id="slider-ecart-max" class="">${settings.ecartMax}</span>
+      </div>
+    </label>
+
     <h3 class="pl-4">Point bonus</h3>
     <div class="pl-4">
     ${Object.entries(levelValue)
@@ -1255,10 +1264,45 @@ function renderHandicapTournament() {
         parseInt(values[handle]);
     });
     slider.noUiSlider.on("end", (values, handle) => {
+      planning.forEach((tour) => {
+        tour.matchs.forEach((match) => {
+          const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
+            match.team1,
+            match.team2
+          );
+          match.initialScoreTeam1 = initialScoreTeam1;
+          match.initialScoreTeam2 = initialScoreTeam2;
+        });
+      });
       saveData();
+      evaluerPlanning();
+      renderStats();
       renderTournament();
     });
   });
+
+  const sliderEcartMax = document.body.querySelector(".slider-ecart-max");
+  if (sliderEcartMax) {
+    noUiSlider.create(sliderEcartMax, {
+      start: parseInt(settings.ecartMax),
+      connect: [true, false],
+      step: 1,
+      range: {
+        min: 0,
+        max: 30,
+      },
+    });
+    sliderEcartMax.noUiSlider.on("slide", (values, handle) => {
+      settings.ecartMax = parseInt(values[handle]);
+      document.getElementById("slider-ecart-max").innerHTML = parseInt(
+        values[handle]
+      );
+    });
+    sliderEcartMax.noUiSlider.on("end", (values, handle) => {
+      saveData();
+      renderStats();
+    });
+  }
 }
 
 function renderStats() {
@@ -1390,7 +1434,7 @@ function renderStats() {
         </button> 
     <div class="accordion-content">
       <div class="flex flex-col w-full">
-      ${sexeIsniveauIssuessues
+      ${niveauIssues
         .map((item) => {
           return `<div>
           Tour ${item.tour} - Terrain ${item.terrain} : Ecart ${item.ecart} - ${item.joueurs}
@@ -1496,7 +1540,8 @@ function matchScore(team1, team2, planning, joueursAttente, params) {
   // Écart de niveau max autorisé
   const tous = [...team1, ...team2];
   const ecart =
-    Math.max(...tous.map(getLevelScore)) - Math.min(...tous.map(getLevelScore));
+    Math.max(...tous.map((p) => getLevelScore(p))) -
+    Math.min(...tous.map((p) => getLevelScore(p)));
   if (ecart > settings.ecartMax) score -= 1 * niveau;
 
   return score;
@@ -1606,14 +1651,17 @@ async function generePlanning() {
           for (const comb of combinaisons) {
             //if (tourMatches.length >= settings.terrains) break;
             //if (comb.joueurs.some((p) => joueursUtilises.has(p.id))) continue;
-
+            const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
+              comb.team1,
+              comb.team2
+            );
             tourMatches.push({
               team1: comb.team1,
               team2: comb.team2,
-              scoreTeam1: 0,
-              scoreTeam2: 0,
-              initialScoreTeam1: 0,
-              initialScoreTeam2: 0,
+              scoreTeam1: initialScoreTeam1,
+              scoreTeam2: initialScoreTeam2,
+              initialScoreTeam1,
+              initialScoreTeam2,
             });
             comb.team1.forEach((p) => joueursUtilises.add(p.id));
             comb.team2.forEach((p) => joueursUtilises.add(p.id));
