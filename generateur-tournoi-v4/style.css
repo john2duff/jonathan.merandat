@@ -80,6 +80,8 @@ body.withPanel .footer{
     display: none;
     z-index: 5;
     box-shadow: 0px -6px 17px 1px gray;
+    overflow-x:hidden;
+    padding-bottom: 50px;
 }
 
 #panel.open {

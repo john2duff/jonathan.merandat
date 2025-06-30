@@ -57,6 +57,13 @@ let waitCount = {};
 let sexeIssues = [];
 let niveauIssues = [];
 
+let intervals = {
+  topLeft: null,
+  bottomLeft: null,
+  topRight: null,
+  bottomRight: null,
+};
+
 // -- DOM CREATION --
 window.addEventListener("DOMContentLoaded", () => {
   document.body.innerHTML = `
@@ -396,10 +403,7 @@ function renderTournament() {
   const el = document.getElementById("tournament");
   let indexMatch = 0; /*➜*/
   const nbMatchRestant = getNombreMatchRestant();
-  let intervalIdTopLeft,
-    intervalIdTopRight,
-    intervalIdBottomLeft,
-    intervalIdBottomRight;
+
   el.innerHTML = `
       <div class="sous-header flex justify-between items-center w-full">
         <button onclick="togglePanel(true);renderPreparationSection();showSection('preparation');"> ⭠ Retour<div> </button>
@@ -462,6 +466,8 @@ function renderTournament() {
                   ${tour.matchs
                     .map((match, index) => {
                       indexMatch++;
+                      const team1IsWinner = isWinner(indexTour, index, true);
+                      const team2IsWinner = isWinner(indexTour, index, false);
                       return `
                         <div class="flex flex-col mx-2 max-w-96 w-full">
                           <div class="flex justify-between items-center w-full p-2 ">
@@ -475,6 +481,13 @@ function renderTournament() {
                               <div class="relative flex flex-col items-center border p-2 rounded">
                               
                                 <span class="flex justify-center items-center text-2xl gap-4 w-full">
+                                  ${
+                                    currentEditMatchIndex != -1
+                                      ? `<button onclick="teamWin(true);" class="${
+                                          team1IsWinner ? "" : "opacity-50"
+                                        }">🏆</button>`
+                                      : ``
+                                  }
                                   <span ${
                                     currentEditMatchIndex == index
                                       ? 'id="currentScoreIndex1"'
@@ -490,6 +503,13 @@ function renderTournament() {
                                       ? 'id="currentScoreIndex2"'
                                       : ""
                                   }>${match.scoreTeam2}</span>
+                                  ${
+                                    currentEditMatchIndex != -1
+                                      ? `<button onclick="teamWin(false);" class="${
+                                          team2IsWinner ? "" : "opacity-50"
+                                        }">🏆</button>`
+                                      : ``
+                                  }
                                 </span>
                                 <div class="flex justify-between items-center h-full w-full">
                                     <div class="flex flex-col flex-1 overflow-hidden">
@@ -511,15 +531,23 @@ function renderTournament() {
                                                   )}
                                                 </div>
                                           </div>
-                                          <div id="plus-top-left" class="absolute flex justify-center items-center left-0 top-0 w-16 h-16 bg-red-100 rounded opacity-50 cursor-pointer" onmousedown="
-                                          touchScore(true, ${
+                                          <div id="plus-top-left" class="absolute flex justify-center items-center left-0 top-0 w-16 h-16 bg-yellow-100 rounded opacity-50 cursor-pointer" onmousedown="startTouchScore(true, '${
                                             indexTour +
                                             "-" +
                                             index +
                                             "-scoreTeam1"
-                                          });intervalIdTopLeft = setInterval(touchScore, 100);"
-                                          onmouseup="() => clearInterval(intervalIdTopLeft);" onmouseleave="() => clearInterval(intervalIdTopLeft);">
+                                          }', intervals, 'topLeft');"
+                                          onmouseup="stopTouchScore(intervals, 'topLeft');" onmouseleave="stopTouchScore(intervals, 'topLeft');">
                                               +
+                                          </div>
+                                          <div id="plus-bottom-left" class="absolute flex justify-center items-center left-0 bottom-0 w-16 h-16 bg-yellow-100 rounded opacity-50 cursor-pointer" onmousedown="startTouchScore(false, '${
+                                            indexTour +
+                                            "-" +
+                                            index +
+                                            "-scoreTeam1"
+                                          }', intervals, 'bottomLeft');"
+                                           onmouseup="stopTouchScore(intervals, 'bottomLeft');" onmouseleave="stopTouchScore(intervals, 'bottomLeft');">
+                                              -
                                           </div>
                                         `
                                         : ``
@@ -540,7 +568,23 @@ function renderTournament() {
                                                 "-scoreTeam2"
                                             )}
                                           </div>
-                                      </div>`
+                                      </div>
+                                      <div id="plus-top-left" class="absolute flex justify-center items-center right-0 top-0 w-16 h-16 bg-yellow-100 rounded opacity-50 cursor-pointer" onmousedown="startTouchScore(true, '${
+                                        indexTour + "-" + index + "-scoreTeam2"
+                                      }', intervals, 'topRight');"
+                                           onmouseup="stopTouchScore(intervals, 'topRight');" onmouseleave="stopTouchScore(intervals, 'topRight');">
+                                              +
+                                          </div>
+                                          <div id="plus-top-left" class="absolute flex justify-center items-center right-0 bottom-0 w-16 h-16 bg-yellow-100 rounded opacity-50 cursor-pointer" onmousedown="startTouchScore(false, '${
+                                            indexTour +
+                                            "-" +
+                                            index +
+                                            "-scoreTeam2"
+                                          }', intervals, 'bottomRight');"
+                                           onmouseup="stopTouchScore(intervals, 'bottomRight');" onmouseleave="stopTouchScore(intervals, 'bottomRight');">
+                                              -
+                                          </div>
+                                      `
                                       : ``
                                   }
 
@@ -640,21 +684,76 @@ function renderTournament() {
       },
     });
     slider.noUiSlider.on("slide", (values, handle) => {
-      planning[obj[0]].matchs[obj[1]][obj[2]] = parseInt(values[handle]);
-      document.getElementById(
-        obj[2] == "scoreTeam1" ? "currentScoreIndex1" : "currentScoreIndex2"
-      ).innerHTML = parseInt(values[handle]);
+      changeLevelScore(parseInt(values[handle]), slider.id);
     });
     slider.noUiSlider.on("end", (values, handle) => {
+      saveData();
+      renderTournament();
+    });
+    slider.noUiSlider.on("set", (values, handle) => {
       saveData();
       renderTournament();
     });
   });
 }
 
+function teamWin(isTeam1) {
+  if (currentEditMatchIndex != -1) {
+    const match = planning[currentTour].matchs[currentEditMatchIndex];
+    let newScoreTeam;
+    const scoreAdverse = isTeam1 ? match.scoreTeam2 : match.scoreTeam1;
+    if (scoreAdverse <= 19) {
+      newScoreTeam = 21;
+    } else if (scoreAdverse >= 32) {
+      newScoreTeam = 32;
+    } else {
+      newScoreTeam = scoreAdverse + 2;
+    }
+    changeLevelScore(
+      newScoreTeam,
+      `${currentTour}-${currentEditMatchIndex}-scoreTeam${isTeam1 ? 1 : 2}`
+    );
+    saveData();
+    renderTournament();
+  }
+}
+
+function isWinner(indexTour, indexMatch, isTeam1) {
+  const match = planning[indexTour].matchs[indexMatch];
+  return isTeam1
+    ? match.scoreTeam1 > match.scoreTeam2
+    : match.scoreTeam2 > match.scoreTeam1;
+}
+
+function changeLevelScore(newScore, id) {
+  const obj = id.split("-");
+  document.getElementById(
+    obj[2] == "scoreTeam1" ? "currentScoreIndex1" : "currentScoreIndex2"
+  ).innerHTML = newScore;
+  planning[obj[0]].matchs[obj[1]][obj[2]] = newScore;
+}
+
+function startTouchScore(increment, id, inter, key) {
+  touchScore(increment, id); // Appel immédiat
+  inter[key] = setInterval(() => {
+    touchScore(increment, id);
+  }, 100);
+}
+
+function stopTouchScore(inter, key) {
+  clearInterval(inter[key]);
+}
+
 function touchScore(isPlus, idSlider) {
   const slider = document.getElementById(idSlider);
-  slider.noUiSlider;
+  var newScore = parseInt(slider.noUiSlider.get()) + (isPlus ? 1 : -1);
+  if (
+    newScore < slider.noUiSlider.options.range.min ||
+    newScore > slider.noUiSlider.options.range.max
+  )
+    return;
+  changeLevelScore(newScore, idSlider);
+  slider.noUiSlider.set(newScore);
 }
 
 function getNombreMatchRestant() {
@@ -1117,24 +1216,26 @@ function renderHandicapTournament() {
     "handicap-tournament-panel"
   );
   handicapTournament.innerHTML = `
-    <label class="flex w-full gap-4 p-4 m-4">
+    <label class="flex w-full gap-4 p-4">
       <input type="checkbox" onchange="(event) => settings.isScoreNegatif = event.currentTarget.checked; saveData(); renderTournament();" ${
         settings.isScoreNegatif ? "checked" : ""
       } />
       <span class="">Score négatif</span>
     </label>
-    <h3>Point bonus</h3>
+    <h3 class="pl-4">Point bonus</h3>
+    <div class="pl-4">
     ${Object.entries(levelValue)
       .map(
         ([key, level]) =>
           `<label class="flex justify-between items-center">
-            <span class="w-4">${key}</span>
+            <span class="w-6">${key}</span>
             <div id="slider-level-${key}" class="slider-level flex-auto mx-6 my-2"> </div>
             <span id="slider-level-label-${key}" class="w-8">${level}</span>
           </label>
         `
       )
       .join("")}
+    </div>
   `;
 
   document.body.querySelectorAll(".slider-level").forEach((slider) => {
@@ -1192,7 +1293,7 @@ function renderStats() {
   ${
     coequipierContrainte == ""
       ? `<span class="p-2">✅ Aucun coéquipier identique</span>`
-      : `<button class="accordion flex justify-between items-center" onclick="this.classList.toggle('open')">
+      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
           <span>❌ ${nbCoequipierContrainte} coéquipiers répétés</span>
           <span>▼</span>
         </button>
@@ -1207,7 +1308,7 @@ function renderStats() {
   ${
     adversaireContrainte == ""
       ? `<span class="p-2">✅ Aucun adversaire identique</span>`
-      : `<button class="accordion flex justify-between items-center" onclick="this.classList.toggle('open')">
+      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
           <span>⚠ ${nbAdversaireContrainte} adversaires répétés</span>
           <span>▼</span>
         </button>
@@ -1221,7 +1322,7 @@ function renderStats() {
   ${
     waitList.length == 0
       ? `<span class="p-2">✅ Aucun joueur en attente</span>`
-      : `<button class="accordion  flex justify-between items-center" onclick="this.classList.toggle('open')">
+      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
         <span>⚠ ${waitList.length} joueurs en attente </span>
         <span>▼</span>
         </button> 
@@ -1257,7 +1358,7 @@ function renderStats() {
   ${
     sexeIssues.length == 0
       ? `<span class="p-2">✅ Aucun problème de mixité</span>`
-      : `<button class="accordion  flex justify-between items-center" onclick="this.classList.toggle('open')">
+      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
           <span>⚠ ${sexeIssues.length} problèmes de mixité</span>
           <span>▼</span>
         </button> 
@@ -1283,7 +1384,7 @@ function renderStats() {
   ${
     niveauIssues.length == 0
       ? `<span class="p-2">✅ Aucun problème d'écart de point</span>`
-      : `<button class="accordion  flex justify-between items-center" onclick="this.classList.toggle('open')">
+      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
       <span>⚠ ${niveauIssues.length} problèmes d'écart de point</span>
         <span>▼</span>
         </button> 
