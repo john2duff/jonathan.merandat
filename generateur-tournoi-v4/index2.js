@@ -39,8 +39,15 @@ const defaultConfig = {
   terrains: 7,
   tours: 8,
   ecartMax: 10,
-  priorities: { equipier: 1, adversaire: 1, attente: 2, sexe: 2, niveau: 1 },
+  priorities: {
+    equipier: 100,
+    attente: 50,
+    adversaire: 20,
+    sexe: 2,
+    niveau: 1,
+  },
   isScoreNegatif: false,
+  attribPoint: { victoire: 5, "petite victoire": 2, défaite: 0 },
 };
 let tournoi = JSON.parse(localStorage.getItem("gen-tournoi") || "{}");
 let players = tournoi.players || [];
@@ -89,6 +96,8 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     showSection("tournament");
   } else if (currentTour == null) {
+    renderTournament();
+    renderResults();
     renderPanelResults();
     showSection("results");
   } else {
@@ -190,7 +199,7 @@ function renderPreparationSection() {
           </div>
       </div>
       
-      ${"" /*renderContraintes("preparation", false)*/}
+      ${renderContraintes("preparation", false)}
     </div>
 
     <div class="sous-header justify-between items-center">
@@ -373,6 +382,27 @@ function renderPreparationSection() {
       renderPreparationSection();
     });
   }
+
+  document.body.querySelectorAll(".slider-contrainte").forEach((slider) => {
+    const obj = slider.id.split("-");
+    noUiSlider.create(slider, {
+      start: settings.priorities[obj[2]],
+      connect: [true, false],
+      step: 1,
+      range: {
+        min: 0,
+        max: 100,
+      },
+    });
+    slider.noUiSlider.on("slide", (values, handle) => {
+      settings.priorities[obj[2]] = parseInt(values[handle]);
+      document.getElementById(`slider-contrainte-label-${obj[2]}`).innerHTML =
+        parseInt(values[handle]);
+    });
+    slider.noUiSlider.on("end", (values, handle) => {
+      saveData();
+    });
+  });
 }
 
 function requestDeletePlayer(event, i) {
@@ -482,13 +512,16 @@ function renderTournament() {
                               
                                 <span class="flex justify-center items-center text-2xl gap-4 w-full">
                                   ${
-                                    currentEditMatchIndex != -1
+                                    currentEditMatchIndex != -1 &&
+                                    currentEditMatchIndex == index
                                       ? `<button onclick="teamWin(true);" class="${
                                           team1IsWinner ? "" : "opacity-50"
                                         }">🏆</button>`
+                                      : team1IsWinner
+                                      ? `<button class="absolute top-0 left-5">🏆</button>`
                                       : ``
                                   }
-                                  <span ${
+                                  <span class="w-8 text-right" ${
                                     currentEditMatchIndex == index
                                       ? 'id="currentScoreIndex1"'
                                       : ""
@@ -498,16 +531,19 @@ function renderTournament() {
                                       ? `<button class="text-xl" onclick="currentEditMatchIndex=-1;renderTournament();"> ✔️ </button>`
                                       : `<button class="text-xl" onclick="currentEditMatchIndex=${index};renderTournament();"> ✏️ </button>`
                                   }
-                                  <span ${
+                                  <span class="w-8 text-left" ${
                                     currentEditMatchIndex == index
                                       ? 'id="currentScoreIndex2"'
                                       : ""
                                   }>${match.scoreTeam2}</span>
                                   ${
-                                    currentEditMatchIndex != -1
+                                    currentEditMatchIndex != -1 &&
+                                    currentEditMatchIndex == index
                                       ? `<button onclick="teamWin(false);" class="${
                                           team2IsWinner ? "" : "opacity-50"
                                         }">🏆</button>`
+                                      : team2IsWinner
+                                      ? `<button class="absolute top-0 right-5">🏆</button>`
                                       : ``
                                   }
                                 </span>
@@ -537,7 +573,15 @@ function renderTournament() {
                                             index +
                                             "-scoreTeam1"
                                           }', intervals, 'topLeft');"
-                                          onmouseup="stopTouchScore(intervals, 'topLeft');" onmouseleave="stopTouchScore(intervals, 'topLeft');">
+                                          onmouseup="stopTouchScore(intervals, 'topLeft');" 
+                                          onmouseleave="stopTouchScore(intervals, 'topLeft');"
+                                          ontouchstart="startTouchScore(true, '${
+                                            indexTour +
+                                            "-" +
+                                            index +
+                                            "-scoreTeam1"
+                                          }', intervals, 'topLeft');" 
+                                          ontouchend="stopTouchScore(intervals, 'topLeft');">
                                               +
                                           </div>
                                           <div id="plus-bottom-left" class="absolute flex justify-center items-center left-0 bottom-0 w-16 h-16 bg-yellow-100 rounded opacity-50 cursor-pointer" onmousedown="startTouchScore(false, '${
@@ -546,7 +590,15 @@ function renderTournament() {
                                             index +
                                             "-scoreTeam1"
                                           }', intervals, 'bottomLeft');"
-                                           onmouseup="stopTouchScore(intervals, 'bottomLeft');" onmouseleave="stopTouchScore(intervals, 'bottomLeft');">
+                                           onmouseup="stopTouchScore(intervals, 'bottomLeft');" 
+                                           onmouseleave="stopTouchScore(intervals, 'bottomLeft');"
+                                            ontouchstart="startTouchScore(false, '${
+                                              indexTour +
+                                              "-" +
+                                              index +
+                                              "-scoreTeam1"
+                                            }', intervals, 'bottomLeft');" 
+                                          ontouchend="stopTouchScore(intervals, 'bottomLeft');">
                                               -
                                           </div>
                                         `
@@ -572,7 +624,15 @@ function renderTournament() {
                                       <div id="plus-top-left" class="absolute flex justify-center items-center right-0 top-0 w-16 h-16 bg-yellow-100 rounded opacity-50 cursor-pointer" onmousedown="startTouchScore(true, '${
                                         indexTour + "-" + index + "-scoreTeam2"
                                       }', intervals, 'topRight');"
-                                           onmouseup="stopTouchScore(intervals, 'topRight');" onmouseleave="stopTouchScore(intervals, 'topRight');">
+                                           onmouseup="stopTouchScore(intervals, 'topRight');" 
+                                           onmouseleave="stopTouchScore(intervals, 'topRight');"
+                                           ontouchstart="startTouchScore(true, '${
+                                             indexTour +
+                                             "-" +
+                                             index +
+                                             "-scoreTeam2"
+                                           }', intervals, 'topRight');" 
+                                          ontouchend="stopTouchScore(intervals, 'topRight');">
                                               +
                                           </div>
                                           <div id="plus-top-left" class="absolute flex justify-center items-center right-0 bottom-0 w-16 h-16 bg-yellow-100 rounded opacity-50 cursor-pointer" onmousedown="startTouchScore(false, '${
@@ -581,7 +641,15 @@ function renderTournament() {
                                             index +
                                             "-scoreTeam2"
                                           }', intervals, 'bottomRight');"
-                                           onmouseup="stopTouchScore(intervals, 'bottomRight');" onmouseleave="stopTouchScore(intervals, 'bottomRight');">
+                                           onmouseup="stopTouchScore(intervals, 'bottomRight');" 
+                                           onmouseleave="stopTouchScore(intervals, 'bottomRight');"
+                                           ontouchstart="startTouchScore(false, '${
+                                             indexTour +
+                                             "-" +
+                                             index +
+                                             "-scoreTeam2"
+                                           }', intervals, 'bottomRight');" 
+                                          ontouchend="stopTouchScore(intervals, 'bottomRight');">
                                               -
                                           </div>
                                       `
@@ -600,10 +668,20 @@ function renderTournament() {
                               </div>`
                               : `
                               <div class="flex flex-col items-center border p-2 rounded w-full">
-                                  <span class="text-2xl gap-4 h-full flex justify-content items-center">
-                                    <span>${match.initialScoreTeam1}</span>
-                                    <span>-</span>
-                                    <span >${match.initialScoreTeam2}</span>
+                                  <span class="text-2xl gap-2 h-full flex justify-content items-center">
+                                    <span class="w-8 text-right">${
+                                      currentTour == -1
+                                        ? match.initialScoreTeam1
+                                        : match.scoreTeam1
+                                    }</span>
+                                    <div class="separator-vertical ${
+                                      currentTour === indexTour ? "mx-1" : ""
+                                    }"></div>
+                                    <span class="w-8 text-left">${
+                                      currentTour == -1
+                                        ? match.initialScoreTeam2
+                                        : match.scoreTeam2
+                                    }</span>
                                   </span>
                                   <div class="flex justify-between items-center w-full">
                                     <div class="flex flex-col flex-1 overflow-hidden ">
@@ -850,20 +928,78 @@ function getTpsTotal() {
 
 function renderResults() {
   const el = document.getElementById("results");
+  const scores = calculerScores();
+
+  const joueurs = players.map((p) => ({
+    nom: p.name,
+    id: p.id,
+    points: scores[p.id]?.points || 0,
+    scoreTotal: scores[p.id]?.scoreTotal || 0,
+  }));
+
+  joueurs.sort((a, b) => b.points - a.points || b.scoreTotal - a.scoreTotal);
+
   el.innerHTML = `
     <div class="sous-header flex justify-between items-center w-full">
-      <button onclick="togglePanel(true);showSection('tournament');"> ⭠ Retour<div> </button>
+      <button onclick="togglePanel(true);showSection('tournament');">⭠ Retour</button>
       <span>Tournoi terminé - durée : ${getTpsTotal()}</span>
       <button onclick="togglePanel()">⚙️ Paramètres</button>
     </div>
-    <div>
-    <h1>Résultats</h1>
-        ${Object.entries(scores).map((score) => {
-          return `${score}`;
-        })}
+
+    <div class="w-full flex flex-col justify-center items-center">
+      <h1 class="text-xl mt-4">Résultats</h1>
+      <ol class="mt-4">
+        ${joueurs
+          .map(
+            (j, i) => `
+          <li class="mb-2">
+            <strong>${i + 1}.</strong> ${j.nom} — 
+            ${j.points} pts 
+            <span class="text-gray-500 text-sm">(score : ${j.scoreTotal})</span>
+          </li>
+        `
+          )
+          .join("")}
+      </ol>
     </div>
-  
   `;
+}
+
+function calculerScores() {
+  const scores = {};
+
+  for (const tour of planning) {
+    for (const match of tour.matchs) {
+      const s1 = match.scoreTeam1;
+      const s2 = match.scoreTeam2;
+
+      let pointsTeam1 = 0;
+      let pointsTeam2 = 0;
+
+      if (s1 > s2) {
+        pointsTeam1 =
+          settings.attribPoint[s1 - s2 <= 2 ? "petite victoire" : "victoire"];
+        pointsTeam2 = settings.attribPoint["défaite"];
+      } else if (s2 > s1) {
+        pointsTeam2 =
+          settings.attribPoint[s2 - s1 <= 2 ? "petite victoire" : "victoire"];
+        pointsTeam1 = settings.attribPoint["défaite"];
+      }
+
+      for (const p of match.team1) {
+        if (!scores[p.id]) scores[p.id] = { points: 0, scoreTotal: 0 };
+        scores[p.id].points += pointsTeam1;
+        scores[p.id].scoreTotal += s1;
+      }
+      for (const p of match.team2) {
+        if (!scores[p.id]) scores[p.id] = { points: 0, scoreTotal: 0 };
+        scores[p.id].points += pointsTeam2;
+        scores[p.id].scoreTotal += s2;
+      }
+    }
+  }
+
+  return scores;
 }
 
 function renderMenuGlobal() {
@@ -956,17 +1092,19 @@ function clotureTour() {
   saveData();
 }
 
-function renderContraintes(from, refreshTournament) {
-  const retour = `<button class="accordion" onclick="this.classList.toggle('open')"> ﹀ Gestion des contraintes</button>
-  <div class="accordion-content flex-wrap gap-4"> 
+function renderContraintes() {
+  const retour = `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
+        <span>Gestion des contraintes </span>
+        <span>▼</span>
+        </button> 
+  <div class="accordion-content flex-wrap gap-4 w-full"> 
   ${Object.entries(settings.priorities)
     .map(
       ([priority, poids]) =>
-        `<label class="flex flex-col" for="${from}_slider_${priority}">${priority} : 
-            <div class="flex items-center">
-              <span class="w-5" id="${from}_value_slider_${priority}">${poids}</span>
-              <input id="${from}_slider_${priority}" type="range" min="1" max="10" value="${poids}" oninput="onInputSlider(event, '${from}', '${priority}', ${refreshTournament})">
-            </div>
+        `<label class="flex justify-between items-center">
+            <span class="w-12">${priority}</span>
+            <div id="slider-contrainte-${priority}" class="slider-contrainte w-64 flex-auto mx-6 my-2"> </div>
+            <span id="slider-contrainte-label-${priority}" class="w-12">${poids}</span>
           </label>`
     )
     .join("")}
@@ -1009,9 +1147,9 @@ function renderPanelTournament() {
   </h3>
   ${"" /*<div id="contrainte-panel">*/}
   ${"" /*renderContraintes("panel", true)*/}
-  </div>
+  
   <h3 class="sous-header flex justify-between">
-  📊 Contraintes <button onclick="evaluerPlanning();">↺</button>
+  📊 Contraintes <button onclick="evaluerPlanning();renderStats();">↺</button>
   </h3>
   <div id="stats-tournament-panel" class="flex flex-col"></div>
   <h3 class="sous-header flex justify-between">
@@ -1037,8 +1175,45 @@ function renderPanelResults() {
   <h3 class="sous-header flex justify-between">
   ⚙️ Attribution des points <button onclick="renderResults();">↺</button>
   </h3>
-  <div id="results-panel" class="flex flex-col"></div>
+  <div class="pl-4 mt-4">
+    ${Object.entries(settings.attribPoint)
+      .map(
+        ([key, level]) =>
+          `<label class="flex flex-col">
+            <span class="">${key}</span>
+            <div class="flex">
+              <div id="slider-point-${key}" class="slider-point flex-auto mx-6 my-2"> </div>
+              <span id="slider-point-label-${key}" class="w-8">${level}</span>
+            </div>
+          </label>
+        `
+      )
+      .join("")}
+  </div>
   `;
+
+  document.body.querySelectorAll(".slider-point").forEach((slider) => {
+    const obj = slider.id.split("-");
+    noUiSlider.create(slider, {
+      start: settings.attribPoint[obj[2]],
+      connect: [true, false],
+      step: 1,
+      range: {
+        min: 0,
+        max: 10,
+      },
+    });
+    slider.noUiSlider.on("slide", (values, handle) => {
+      settings.attribPoint[obj[2]] = parseInt(values[handle]);
+      document.getElementById(`slider-point-label-${obj[2]}`).innerHTML =
+        parseInt(values[handle]);
+    });
+    slider.noUiSlider.on("end", (values, handle) => {
+      saveData();
+      renderResults();
+    });
+  });
+
   renderResults();
 }
 
@@ -1120,16 +1295,12 @@ function evaluerPlanning() {
         });
       }
 
-      const tous = [...match.team1, ...match.team2];
-      const ecart =
-        Math.max(...tous.map((p) => getLevelScore(p))) -
-        Math.min(...tous.map((p) => getLevelScore(p)));
+      const ecart = Math.abs(match.initialScoreTeam1 - match.initialScoreTeam2);
       if (ecart > settings.ecartMax) {
         niveauIssues.push({
           tour: tourIdx + 1,
           terrain: matchIdx + 1,
           ecart,
-          joueurs: tous.map((p) => p.name).join(", "),
         });
       }
     });
@@ -1142,8 +1313,7 @@ function evaluerPlanning() {
     });
   });
 
-  let score = 1000;
-  let comptIssue = 0;
+  let score = 0;
 
   // Adversaires rencontrés plusieurs fois
   let repeatOpponentCount = 0;
@@ -1153,32 +1323,26 @@ function evaluerPlanning() {
     );
   }
   repeatOpponentCount /= 2;
-  if (repeatOpponentCount > 0) comptIssue++;
-  score -= repeatOpponentCount * settings.priorities.adversaire;
+  score += repeatOpponentCount * settings.priorities.adversaire;
 
   // Coéquipiers répétés
   let repeatTeammateCount = 0;
   for (const key in teammateMap) {
     repeatTeammateCount += Object.entries(teammateMap[key]).length;
   }
-  if (repeatTeammateCount > 0) comptIssue++;
-  score -= repeatTeammateCount * settings.priorities.equipier;
+  score += repeatTeammateCount * settings.priorities.equipier;
 
   // Nombre total d'attentes
   const totalWaits = Object.values(waitCount).reduce((a, b) => a + b.length, 0);
-  if (totalWaits > 0) comptIssue++;
-  score -= totalWaits * settings.priorities.attente;
+  score += totalWaits * settings.priorities.attente;
 
   // Problèmes d'équilibre des sexes
-  if (sexeIssues.length > 0) comptIssue++;
-  score -= sexeIssues.length * settings.priorities.sexe;
+  score += sexeIssues.length * settings.priorities.sexe;
 
   // Problèmes d'écart de niveau
-  if (niveauIssues.length > 0) comptIssue++;
-  score -= niveauIssues.length * settings.priorities.niveau;
+  score += niveauIssues.length * settings.priorities.niveau;
 
-  scoreStat = (comptIssue / 5) * 100;
-  return Math.max(0, score); // Pour éviter un score négatif
+  return score;
 }
 
 function renderAccordions(map, label) {
@@ -1217,7 +1381,7 @@ function renderHandicapTournament() {
   );
   handicapTournament.innerHTML = `
     <label class="flex w-full gap-4 p-4">
-      <input type="checkbox" onchange="(event) => settings.isScoreNegatif = event.currentTarget.checked; saveData(); renderTournament();" ${
+      <input type="checkbox" onchange="onChangeScoreNegatif(event);" ${
         settings.isScoreNegatif ? "checked" : ""
       } />
       <span class="">Score négatif</span>
@@ -1300,9 +1464,26 @@ function renderHandicapTournament() {
     });
     sliderEcartMax.noUiSlider.on("end", (values, handle) => {
       saveData();
+      evaluerPlanning();
       renderStats();
     });
   }
+}
+
+function onChangeScoreNegatif(event) {
+  settings.isScoreNegatif = event.currentTarget.checked;
+  planning.forEach((tour) => {
+    tour.matchs.forEach((match) => {
+      const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
+        match.team1,
+        match.team2
+      );
+      match.initialScoreTeam1 = initialScoreTeam1;
+      match.initialScoreTeam2 = initialScoreTeam2;
+    });
+  });
+  saveData();
+  renderTournament();
 }
 
 function renderStats() {
@@ -1383,7 +1564,7 @@ function renderStats() {
                     }</span>
                   </div></button>
                 <div class="accordion-content pl-4">
-                  <div class="flex pl-4 gap-1">
+                  <div class="flex flex-wrap pl-4 gap-1">
                     ${tours
                       .map(
                         (t) =>
@@ -1432,12 +1613,12 @@ function renderStats() {
       <span>⚠ ${niveauIssues.length} problèmes d'écart de point</span>
         <span>▼</span>
         </button> 
-    <div class="accordion-content">
+    <div class="accordion-content pl-4">
       <div class="flex flex-col w-full">
       ${niveauIssues
         .map((item) => {
           return `<div>
-          Tour ${item.tour} - Terrain ${item.terrain} : Ecart ${item.ecart} - ${item.joueurs}
+          <span class="flex justify-between w-full p-2 pl-4 "> Tour ${item.tour} - Terrain ${item.terrain} : Ecart ${item.ecart} </span>
         </div>
         `;
         })
@@ -1472,13 +1653,15 @@ function attentePenalty(joueurs, joueursAttente) {
   return penalty;
 }
 
-function sameTeamCount(p1, p2, planning) {
+function sameTeamCount(p1, p2, currentPlanning) {
   let count = 0;
-  for (const tour of planning) {
+  for (const tour of currentPlanning) {
     for (const match of tour.matchs) {
+      const team1Ids = match.team1.map((p) => p.id);
+      const team2Ids = match.team2.map((p) => p.id);
       if (
-        (match.team1.includes(p1) && match.team1.includes(p2)) ||
-        (match.team2.includes(p1) && match.team2.includes(p2))
+        (team1Ids.includes(p1.id) && team1Ids.includes(p2.id)) ||
+        (team2Ids.includes(p1.id) && team2Ids.includes(p2.id))
       ) {
         count++;
       }
@@ -1487,13 +1670,15 @@ function sameTeamCount(p1, p2, planning) {
   return count;
 }
 
-function sameOpponentCount(p1, p2, planning) {
+function sameOpponentCount(p1, p2, currentPlanning) {
   let count = 0;
-  for (const tour of planning) {
+  for (const tour of currentPlanning) {
     for (const match of tour.matchs) {
+      const team1Ids = match.team1.map((p) => p.id);
+      const team2Ids = match.team2.map((p) => p.id);
       if (
-        (match.team1.includes(p1) && match.team2.includes(p2)) ||
-        (match.team2.includes(p1) && match.team1.includes(p2))
+        (team1Ids.includes(p1.id) && team2Ids.includes(p2.id)) ||
+        (team2Ids.includes(p1.id) && team1Ids.includes(p2.id))
       ) {
         count++;
       }
@@ -1507,42 +1692,46 @@ function getMatchStartScore(match) {
   return joueurs.reduce((acc, p) => acc + getLevelScore(p), 0);
 }
 
-function matchScore(team1, team2, planning, joueursAttente, params) {
+function matchScore(team1, team2, currentPlanning, joueursAttente, params) {
   combinaisonsTeste++;
-  let score = 100;
+  let score = 0;
   const { equipier, adversaire, attente, sexe, niveau } = params;
 
   // Coéquipiers déjà ensemble
-  let sameCount1 = sameTeamCount(team1[0], team1[1], planning);
-  if (sameCount1 > 0) score -= sameCount1 * equipier;
-  let sameCount2 = sameTeamCount(team2[0], team2[1], planning);
-  if (sameCount2 > 0) score -= sameCount2 * equipier;
+  let sameCount1 = sameTeamCount(team1[0], team1[1], currentPlanning);
+  if (sameCount1 > 0) {
+    score += sameCount1 * equipier; //score += Math.pow(equipier, 2); // ou Math.pow(attente + 1, 1.5) //score -= sameCount1 * equipier;
+  }
+  let sameCount2 = sameTeamCount(team2[0], team2[1], currentPlanning);
+  if (sameCount2 > 0) {
+    score += sameCount2 * equipier; //score += Math.pow(equipier, 2); //score -= sameCount2 * equipier;
+  }
 
   // Adversaires déjà rencontrés
   for (const p1 of team1) {
     for (const p2 of team2) {
-      let sameOpponent1 = sameOpponentCount(p1, p2, planning);
-      if (sameOpponent1 > 0) score -= sameOpponent1 * adversaire;
+      let sameOpponent1 = sameOpponentCount(p1, p2, currentPlanning);
+      if (sameOpponent1 > 0) score += sameOpponent1 * adversaire;
     }
   }
 
   // Attente minimisée
   const tousLesJoueurs = [...team1, ...team2];
   tousLesJoueurs.forEach((p) => {
-    const attente = joueursAttente[p.id] || 0;
-    score -= Math.pow(attente, 2); // ou Math.pow(attente + 1, 1.5)
+    const nbAttente = joueursAttente[p.id] || 0;
+    score += nbAttente * attente; //score += Math.pow(nbAttente, 2); // ou Math.pow(attente + 1, 1.5)
   });
 
   // Mixité
   const mixte = (t) => t.filter((p) => p.gender === "F").length === 1;
-  if (!(mixte(team1) && mixte(team2))) score -= 1 * sexe;
+  if (!(mixte(team1) && mixte(team2))) score += 1 * sexe;
 
   // Écart de niveau max autorisé
   const tous = [...team1, ...team2];
   const ecart =
     Math.max(...tous.map((p) => getLevelScore(p))) -
     Math.min(...tous.map((p) => getLevelScore(p)));
-  if (ecart > settings.ecartMax) score -= 1 * niveau;
+  if (ecart > settings.ecartMax) score += 1 * niveau;
 
   return score;
 }
@@ -1559,8 +1748,21 @@ function permutations(arr) {
   return result;
 }
 
-function compositeScore(team1, team2, planning, joueursAttente, priorities) {
-  let score = matchScore(team1, team2, planning, joueursAttente, priorities);
+function compositeScore(
+  team1,
+  team2,
+  currentPlanning,
+  joueursAttente,
+  priorities,
+  coequipiersMap
+) {
+  let score = matchScore(
+    team1,
+    team2,
+    currentPlanning,
+    joueursAttente,
+    priorities
+  );
 
   // Bonus pour joueurs ayant attendu
   const bonusAttente = [...team1, ...team2].reduce((acc, p) => {
@@ -1568,39 +1770,35 @@ function compositeScore(team1, team2, planning, joueursAttente, priorities) {
     return acc + Math.pow(attente, 3); // exponentiel
   }, 0);
 
-  return score + bonusAttente;
+  return score - bonusAttente;
 }
 
 // -- GÉNÉRATION DU PLANNING --
 async function generePlanning() {
   return new Promise(async (resolve, reject) => {
     try {
-      settings.priorities = getSettingsPriorities();
-      let planning = [];
+      let currentPlanning = [];
       let joueursAttente = {};
+      let coequipiersMap = {};
       maxTries = 3000; // ou settings.maxTries si défini
       permutationUsed = [];
-
+      let nbTries = 0;
       for (let tour = 0; tour < settings.tours; tour++) {
         const joueursUtilises = new Set();
         const tourMatches = [];
 
         for (let terrain = 0; terrain < settings.terrains; terrain++) {
           const combinaisons = [];
-          let permutationIndex = 0;
+          let playersShuffle = shuffle(players);
           // Construire liste des joueurs disponibles
-          const disponibles = players.filter((p) => !joueursUtilises.has(p.id));
-          /*.sort((a, b) => {
-              const attenteA = joueursAttente[a.id] || 0;
-              const attenteB = joueursAttente[b.id] || 0;
-              return attenteB - attenteA; // ceux qui ont attendu le plus en premier
-            })*/ if (disponibles.length < 4) break;
+          const disponibles = playersShuffle.filter(
+            (p) => !joueursUtilises.has(p.id)
+          );
+          if (disponibles.length < 4) break;
           permutationTotal = factorial(disponibles.length);
 
-          for (let t = 0; t < maxTries; t++) {
-            /*const candidats = [...disponibles];
-            shuffle(candidats);
-            const groupe = candidats.slice(0, 4);*/
+          const nbBoucle = Math.min(maxTries, permutationTotal);
+          for (let t = 0; t < nbBoucle; t++) {
             const groupe = getPermutationsJoueur(disponibles);
             if (groupe == null) break;
 
@@ -1609,48 +1807,17 @@ async function generePlanning() {
             const score = compositeScore(
               team1,
               team2,
-              planning,
+              currentPlanning,
               joueursAttente,
-              settings.priorities
+              settings.priorities,
+              coequipiersMap
             );
-
             combinaisons.push({ team1, team2, score });
+            nbTries++;
           }
 
-          /*while (
-            tourMatches.length < settings.terrains &&
-            permutationIndex < maxTries
-          ) {
-            //const permutation = getNthPermutation(disponibles, permutationIndex);
-            //const groupe = disponibles.slice(0, 4);
-            const groupe = getPermutationsJoueur(disponibles);
-            if (groupe == null) break;
-
-            const team1 = [groupe[0], groupe[1]];
-            const team2 = [groupe[2], groupe[3]];
-            const score = compositeScore(
-              team1,
-              team2,
-              planning,
-              joueursAttente,
-              settings.priorities
-            );*/
-
-          /*const score = matchScore(
-              team1,
-              team2,
-              planning,
-              joueursAttente,
-              settings.priorities
-            );*/
-          //combinaisons.push({ team1, team2, score });
-          // permutationIndex++;
-          //}
-
-          combinaisons.sort((a, b) => b.score - a.score);
+          combinaisons.sort((a, b) => a.score - b.score);
           for (const comb of combinaisons) {
-            //if (tourMatches.length >= settings.terrains) break;
-            //if (comb.joueurs.some((p) => joueursUtilises.has(p.id))) continue;
             const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
               comb.team1,
               comb.team2
@@ -1665,19 +1832,19 @@ async function generePlanning() {
             });
             comb.team1.forEach((p) => joueursUtilises.add(p.id));
             comb.team2.forEach((p) => joueursUtilises.add(p.id));
+            [...comb.team1, ...comb.team2].forEach((p, _, arr) => {
+              if (!coequipiersMap[p.id]) coequipiersMap[p.id] = new Set();
+              arr.forEach((autre) => {
+                if (autre.id !== p.id) coequipiersMap[p.id].add(autre.id);
+              });
+            });
+
             break;
             //on ne prend que le premier
           }
+
           permutationUsed = [];
         }
-
-        // Vérifie qu'aucun joueur déjà utilisé
-        /*if (groupe.every((p) => !joueursUtilises.has(p.id))) {
-          tourMatches.push({ team1, team2 });
-          groupe.forEach((p) => joueursUtilises.add(p.id));
-          permutationUsed = [];
-        }*/
-
         // Marquer les joueurs qui n'ont pas joué
         players.forEach((p) => {
           if (!joueursUtilises.has(p.id)) {
@@ -1685,10 +1852,22 @@ async function generePlanning() {
           }
         });
 
-        planning.push({ startDate: null, endDate: null, matchs: tourMatches });
-      }
+        currentPlanning.push({
+          startDate: null,
+          endDate: null,
+          matchs: tourMatches,
+        });
 
-      resolve(planning);
+        combinaisonsTeste += nbTries;
+        const container = document.getElementById("label-progress-bar");
+        container.innerHTML = `
+              <center>
+                <span>Combinaisons testées : ${combinaisonsTeste}
+              </span></center>
+            `;
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+      resolve({ currentPlanning, nbTries });
     } catch (e) {
       console.error("error generatePlanning", e);
       reject();
@@ -1699,18 +1878,22 @@ async function generePlanning() {
 function getInitialScore(team1, team2) {
   let scoreTeam1 = team1.reduce((acc, p) => acc + getLevelScore(p), 0);
   let scoreTeam2 = team2.reduce((acc, p) => acc + getLevelScore(p), 0);
+  const minScore = Math.min(scoreTeam1, scoreTeam2);
+  const maxScore = Math.max(scoreTeam1, scoreTeam2);
+  const diff = settings.isScoreNegatif
+    ? minScore - maxScore
+    : maxScore - minScore;
   if (settings.isScoreNegatif) {
-    // On prend la différence, la team avec le plus petit score devient 0
-    const diff = scoreTeam1 - scoreTeam2;
-    scoreTeam1 = diff;
-    scoreTeam2 = 0;
+    return [
+      scoreTeam1 >= scoreTeam2 ? 0 : diff,
+      scoreTeam1 >= scoreTeam2 ? diff : 0,
+    ];
   } else {
-    // Score relatif à la plus faible équipe qui devient 0
-    const minScore = Math.min(scoreTeam1, scoreTeam2);
-    scoreTeam1 = scoreTeam1 - minScore;
-    scoreTeam2 = scoreTeam2 - minScore;
+    return [
+      scoreTeam1 >= scoreTeam2 ? diff : 0,
+      scoreTeam1 >= scoreTeam2 ? 0 : diff,
+    ];
   }
-  return [scoreTeam1, scoreTeam2];
 }
 
 let bestPlanning = null;
@@ -1737,29 +1920,11 @@ let permutationInitiale = null;
 let combinaisonsTeste = null;
 
 function prepareOptimise() {
-  //totalOrders = factorial(players.length);
   contraintesUsed = [];
   contraintesPossible = generateConstraintCombinations(rangeContraintes);
   permutationInitiale = factorial(players.length);
-  //console.log(contraintesPossible.length); // total de combinaisons
-  //console.log(contraintesPossible); // tableau de toutes les combinaisons possibles
-  /*shuffledOrders = [];
-  if (totalOrders > 100) {
-    totalOrdersMessage =
-      "Combinaisons possibles : " +
-      totalOrders +
-      ". Seulement 100 au hasard seront testé";
-  }
-  var t = Math.min(totalOrders, 100);
-  for (let i = 0; i < t; i++) {
-    shuffledOrders.push(
-      getNthPermutation(players, Math.floor(Math.random() * (totalOrders + 1)))
-    );
-  }*/
-  //shuffledOrders = generateShuffledOrders(100);
-  //shuffledOrdersIndex = 0;
-  //maxTries = shuffledOrders.length;
   addProgressBar();
+  console.log(checkRepetitionCoherence(players.length, settings.tours));
 }
 
 /*function getOrder() {
@@ -1808,56 +1973,30 @@ async function optimisePlanning() {
   togglePanel();
 
   let historyBestPlanning = [];
-  bestScore = -Infinity;
-  scoreStat = -Infinity;
+  bestScore = Infinity;
   permutationTotal = factorial(players.length);
   combinaisonsTeste = 0;
-
-  for (let i = 0; i < contraintesPossible.length && !stopRequested; i++) {
-    planning = await generePlanning();
-
-    //c'est que l'on n'a plus de set de joueurs
-    if (planning === false) {
-      break;
-    }
+  planning = [];
+  bestPlanning = null;
+  stopRequested = false;
+  const tentative = 1000;
+  for (let i = 0; i < tentative && !stopRequested; i++) {
+    const obj = await generePlanning();
     const score = evaluerPlanning();
-
-    if (score > bestScore) {
+    if (score < bestScore) {
       bestScore = score;
-      bestScoreStat = scoreStat;
-      bestPlanning = planning;
+      bestPlanning = obj.currentPlanning;
       historyBestPlanning.push(`${bestScore / 10} % `);
       renderTournament();
       renderStats();
+      const container = document.getElementById("label2-progress-bar");
+      container.innerHTML = `
+              <center>
+                <span>Meilleur score : ${bestScore} </span> </br> <span class="text-sm">Il faut avoir le score le plus petit possible</span></center>
+            `;
+      await new Promise((r) => requestAnimationFrame(r));
     }
-
-    document.getElementById("progress-bar").value = i + 1;
-    const container = document.getElementById("label-progress-bar");
-    container.innerHTML = `
-      <center>
-        <span>${Math.round(
-          (i / contraintesPossible.length) * 100
-        )} %</span> </br>
-        <span>Combinaisons testées : ${combinaisonsTeste}
-      </span></center>
-    `;
-    await new Promise((r) => requestAnimationFrame(r));
-
-    /*document.getElementById(
-      "label-progress-bar"
-    ).innerHTML = `Recherche des contraintes ${i + 1} / ${
-      contraintesPossible.length
-    } </br>
-    Respect des contraintes : ${bestScore / 10} % `;*/
-    /*updateProgressBar(
-      combinaisonsTeste,
-      permutationInitiale,
-      contraintesPossible,
-      i
-    );*/
-
-    if (score === 1000) break;
-    await new Promise((r) => requestAnimationFrame(r));
+    if (score === 0) break;
   }
 
   if (bestPlanning) {
@@ -1865,8 +2004,8 @@ async function optimisePlanning() {
     saveData();
     renderPreparationSection();
     renderTournament();
+    evaluerPlanning();
     renderStats();
-    console.log(settings.priorities);
   }
   document.body.removeChild(loader);
   stopRequested = false;
@@ -1891,17 +2030,30 @@ function addProgressBar() {
   loader.style.alignItems = "center";
   loader.style.justifyContent = "center";
   loader.style.zIndex = "1000";
-  const progress = document.createElement("progress");
+  const loaderCirc = document.createElement("div");
+  loaderCirc.className = "loader";
+  /* const progress = document.createElement("progress");
   progress.id = "progress-bar";
-  progress.max = contraintesPossible.length;
-  progress.value = 0;
+  progress.max = 1000;
+  progress.value = 0;*/
+  const title = document.createElement("div");
+  title.style.marginTop = "1em";
+  title.id = "title-progress-bar";
+  title.innerHTML = `<center><span class="flex flex-col w-80" >Génération du tournoi en cours... </br> </br><button class="btn-secondary" onclick="stopRequest()"> Arrêter la recherche </button></span> </br>
+  <span style="font-size:0.8em; font-style:italic;">La meilleure distribution sera retenue</span> </center>`;
   const label = document.createElement("div");
   label.style.marginTop = "1em";
   label.id = "label-progress-bar";
-  loader.innerHTML = `<center><span calss="flex w-80 justidy-between" >Génération du tournoi en cours... </br> </br><button class="btn-secondary" onclick="stopRequest()"> Arrêter la recherche </button></span> </br>
-  <span style="font-size:0.8em; font-style:italic;">La meilleure distribution sera retenue</span> </br></br><center>`;
-  loader.appendChild(progress);
+  label.innerHTML = ``;
+  const label2 = document.createElement("div");
+  label2.style.marginTop = "1em";
+  label2.id = "label2-progress-bar";
+  label2.innerHTML = ``;
+  loader.appendChild(loaderCirc);
+  //loader.appendChild(progress);
+  loader.appendChild(title);
   loader.appendChild(label);
+  loader.appendChild(label2);
   document.body.append(loader);
 }
 
@@ -2108,4 +2260,13 @@ function simplifierNombre(nombre) {
     }
   }
   return nombre.toLocaleString();
+}
+
+function checkRepetitionCoherence(nJoueurs, nTours) {
+  const maxCoequipiersUnics = nJoueurs - 1;
+  if (nTours > maxCoequipiersUnics) {
+    return `⚠️ Impossible sans répétition : ${nTours} > ${maxCoequipiersUnics}`;
+  } else {
+    return `✅ Possible sans répétition (en théorie)`;
+  }
 }

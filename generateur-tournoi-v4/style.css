@@ -304,3 +304,29 @@ body.withPanel .footer{
 #button-cloture:disabled{
     opacity: 0.7;
 }
+
+.loader {
+    border: 6px solid #f3f3f3;
+    /* contour clair */
+    border-top: 6px solid #3498db;
+    /* couleur animée */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    } }
+
+        .noUi-handle:after,
+        .noUi-handle:before{
+            background: #585858;
+        }
