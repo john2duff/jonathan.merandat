@@ -36,15 +36,20 @@ const levelValue = {
 };
 
 const defaultConfig = {
+  typeTournoi: "double",
+  DMForbidden: false,
+  DHForbidden: false,
+  DDForbidden: false,
+  allowSimpleIfTypeTournoiDouble: true,
+  genderDifferentForbidden: false,
   terrains: 7,
   tours: 8,
   ecartMax: 10,
   priorities: {
     equipier: 100,
-    attente: 50,
     adversaire: 20,
-    sexe: 2,
     niveau: 1,
+    sexe: 1,
   },
   isScoreNegatif: false,
   attribPoint: { victoire: 5, "petite victoire": 2, défaite: 0 },
@@ -54,14 +59,19 @@ let players = tournoi.players || [];
 let settings = tournoi.settings || defaultConfig;
 let scores = tournoi.scores || {};
 let planning = tournoi.planning || [];
+let currentNbAdversaireSimpleRepetee = tournoi.currentNbAdversaireSimpleRepetee || 0;
+let currentNbAdversaireDoubleRepetee = tournoi.currentNbAdversaireDoubleRepetee || 0;
+let currentNbCoequipierRepetee = tournoi.currentNbCoequipierRepetee || 0;
+let currentNbEgaliteSexeNonRespecte = tournoi.currentNbEgaliteSexeNonRespecte || 0;
+let currentNbEcartMaxNonRespecte = tournoi.currentNbEcartMaxNonRespecte || 0;
+let currentNbJoueursAttente = tournoi.currentNbJoueursAttente || 0;
 let currentTour = tournoi.currentTour === undefined ? -1 : tournoi.currentTour;
 let currentEditMatchIndex = -1;
 let currentStopTimer = null;
 
 let opponentsMap = {}; // { playerName: { opponentName: count } }
 let teammateMap = {}; // { playerName: { teammateName: count } }
-let waitCount = {};
-let sexeIssues = [];
+let waitCount = [];
 let niveauIssues = [];
 
 let intervals = {
@@ -162,6 +172,12 @@ function saveData() {
       scores,
       planning,
       currentTour,
+      currentNbJoueursAttente,
+      currentNbAdversaireSimpleRepetee,
+      currentNbAdversaireDoubleRepetee,
+      currentNbCoequipierRepetee,
+      currentNbEgaliteSexeNonRespecte,
+      currentNbEcartMaxNonRespecte
     })
   );
 }
@@ -171,8 +187,7 @@ function regenerate() {
     confirm("Un tournoi existe déjà, il va être perdu, voulez vous-continuer ?")
   ) {
     currentTour = -1;
-    prepareOptimise();
-    optimisePlanning();
+    optimisePlanningV3();
   }
 }
 
@@ -184,6 +199,13 @@ function renderPreparationSection() {
       <h2>🛠️ Préparation</h2>
     </div>
     <div class="flex flex-wrap gap-4 m-5">
+      <div class="flex flex-col flex-auto min-w-96">
+        <label for="type-tournoi-value" class="mb-2">Type de tournoi</label> 
+          <select id="type-tournoi-select" onchange="settings.typeTournoi = this.value == 'double' ? 'double' : 'simple';saveData();" class="w-full">
+            <option value="double" ${settings.typeTournoi === "double" ? "selected" : ""}>Double</option>
+            <option value="simple" ${settings.typeTournoi === "simple" ? "selected" : ""}>Simple</option>
+          </select>
+      </div>
       <div class="flex flex-col flex-auto min-w-96">
         <label for="terrains-value" class="mb-2">Nombre de terrains</label> 
           <div class="flex items-center justify-between">
@@ -241,7 +263,7 @@ function renderPreparationSection() {
       /*➜*/
       planning.length == 0
         ? `
-      <button class="btn-primary" onclick="prepareOptimise(); optimisePlanning();"> 🏆 Générer le tournoi</button>
+      <button class="btn-primary" onclick="optimisePlanningV3();"> 🏆 Générer le tournoi</button>
       `
         : `
       <div class="flex justify-between w-full p-2">
@@ -1493,144 +1515,36 @@ function onChangeScoreNegatif(event) {
 function renderStats() {
   const stats = document.getElementById("stats-tournament-panel");
 
-  const waitList = Object.entries(waitCount).sort(
-    (a, b) => b[1].length - a[1].length
-  );
-
-  const coequipierContrainte = renderAccordions(teammateMap, "");
-  const nbCoequipierContrainte = Object.entries(teammateMap).reduce(
-    (acc, [p, data]) =>
-      acc +
-      Object.entries(data).reduce(
-        (acc2, [p2, data2]) => acc2 + (data2 > 1 ? data2 - 1 : 0),
-        0
-      ),
-    0
-  );
-  const adversaireContrainte = renderAccordions(opponentsMap, "");
-  const nbAdversaireContrainte = Object.entries(opponentsMap).reduce(
-    (acc, [p, data]) =>
-      acc +
-      Object.entries(data).reduce(
-        (acc2, [p2, data2]) => acc2 + (data2 > 1 ? data2 - 1 : 0),
-        0
-      ),
-    0
-  );
-
   stats.innerHTML = `
   ${
-    coequipierContrainte == ""
+    currentNbCoequipierRepetee == 0
       ? `<span class="p-2">✅ Aucun coéquipier identique</span>`
-      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
-          <span>❌ ${nbCoequipierContrainte} coéquipiers répétés</span>
-          <span>▼</span>
-        </button>
-      </div>
-      <div class="accordion-content">
-        <div class="flex flex-col w-full pl-4">
-          ${coequipierContrainte}
-        </div>
-      </div>`
+      : `<span class="p-2">❌ ${currentNbCoequipierRepetee} coéquipiers répétés</span>`
   }
 
   ${
-    adversaireContrainte == ""
+    currentNbAdversaireDoubleRepetee + currentNbAdversaireSimpleRepetee == 0
       ? `<span class="p-2">✅ Aucun adversaire identique</span>`
-      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
-          <span>⚠ ${nbAdversaireContrainte} adversaires répétés</span>
-          <span>▼</span>
-        </button>
-       <div class="accordion-content">
-        <div class="flex flex-col w-full pl-4">
-          ${adversaireContrainte}
-        </div>
-      </div>`
+      : `<span class="p-2">⚠ ${currentNbAdversaireDoubleRepetee + currentNbAdversaireSimpleRepetee} adversaires répétés</span>`
   }
 
   ${
-    waitList.length == 0
+    currentNbJoueursAttente == 0
       ? `<span class="p-2">✅ Aucun joueur en attente</span>`
-      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
-        <span>⚠ ${waitList.length} joueurs en attente </span>
-        <span>▼</span>
-        </button> 
-        <div class="accordion-content pl-4">
-        <div class="flex flex-col w-full">
-           ${waitList
-             .map(
-               ([name, tours]) => `
-                <button class="accordion" onclick="this.classList.toggle('open')">
-                  <div class="flex pl-4">
-                    <span class="w-full">+ ${name}</span>
-                    <span class="justify-center inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset">x${
-                      tours.length
-                    }</span>
-                  </div></button>
-                <div class="accordion-content pl-4">
-                  <div class="flex flex-wrap pl-4 gap-1">
-                    ${tours
-                      .map(
-                        (t) =>
-                          `<span class="justify-center inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-yellow-600/20 ring-inset" >Tour ${t}</span>`
-                      )
-                      .join("")}
-                  </div>
-                </div>
-              `
-             )
-             .join("")}
-        </div>
-      </div>`
+      : `<span class="p-2">⚠ ${currentNbJoueursAttente} joueurs en attente </span>`
   }
 
   ${
-    sexeIssues.length == 0
+    currentNbEgaliteSexeNonRespecte == 0
       ? `<span class="p-2">✅ Aucun problème de mixité</span>`
-      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
-          <span>⚠ ${sexeIssues.length} problèmes de mixité</span>
-          <span>▼</span>
-        </button> 
-        <div class="accordion-content">
-          <div class="flex flex-col w-full">
-            ${sexeIssues
-              .map((item) => {
-                return `
-                <button class="accordion w-full flex justify-between" onclick="this.classList.toggle('open')">
-                  <span class="w-full">+ Tour ${item.tour} - Terrain ${item.terrain}</span> 
-                </button>
-                <div class="accordion-content pl-4">
-                  <div class="flex flex-col w-full">
-                    <span class="flex justify-between w-full p-2 pl-4 ">${item.team1} vs ${item.team2}</span>
-                  </div>
-                </div>`;
-              })
-              .join("")}
-          </div>
-        </div>`
+      : `<span class="p-2">⚠ ${currentNbEgaliteSexeNonRespecte} problèmes de mixité</span>`
   }
 
   ${
-    niveauIssues.length == 0
+    currentNbEcartMaxNonRespecte == 0
       ? `<span class="p-2">✅ Aucun problème d'écart de point</span>`
-      : `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
-      <span>⚠ ${niveauIssues.length} problèmes d'écart de point</span>
-        <span>▼</span>
-        </button> 
-    <div class="accordion-content pl-4">
-      <div class="flex flex-col w-full">
-      ${niveauIssues
-        .map((item) => {
-          return `<div>
-          <span class="flex justify-between w-full p-2 pl-4 "> Tour ${item.tour} - Terrain ${item.terrain} : Ecart ${item.ecart} </span>
-        </div>
-        `;
-        })
-        .join("")}
-      </div>
-    </div>`
+      : `<span class="p-2">⚠ ${currentNbEcartMaxNonRespecte} problèmes d'écart de point</span>`
   }
-
   
 `;
 }
@@ -1900,6 +1814,7 @@ function getInitialScore(team1, team2) {
   }
 }
 
+
 let bestPlanning = null;
 let bestScore = -Infinity;
 let bestScoreStat = -Infinity;
@@ -1923,13 +1838,6 @@ let permutationTotal = null;
 let permutationInitiale = null;
 let combinaisonsTeste = null;
 
-function prepareOptimise() {
-  contraintesUsed = [];
-  contraintesPossible = generateConstraintCombinations(rangeContraintes);
-  permutationInitiale = factorial(players.length);
-  addProgressBar();
-  console.log(checkRepetitionCoherence(players.length, settings.tours));
-}
 
 /*function getOrder() {
   let candidateOrder = null;
@@ -2015,6 +1923,825 @@ async function optimisePlanning() {
   stopRequested = false;
   bestPlanning = null;
 }
+
+async function optimisePlanningV3() {
+
+  addProgressBar();
+
+  showSection("tournament");
+  renderPanelTournament();
+  togglePanel();
+
+  const joueurs = players;
+  const n = players.length;
+  const t = settings.terrains;
+  const k = settings.tours;
+  const typeTournoiDouble = settings.typeTournoi === "double";
+  const DHForbidden = settings.DHForbidden || false;
+  const DDForbidden = settings.DDForbidden || false;
+  const DMForbidden = settings.DMForbidden || false;
+  const allowSimpleIfTypeTournoiDouble = settings.allowSimpleIfTypeTournoiDouble || false;
+  const ecartMax = settings.ecartMax || null;
+
+  let coequipierRepetee;
+  let adversaireSimpleRepetee;
+  let adversaireDoubleRepetee;
+  
+  // on attribue un id unique aux joueurs
+  players = players.map((p, index) => ({ ...p , id: index }));
+
+  let playersIds;
+  let equipesPossibleSimple; 
+  let equipesPossibleDouble;
+  let matchPossibleSimple; 
+  let matchPossibleDouble;
+  let matchsPossibleTour;
+  let nbRotation = null;
+  let init = true;
+  var score = Infinity;
+  let meilleurScore = Infinity;
+
+  let nbAdversaireSimpleRepetee;
+  let nbAdversaireDoubleRepetee;
+  let nbCoequipierRepetee;
+  let nbEgaliteSexeNonRespecte;
+  let nbEcartMaxNonRespecte;
+
+  const distributions = []
+  while (score > 0 && !stopRequested) {
+    score = 0;
+    nbAdversaireSimpleRepetee = 0;
+    nbAdversaireDoubleRepetee = 0;
+    nbCoequipierRepetee = 0;
+    nbEgaliteSexeNonRespecte = 0;
+    nbEcartMaxNonRespecte = 0;
+    if (nbRotation === 0) init = true;
+
+    if (init){
+      playersIds = players.map((p) => p.id);
+      //on mélange les joueurs 
+      //players = shuffle(players);
+      coequipierRepetee = {};
+      adversaireSimpleRepetee = {};
+      adversaireDoubleRepetee = {};
+      equipesPossibleSimple = getEquipesPossibleSimple(playersIds, coequipierRepetee);
+      equipesPossibleDouble = typeTournoiDouble ? getEquipesPossibleDouble(playersIds, coequipierRepetee, DHForbidden, DDForbidden, DMForbidden) : [];
+      matchPossibleSimple = getMatchsPossibleSimple(equipesPossibleSimple, adversaireSimpleRepetee);
+      matchPossibleDouble = typeTournoiDouble ? getMatchsPossibleDouble(equipesPossibleDouble, adversaireDoubleRepetee) : [];
+      matchsPossibleTour = typeTournoiDouble ? [...matchPossibleDouble] : [...matchPossibleSimple];
+      console.log("Matchs possibles : ", matchsPossibleTour);
+      nbRotation = matchsPossibleTour.length;
+
+      adversaireSimpleRepetee = {}
+      adversaireDoubleRepetee = {};
+      coequipierRepetee = {};
+
+      init = false;
+    }
+
+    const attenteJoueurs = {};
+    const currentDistribution = [];
+    const currentScore = 0;
+    for (let indexTour = 0; indexTour < k; indexTour++) {
+
+      //on met de côté les joueurs qui vont attendre
+      const joueursByAttente = [...playersIds].sort((a, b) => {
+        const attenteA = attenteJoueurs[a] || 0;
+        const attenteB = attenteJoueurs[b] || 0;
+        return attenteA - attenteB;
+      });
+      const currentJoueursAttente = [];
+      const nbJoueurAttente = n - (t * (typeTournoiDouble ? 4 : 2));
+      for(let i = 0; i < nbJoueurAttente; i++){
+        const joueurAttente = joueursByAttente[i];
+        currentJoueursAttente.push(joueurAttente);
+        attenteJoueurs[joueurAttente] = (attenteJoueurs[joueurAttente] || 0) + 1;
+      }
+
+      const matchsTour = [];
+      const joueursUtilises = new Set();
+
+      for (let indexTerrain = 0; indexTerrain < t; indexTerrain++) {
+
+        let indexMatch = 0;
+        for (indexMatch = 0 ; indexMatch < matchsPossibleTour.length; indexMatch++){
+          let curMatch = matchsPossibleTour[indexMatch];
+          let joueurValide = !joueursUtilises.has(curMatch[0]) && !joueursUtilises.has(curMatch[1]) && !currentJoueursAttente.includes(curMatch[0]) && !currentJoueursAttente.includes(curMatch[1]);
+          if (joueurValide){
+            break;
+          }
+        }
+
+        if (indexMatch >= matchsPossibleTour.length || matchsPossibleTour.length == 0) {
+          if (typeTournoiDouble && allowSimpleIfTypeTournoiDouble)  {
+            //on essaye en simple
+            matchsPossibleTour = matchPossibleSimple;
+          } else {
+            matchsPossibleTour = typeTournoiDouble ?  [...matchPossibleDouble] : [...matchPossibleSimple];
+          }
+          matchsPossibleTour.push(matchsPossibleTour.shift());
+          indexTerrain--;
+          indexMatch = 0;
+          continue;
+        }
+
+        const match = matchsPossibleTour[indexMatch];
+        matchsTour.push(match);
+        joueursUtilises.add(match[0]);
+        joueursUtilises.add(match[1]);
+        matchsPossibleTour.splice(indexMatch, 1);
+
+        //adversaire répété
+
+        if (match[0].length == 1){
+          if (adversaireSimpleRepetee[match[0][0]] && adversaireSimpleRepetee[match[0][0]][match[1][0]]) {
+            adversaireSimpleRepetee[match[0][0]][match[1][0]]++;
+            nbAdversaireSimpleRepetee++;
+          } else {
+            if (adversaireSimpleRepetee[match[0][0]] == undefined){
+              adversaireSimpleRepetee[match[0][0]] = {};
+            }
+            adversaireSimpleRepetee[match[0][0]][match[1][0]] = 1;
+          }
+          if (adversaireSimpleRepetee[match[1][0]] && adversaireSimpleRepetee[match[1][0]][match[0][0]]) {
+            adversaireSimpleRepetee[match[1][0]][match[0][0]]++;
+            nbAdversaireSimpleRepetee++;
+          } else {
+            if (adversaireSimpleRepetee[match[1][0]] == undefined){
+              adversaireSimpleRepetee[match[1][0]] = {};
+            }
+            adversaireSimpleRepetee[match[1][0]][match[0][0]] = 1;
+          }
+          
+        } else if (match[0].length > 1){
+          if (adversaireDoubleRepetee[match[0][0]] && adversaireDoubleRepetee[match[0][0]][match[1][0]]) {
+            adversaireDoubleRepetee[match[0][0]][match[1][0]]++;
+            nbAdversaireDoubleRepetee++;
+          } else {
+            if (adversaireDoubleRepetee[match[1][0]] == undefined){
+              adversaireDoubleRepetee[match[1][0]] = {};
+            }
+            adversaireDoubleRepetee[match[0][0]][match[1][0]] = 1;
+          }
+          if (adversaireDoubleRepetee[match[1][0]] && adversaireDoubleRepetee[match[1][0]][match[0][0]]) {
+            adversaireDoubleRepetee[match[1][0]][match[0][0]]++;
+            nbAdversaireDoubleRepetee++;
+          } else{
+            if (adversaireDoubleRepetee[match[1][0]] == undefined){
+              adversaireDoubleRepetee[match[1][0]] = {};
+            }
+            adversaireDoubleRepetee[match[1][0]][match[0][0]] = 1;
+          }
+          if (adversaireDoubleRepetee[match[0][1]] && adversaireDoubleRepetee[match[0][1]][match[1][1]]) {
+            adversaireDoubleRepetee[match[0][1]][match[1][1]]++;
+            nbAdversaireDoubleRepetee++;
+          } else {
+            if (adversaireDoubleRepetee[match[0][1]] == undefined){
+              adversaireDoubleRepetee[match[0][1]] = {};
+            }
+            adversaireDoubleRepetee[match[0][1]][match[1][1]] = 1;
+          }
+          if (adversaireDoubleRepetee[match[1][1]] && adversaireDoubleRepetee[match[1][1]][match[0][1]]) {
+            adversaireDoubleRepetee[match[1][1]][match[0][1]]++;
+            nbAdversaireDoubleRepetee++;
+          } else {
+            if (adversaireDoubleRepetee[match[1][1]] == undefined){
+              adversaireDoubleRepetee[match[1][1]] = {};
+            }
+            adversaireDoubleRepetee[match[1][1]][match[0][1]] = 1;
+          }
+        }
+
+        //coequipier répété
+        if (match[0].length > 1){
+          if (coequipierRepetee[match[0][0]] && coequipierRepetee[match[0][0]][match[0][1]]) {
+            coequipierRepetee[match[0][0]][match[0][1]]++;
+            nbCoequipierRepetee++;
+          } else {
+            if (coequipierRepetee[match[0][0]] == undefined){
+              coequipierRepetee[match[0][0]] = {};
+            }
+            coequipierRepetee[match[0][0]][match[0][1]] = 1;
+          }
+          if (coequipierRepetee[match[0][1]] && coequipierRepetee[match[0][1]][match[0][0]]) {
+            coequipierRepetee[match[0][1]][match[0][0]]++;
+            nbCoequipierRepetee++;
+          } else {
+            if (coequipierRepetee[match[0][1]] == undefined){
+              coequipierRepetee[match[0][1]] = {};
+            }
+            coequipierRepetee[match[0][1]][match[0][0]] = 1;
+          }
+          if (coequipierRepetee[match[1][0]] && coequipierRepetee[match[1][0]][match[1][1]]) {
+            coequipierRepetee[match[1][0]][match[1][1]]++;
+            nbCoequipierRepetee++;
+          } else {
+            if (coequipierRepetee[match[1][0]] == undefined){
+              coequipierRepetee[match[1][0]] = {};
+            }
+            coequipierRepetee[match[1][0]][match[1][1]] = 1;
+          }
+          if (coequipierRepetee[match[1][1]] && coequipierRepetee[match[1][1]][match[1][0]]) {
+            coequipierRepetee[match[1][1]][match[1][0]]++;
+            nbCoequipierRepetee++;
+          } else {
+            if (coequipierRepetee[match[1][1]] == undefined){
+              coequipierRepetee[match[1][1]] = {};
+            }
+            coequipierRepetee[match[1][1]][match[1][0]] = 1;
+          }
+        }
+
+        //égalité des sexe
+        const nbHommeEquipe1 = match[0].reduce((acc, joueur) => acc + (isHomme(joueur) ? 1 : 0), 0);
+        const nbHommeEquipe2 = match[1].reduce((acc, joueur) => acc + (isHomme(joueur) ? 1 : 0), 0);
+        if (nbHommeEquipe1 !== nbHommeEquipe2){
+            currentScore += 1 * settings.priorities.sexe;
+            nbEgaliteSexeNonRespecte++;
+        }
+
+        //écart de niveau
+        //const equipe1Level = getLevel(match[0][0]) + (typeTournoiDouble ? getLevel(match[0][1]) : 0);
+        //const equipe2Level = getLevel(match[1][0]) + (typeTournoiDouble ? getLevel(match[1][1]) : 0);
+        //const ecart = Math.abs(equipe1Level - equipe2Level);
+        const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
+                match[0],
+                match[1]
+              );
+        match["initialScoreTeam1"] = initialScoreTeam1;
+        match["initialScoreTeam2"] = initialScoreTeam2;
+        match["scoreTeam1"] = initialScoreTeam1;
+        match["scoreTeam2"] = initialScoreTeam2;
+        const ecart = Math.abs(initialScoreTeam1 - initialScoreTeam2);
+        if (ecart > ecartMax){
+          currentScore += 1 * settings.priorities.niveau;
+          nbEcartMaxNonRespecte++;
+        }
+      }
+
+      score += currentScore;
+      currentDistribution.push({ matchs: matchsTour, attente: currentJoueursAttente });
+
+    }
+    distributions.push({ distribution: currentDistribution, score: currentScore, attente: attenteJoueurs });
+    
+    //on fait une rotation, le premier match à la fin
+    matchsPossibleTour.push(matchsPossibleTour.shift());
+    nbRotation--;
+
+    if (score < meilleurScore) {
+        meilleurScore = score;
+        meilleureDistribution = distributions[distributions.length -1];
+        currentNbJoueursAttente = Object.entries(attenteJoueurs).length;
+        currentNbAdversaireSimpleRepetee = nbAdversaireSimpleRepetee;
+        currentNbAdversaireDoubleRepetee = nbAdversaireDoubleRepetee;
+        currentNbCoequipierRepetee = nbCoequipierRepetee;
+        currentNbEgaliteSexeNonRespecte = nbEgaliteSexeNonRespecte;
+        currentNbEcartMaxNonRespecte = nbEcartMaxNonRespecte;
+    }
+
+    const container = document.getElementById("label2-progress-bar");
+    container.innerHTML = `
+            <center>
+              <span>Meilleur score : ${meilleurScore} </span> </br> <span class="text-sm">Il faut avoir le score le plus petit possible</span></center>
+          `;
+    await new Promise((r) => requestAnimationFrame(r))
+
+  }
+
+
+
+  if (meilleureDistribution == null){
+    console.log("Aucune distribution trouvée");
+  }else{
+    console.log("Nombre distributions testés : " + distributions.length)
+    planning = transformerDistribution(meilleureDistribution);
+    saveData();
+    renderPreparationSection();
+    renderTournament();
+  }
+
+  document.body.removeChild(loader);
+  stopRequested = false;
+  bestPlanning = null;
+
+}
+
+function getLevel(playerId){
+  const player = players.find(p => p.id === playerId);
+  return player ? levelValue[player.level] : 0;
+}
+
+function isHomme(playerId){
+  const player = players.find(p => p.id === playerId);
+  return player && player.gender === "H";
+}
+
+function getEquipesPossibleSimple(playersIds){
+  const retour = [];
+  const n = playersIds.length;
+  for (let i = 0; i < playersIds.length; i++) {
+    retour.push([playersIds[i]]);
+  }
+  console.log("Equipes simple :", retour);
+  return retour;
+}
+
+function getMatchsPossibleSimple(equipePossibles, adversaireSimpleRepetee){
+  const retour = [];
+  let nbIterations = equipePossibles.length;
+    let compt = 1;
+    for (let i = 0; i < nbIterations; i++) {
+      for (let j = compt; j < nbIterations; j++) {
+        if (adversaireSimpleRepetee[equipePossibles[i]] && adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]]) {
+            adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] += 1 * settings.priorities.adversaire; //poids deux pour les coequipier
+        } else {
+            adversaireSimpleRepetee[equipePossibles[i]] = adversaireSimpleRepetee[equipePossibles[i]] || {};
+            adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] = 1;
+        }
+
+        retour.push([equipePossibles[i], equipePossibles[j]]);
+      }
+      compt++;
+    }
+    retour.sort((a, b) => {
+      const scoreA = adversaireSimpleRepetee[a[0]][a[1]];
+      const scoreB = adversaireSimpleRepetee[b[0]][b[1]];
+      return scoreA - scoreB;
+    });
+  console.log("Matchs simple :", retour);
+  return retour;
+}
+
+function getEquipesPossibleDouble(playersIds, coequipierRepetee, DHForbidden, DDForbidden, DMForbidden){
+  const retour = [];
+  const n = playersIds.length;
+    let nbIterations = playersIds.length;
+    let compt = 1;
+    for (let i = 0; i < nbIterations; i++) {
+      for (let j = compt; j < nbIterations; j++) {
+        const isHommeP1 = isHomme(playersIds[i]);
+        const isHommeP2 = isHomme(playersIds[j]);
+        if ((isHommeP1 && isHommeP2 && DHForbidden) ||
+            (!isHommeP1 && !isHommeP2 && DDForbidden) ||
+            ((isHommeP1 != isHommeP2) && DMForbidden)){
+              continue;
+            }
+        if (coequipierRepetee[playersIds[i]] && coequipierRepetee[playersIds[i]][playersIds[j]]) {
+            coequipierRepetee[playersIds[i]][playersIds[j]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+        } else {
+            coequipierRepetee[playersIds[i]] = coequipierRepetee[playersIds[i]] || {};
+            coequipierRepetee[playersIds[i]][playersIds[j]] = 1;
+        }
+        retour.push([playersIds[i], playersIds[j]]);
+      }
+      compt++;
+    }
+    retour.sort((a, b) => {
+      const scoreA = coequipierRepetee[a[0]][a[1]];
+      const scoreB = coequipierRepetee[b[0]][b[1]];
+      return scoreA - scoreB;
+    });
+  console.log("Equipes double :", retour);
+  return retour;
+}
+
+
+
+function getMatchsPossibleDouble(equipePossibles, adversaireSimpleRepetee){
+  const retour = [];
+  let nbIterations = equipePossibles.length;
+  let compt = 1;
+  for (let i = 0; i < nbIterations; i++) {
+    for (let j = compt; j < nbIterations; j++) {
+      //si un joueur est répété dans les deux équipes, on skip  
+      if (equipePossibles[i][0] == equipePossibles[j][0] ||
+          equipePossibles[i][0] == equipePossibles[j][1] ||
+          equipePossibles[i][1] == equipePossibles[j][0] ||
+          equipePossibles[i][1] == equipePossibles[j][1]){
+            continue;
+          } 
+      
+      //on fait ça pour i et j
+      if (adversaireSimpleRepetee[equipePossibles[i]] && adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]]) {
+          adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+      } else {
+          adversaireSimpleRepetee[equipePossibles[i]] = adversaireSimpleRepetee[equipePossibles[i]] || {};
+          adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] = 1;
+      }
+      if (adversaireSimpleRepetee[equipePossibles[j]] && adversaireSimpleRepetee[equipePossibles[j]][equipePossibles[i]]) {
+          adversaireSimpleRepetee[equipePossibles[j]][equipePossibles[i]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+      } else {
+          adversaireSimpleRepetee[equipePossibles[j]] = adversaireSimpleRepetee[equipePossibles[j]] || {};
+          adversaireSimpleRepetee[equipePossibles[j]][equipePossibles[i]] = 1;
+      }
+      retour.push([equipePossibles[i], equipePossibles[j]]);
+    }
+    compt++;
+  }
+  retour.sort((a, b) => {
+    const scoreA = adversaireSimpleRepetee[a[0]][a[1]];
+    const scoreB = adversaireSimpleRepetee[b[0]][b[1]];
+    return scoreA - scoreB;
+  });
+  console.log("Match double :", retour);
+  return retour;
+}
+
+
+let nbMatchPossible = null;
+let nbEquipePossible = null;
+let differentEquipierAndOpponentIsPossible = null;
+
+function getNbMatchPossible(){
+  const n = players.length;
+  if (settings.typeTournoi == "double"){
+    return 2 ** (2**n);
+  }else{
+    return (n * (n- 1)) / 2;
+  }
+}
+
+function getNbEquipePossible(){
+  const n = players.length;
+  if (settings.typeTournoi == "double"){
+    return 2**n;
+  }else{
+    return null;
+  }
+}
+
+function getDifferentEquipierAndOpponentIsPossible(){
+  if (settings.typeTournoi == "double"){
+      settings.tours * settings.terrains <= nbMatchPossible;
+  }else{
+    const n = players.length;
+    settings.tours * settings.terrains <= 2**(n/2)
+  }
+}
+
+function factorielle(x) {
+    if (x === 0 || x === 1) return 1;
+    return x * factorielle(x - 1);
+}
+
+async function optimisePlanningV2() {
+
+  showSection("tournament");
+  renderPanelTournament();
+  togglePanel();
+
+  const joueurs = players;
+  const n = players.length;
+  const t = settings.terrains;
+  const k = settings.tours;
+  
+  let meilleureDistribution = null;
+  let meilleurScore = Infinity;
+  const distributionsTestees = new Set();
+
+  let nbTotalDistributionsSansContrainte = 0;
+  if (settings.typeTournoi === "simple") {
+    nbTotalDistributionsSansContrainte = (((2*t)**n) * (factorielle((2*t)) / ((2**t) * factorielle(t)))) ** k;
+  }else{
+    nbTotalDistributionsSansContrainte = ((4*t)**n) * (factorielle((4*t)) / ( (factorielle(2) ** (2*t)) * factorielle(t)));
+  }
+
+  for (let i = 0; i < nbTotalDistributionsSansContrainte; i++) {
+      const { distribution, score, attente } = await genererDistributionAleatoire(joueurs, t, k);
+
+      if (stopRequested) break;
+
+      const hash = genererHashDistribution(distribution);
+
+        // Si cette distribution a déjà été testée, on passe à l'itération suivante
+        if (distributionsTestees.has(hash)) {
+            continue;
+        }
+
+      if (score < meilleurScore) {
+          meilleurScore = score;
+          meilleureDistribution = { distribution, score, attente };
+          
+          // Si le score est parfait (0), on s'arrête
+          if (meilleurScore === 0) {
+              console.log(`Distribution parfaite trouvée à l'itération ${i + 1}`);
+              break;
+          }
+      }
+
+      const container = document.getElementById("label2-progress-bar");
+      container.innerHTML = `
+              <center>
+                <span>Meilleur score : ${meilleurScore} </span> </br> <span class="text-sm">Il faut avoir le score le plus petit possible</span></center>
+            `;
+      await new Promise((r) => requestAnimationFrame(r))
+
+  }
+
+  if (meilleureDistribution) {
+    planning = transformerDistribution(meilleureDistribution.distribution);
+    saveData();
+    renderPreparationSection();
+    renderTournament();
+    //evaluerPlanning();
+    //renderStats();
+  }
+  document.body.removeChild(loader);
+  stopRequested = false;
+  bestPlanning = null;
+
+}
+
+function transformerDistribution(obj) {
+
+  return obj["distribution"].map(tour => {
+    const matchsTransformes = tour.matchs.map(match => {
+      //const matchId = `${match[0].map(j => j.id).sort().join('-')}-${match[1].map(j => j.id).sort().join('-')}`;
+      return {
+        team1: match[0].map(j =>  players.find(p => p.id === j)),
+        team2: match[1].map(j =>  players.find(p => p.id === j)),
+        scoreTeam1: match.scoreTeam1,
+        scoreTeam2: match.scoreTeam2,
+        initialScoreTeam1: match.initialScoreTeam1,
+        initialScoreTeam2: match.initialScoreTeam2
+      };
+    });
+    return {
+      matchs: matchsTransformes,
+    };
+  });
+}
+
+
+function genererHashDistribution(distribution) {
+    // Trier les matchs de chaque tour pour garantir une représentation unique
+    const toursTries = distribution.map(tour => {
+        const matchsTries = tour.matchs.map(match => {
+            // Trier les joueurs dans chaque équipe et chaque match
+            const equipe1Triee = [...match[0]].sort((a, b) => a.id - b.id);
+            const equipe2Triee = [...match[1]].sort((a, b) => a.id - b.id);
+            // Trier les équipes pour éviter les doublons (ex. : [A,B] vs [C,D] est différent de [C,D] vs [A,B])
+            return [equipe1Triee, equipe2Triee].sort((a, b) => a[0].id - b[0].id);
+        }).sort((a, b) => {
+            // Comparer les matchs pour les trier
+            return a[0][0].id - b[0][0].id;
+        });
+        return { tour: tour.tour, matchs: matchsTries };
+    });
+
+    // Convertir la distribution triée en une chaîne de caractères unique
+    const hash = JSON.stringify(toursTries);
+    return hash;
+}
+
+async function genererDistributionAleatoire(joueurs, t, k) {
+
+    const typeTournoi = settings.typeTournoi; // "simple" ou "double"
+    const matchsDejaJoues = new Set();
+    const distribution = [];
+    let attente = new Map(joueurs.map(joueur => [joueur.id, 0]));
+
+    for (let tour = 0; tour < k; tour++) {
+        const joueursUtilises = new Set();
+        // Retirer les joueurs en attente pour ce tour
+        const nombreJoueursActifs = typeTournoi === "simple" ? t * 2 : t * 4;
+        const { joueursActifs, joueursEnAttente, attente: nouvelleAttente } = retirerJoueursEnAttente(
+            joueurs,
+            nombreJoueursActifs
+        );
+
+        // Mettre à jour le compteur d'attente
+        attente = new Map(nouvelleAttente);
+
+        const equipes = genererEquipesPossibles(joueursActifs);
+        const matchs = genererMatchs(equipes, matchsDejaJoues, joueursUtilises);
+        distribution.push({ tour: tour + 1, matchs, joueursEnAttente });
+    }
+
+    // Évaluer la distribution
+    const score = evaluuerDistribution(distribution);
+
+    return { distribution, score, attente: Array.from(attente.entries()).sort((a, b) => a[1] - b[1]) };
+}
+
+function retirerJoueursEnAttente(joueurs, nombreJoueursActifs) {
+    const joueursActifs = [];
+    const joueursEnAttente = [];
+    const attente = new Map();
+
+    // Initialiser le compteur d'attente pour chaque joueur
+    joueurs.forEach(joueur => {
+        attente.set(joueur.id, 0);
+    });
+
+    // Trier les joueurs par ordre croissant d'attente
+    const joueursTries = [...joueurs].sort((a, b) => attente.get(a.id) - attente.get(b.id));
+
+    // Sélectionner les joueurs actifs
+    for (let i = 0; i < Math.min(nombreJoueursActifs, joueursTries.length); i++) {
+        joueursActifs.push(joueursTries[i]);
+    }
+
+    // Les joueurs restants sont en attente
+    for (let i = joueursActifs.length; i < joueursTries.length; i++) {
+        joueursEnAttente.push(joueursTries[i]);
+        attente.set(joueursTries[i].id, attente.get(joueursTries[i].id) + 1);
+    }
+
+    // Retourner les joueurs actifs, en attente, et le compteur d'attente
+    return {
+        joueursActifs,
+        joueursEnAttente,
+        attente: Array.from(attente.entries()).sort((a, b) => a[1] - b[1])
+    };
+}
+
+
+function genererEquipesPossibles(joueurs) {
+    const equipes = [];
+    const n = joueurs.length;
+
+    if (settings.typeTournoi === "simple") {
+        // Pour les matchs simples, chaque joueur est une "équipe" à lui tout seul
+        return joueurs.map(joueur => [joueur]);
+    } else {
+        // Pour les matchs doubles, générer toutes les combinaisons de 2 joueurs
+        for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+                const joueur1 = joueurs[i];
+                const joueur2 = joueurs[j];
+                equipes.push([joueur1, joueur2]);
+            }
+        }
+    }
+
+    return equipes;
+}
+
+
+function genererMatchs(equipes, matchsDejaJoues, joueursUtilises = new Set()) {
+    const matchs = [];
+    let equipesDisponibles = [...equipes];
+
+    // Mélanger les équipes pour éviter les biais
+    equipesDisponibles.sort(() => Math.random() - 0.5);
+
+    let equipesOptimal = true;
+
+    while (equipesDisponibles.length >= 2 || equipesOptimal) {
+
+        if (equipesDisponibles.length < 2 && !equipesOptimal){
+          break;
+        }
+        if (equipesDisponibles.length < 2 && equipesOptimal){
+          equipesOptimal = false;
+          console.log("On n'est pas arrivé à faire sans répétition adversaire équipier")
+          //on remet 
+          equipesDisponibles = [...equipes]
+        }
+
+        const equipe1 = equipesDisponibles.shift();
+        let equipe2 = null;
+
+        // Vérifier que les joueurs de l'équipe 1 ne sont pas déjà utilisés
+        const joueursEquipe1 = new Set(equipe1.map(j => j.id));
+        if ([...joueursEquipe1].some(id => joueursUtilises.has(id))) {
+            continue;
+        }
+
+        // Trouver une équipe 2 dont les joueurs ne sont pas déjà utilisés et ne sont pas dans l'équipe 1
+        for (let i = 0; i < equipesDisponibles.length; i++) {
+            const candidate = equipesDisponibles[i];
+            const joueursCandidate = new Set(candidate.map(j => j.id));
+
+            // Vérifier que les joueurs de l'équipe 2 ne sont pas déjà utilisés
+            if ([...joueursCandidate].some(id => joueursUtilises.has(id))) {
+                continue;
+            }
+
+            // Vérifier qu'aucun joueur de l'équipe 2 n'est dans l'équipe 1 (éviter les doublons)
+            if ([...joueursEquipe1].some(id => joueursCandidate.has(id))) {
+                continue;
+            }
+
+            if (equipesOptimal){
+              // Vérifier la contrainte de sexe si nécessaire
+              if (!settings.allowGenderDifferent) {
+                  const hommeEquipe1 = equipe1.filter(j => j.gender == 'H').length;
+                  const hommeCandidate = candidate.filter(j => j.gender == 'H').length;   
+                  if (hommeEquipe1 != hommeCandidate)  
+                    continue;
+              }
+
+              const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
+                equipe1,
+                candidate
+              );
+              // Vérifier l'écart de points
+              if (Math.abs(initialScoreTeam1 - initialScoreTeam2) > settings.ecartMax) {
+                  continue;
+              }
+            }
+            
+            // Vérifier que le match n'a pas déjà été joué
+            const cleMatch = `${[...joueursEquipe1].sort().join('-')}-${[...joueursCandidate].sort().join('-')}`;
+            
+            if (!matchsDejaJoues.has(cleMatch)) {
+                equipe2 = candidate;
+                equipesDisponibles.splice(i, 1);
+                matchsDejaJoues.add(cleMatch);
+
+                // Marquer les joueurs comme utilisés pour ce tour
+                joueursCandidate.forEach(id => joueursUtilises.add(id));
+                joueursEquipe1.forEach(id => joueursUtilises.add(id));
+
+                break;
+            }
+        }
+
+        if (equipe2) {
+            matchs.push([equipe1, equipe2]);
+        }
+    }
+
+    return matchs;
+}
+
+
+
+function evaluuerDistribution(distribution, config) {
+    let score = 0;
+    const repetitionsAdversaires = new Map();
+    const repetitionsCoequipiers = new Map();
+
+    // Compter les répétitions
+    distribution.forEach(tour => {
+        tour.matchs.forEach(([equipe1, equipe2]) => {
+            // Répétitions d'adversaires
+            equipe1.forEach(j1 => {
+                equipe2.forEach(j2 => {
+                    const cleAdversaire = `${j1.id}-${j2.id}`;
+                    repetitionsAdversaires.set(cleAdversaire, (repetitionsAdversaires.get(cleAdversaire) || 0) + 1);
+                });
+            });
+
+            // Répétitions de coéquipiers (uniquement pour les matchs doubles)
+            if (settings.typeTournoi === "double") {
+                const cleCoequipier1 = `${equipe1[0].id}-${equipe1[1].id}`;
+                const cleCoequipier2 = `${equipe2[0].id}-${equipe2[1].id}`;
+
+                [cleCoequipier1, cleCoequipier2].forEach(cle => {
+                    repetitionsCoequipiers.set(cle, (repetitionsCoequipiers.get(cle) || 0) + 1);
+                });
+            }
+        });
+    });
+
+    // Calculer le score en fonction des répétitions
+    repetitionsAdversaires.forEach((count, cle) => {
+        if (count > 1) {
+            score += (count - 1) * settings.priorities.adversaire;
+        }
+    });
+
+    repetitionsCoequipiers.forEach((count, cle) => {
+        if (count > 1) {
+            score += (count - 1) * settings.priorities.equipier;
+        }
+    });
+
+    return score;
+}
+
+
+/*async function optimisePlanningV2(){
+  showSection("tournament");
+  renderPanelTournament();
+  togglePanel();
+
+  nbMatchPossible = getNbMatchPossible();
+  if (settings.typeTournoi == "double"){
+    nbEquipePossible = getNbEquipePossible();
+  }
+  differentEquipierAndOpponentIsPossible = getDifferentEquipierAndOpponentIsPossible();
+
+
+
+}
+
+async function generePlanningV2(){
+
+  //on initialise le compteur d'attente
+  waitCount = Object.entries(players).map(([_, p]) => [p, 0]);
+
+  const n = players.length;
+  if (n > settings.terrains * (settings.typeTournoi == "double" ? 4 : 2 )){
+    waitCount
+  }
+
+}*/
+
 
 function stopRequest() {
   stopRequested = true;
