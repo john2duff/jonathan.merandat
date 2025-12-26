@@ -252,6 +252,23 @@ body.withPanel .footer{
     background-color: var(--bg-femme);
 }
 
+.player-attente{
+    border-radius: 5px;
+    padding: 2px 6px;
+    margin: 2px;
+}
+.player-attente-H{
+    background-color: var(--bg-homme);
+}
+
+.player-attente-F {
+    background-color: var(--bg-femme);
+}
+
+.divAttente{
+    background-color: var(--bg4-color);
+}
+
 .noUi-touch-area{
     background-color: var(--bg4-color);
 }

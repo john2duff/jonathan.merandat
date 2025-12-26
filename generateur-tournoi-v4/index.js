@@ -43,13 +43,13 @@ const defaultConfig = {
   allowSimpleIfTypeTournoiDouble: true,
   genderDifferentForbidden: false,
   terrains: 7,
-  tours: 8,
+  tours: 6,
   ecartMax: 10,
   priorities: {
     equipier: 100,
-    adversaire: 20,
-    niveau: 1,
-    sexe: 1,
+    adversaire: 60,
+    niveau: 40,
+    sexe: 20,
   },
   isScoreNegatif: false,
   attribPoint: { victoire: 5, "petite victoire": 2, défaite: 0 },
@@ -199,21 +199,21 @@ function renderPreparationSection() {
       <h2>🛠️ Préparation</h2>
     </div>
     <div class="flex flex-wrap gap-4 m-5">
-      <div class="flex flex-col flex-auto min-w-96">
+      <div class="flex flex-col flex-auto min-w-48">
         <label for="type-tournoi-value" class="mb-2">Type de tournoi</label> 
           <select id="type-tournoi-select" onchange="settings.typeTournoi = this.value == 'double' ? 'double' : 'simple';saveData();" class="w-full">
             <option value="double" ${settings.typeTournoi === "double" ? "selected" : ""}>Double</option>
             <option value="simple" ${settings.typeTournoi === "simple" ? "selected" : ""}>Simple</option>
           </select>
       </div>
-      <div class="flex flex-col flex-auto min-w-96">
+      <div class="flex flex-col flex-auto min-w-48">
         <label for="terrains-value" class="mb-2">Nombre de terrains</label> 
           <div class="flex items-center justify-between">
             <div class="slider-param-terrains flex-auto mr-6"> </div>
             <span id="terrains-value" class="w-8">${settings.terrains} </span>
           </div>
       </div>
-      <div class="flex flex-col flex-auto min-w-96">
+      <div class="flex flex-col flex-auto min-w-48">
         <label for="tours-value" class="mb-2">Nombre de tours</label> 
         <div class="flex items-center justify-between">
             <div class="slider-param-tours flex-auto mr-6"> </div>
@@ -733,6 +733,24 @@ function renderTournament() {
                           }
 
                          </div>
+                      `;
+                    })
+                    .join("")}
+                </div>
+                
+            </div>
+              <div class="flex justify-center flex-wrap w-full bg-gray-10 m-2">
+                <h3>Joueurs en attente </h3>
+                <div class="flex justify-center flex-wrap gap-4 w-full">
+                  ${tour.attentes
+                    .map((player, index) => {
+                      return `
+                      <div class="block truncate player-attente player-attente-${
+                          player.gender
+                        }">
+                        <span>${player.name}</span>
+                        ${/*getLevelTournament(player)*/ ""}
+                      </div>
                       `;
                     })
                     .join("")}
@@ -2467,7 +2485,9 @@ function transformerDistribution(obj) {
         initialScoreTeam2: match.initialScoreTeam2
       };
     });
+    const attentes = tour.attente.map(id => players.find(p => p.id === id));
     return {
+      attentes: attentes,
       matchs: matchsTransformes,
     };
   });
