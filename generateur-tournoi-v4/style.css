@@ -171,6 +171,11 @@ body.withPanel .footer{
     box-shadow: 0px 8px 11px 0px gray;
 }
 
+
+.sous-sous-header{
+    top: 51px;
+
+}
 .sous-header-secondary {
     background: var(--bg4-color);
     color: var(--text4-color);
@@ -347,3 +352,7 @@ body.withPanel .footer{
         .noUi-handle:before{
             background: #585858;
         }
+
+.slider{
+    margin: 0px 20px;
+}

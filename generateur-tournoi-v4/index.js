@@ -35,6 +35,22 @@ const levelValue = {
   N1: 0,
 };
 
+const titleContrainte = {
+  equipier: "Coéquipier différents",
+  adversaire: "Adversaires différents",
+  niveau: "Ecart de point max.",
+  sexe: "Egalité des sexes",
+  isScoreNegatif: "Score négatif"
+}
+
+const descContrainte = {
+  equipier: "Eviter un maximum de jouer plusieurs fois avec le même équipier",
+  adversaire: "Eviter un maximum de jouer plusieurs fois contre le même adversaire",
+  niveau: "Eviter d'avoir des matchs avec un écart de point supérieur au maximum défini ci-dessous",
+  sexe: "Eviter d'avoir des matchs avec un nombre d'homme(s) et de dame(s) différent entre les deux équipes",
+  isScoreNegatif: "Si activer, le début du match sera par exemple de -3 / 0 au lieu de 0 / 3"
+}
+
 const defaultConfig = {
   typeTournoi: "double",
   DMForbidden: false,
@@ -59,6 +75,8 @@ let players = tournoi.players || [];
 let settings = tournoi.settings || defaultConfig;
 let scores = tournoi.scores || {};
 let planning = tournoi.planning || [];
+let scoreDistribution = tournoi.scoreDistribution || Infinity;
+let nbDistributionTeste = tournoi.nbDistributionTeste || 0;
 let currentNbAdversaireSimpleRepetee = tournoi.currentNbAdversaireSimpleRepetee || 0;
 let currentNbAdversaireDoubleRepetee = tournoi.currentNbAdversaireDoubleRepetee || 0;
 let currentNbCoequipierRepetee = tournoi.currentNbCoequipierRepetee || 0;
@@ -177,7 +195,9 @@ function saveData() {
       currentNbAdversaireDoubleRepetee,
       currentNbCoequipierRepetee,
       currentNbEgaliteSexeNonRespecte,
-      currentNbEcartMaxNonRespecte
+      currentNbEcartMaxNonRespecte, 
+      nbDistributionTeste,
+      scoreDistribution
     })
   );
 }
@@ -209,15 +229,15 @@ function renderPreparationSection() {
       <div class="flex flex-col flex-auto min-w-48">
         <label for="terrains-value" class="mb-2">Nombre de terrains</label> 
           <div class="flex items-center justify-between">
-            <div class="slider-param-terrains flex-auto mr-6"> </div>
-            <span id="terrains-value" class="w-8">${settings.terrains} </span>
+            <div class="slider slider-param-terrains flex-auto mr-6"> </div>
+            <span id="terrains-value" class="w-8 ml-2">${settings.terrains} </span>
           </div>
       </div>
       <div class="flex flex-col flex-auto min-w-48">
         <label for="tours-value" class="mb-2">Nombre de tours</label> 
         <div class="flex items-center justify-between">
-            <div class="slider-param-tours flex-auto mr-6"> </div>
-            <span id="tours-value" class="w-8">${settings.tours} </span>
+            <div class="slider slider-param-tours flex-auto mr-6"> </div>
+            <span id="tours-value" class="w-8 ml-2">${settings.tours} </span>
           </div>
       </div>
       
@@ -267,7 +287,10 @@ function renderPreparationSection() {
       `
         : `
       <div class="flex justify-between w-full p-2">
-        <button class="btn-secondary" onclick="regenerate();"> ↺ Régénérer le tournoi</button>
+        ${(settings.typeTournoi === "double" && players.length >= 4) || (settings.typeTournoi !== "double" && players.length >= 2) ?
+          `<button class="btn-secondary" onclick="regenerate();"> ↺ Régénérer le tournoi</button>`
+          : `<span>Pas assez de joueurs..</span>`
+        }
         <button class="btn-primary" onclick="showSection('tournament');renderPanelTournament();"> Tournoi ${
           currentTour == null
             ? "terminé"
@@ -366,7 +389,7 @@ function renderPreparationSection() {
       connect: [true, false],
       step: 1,
       range: {
-        min: 0,
+        min: 1,
         max: 20,
       },
     });
@@ -389,7 +412,7 @@ function renderPreparationSection() {
       connect: [true, false],
       step: 1,
       range: {
-        min: 0,
+        min: 1,
         max: 20,
       },
     });
@@ -425,6 +448,9 @@ function renderPreparationSection() {
       saveData();
     });
   });
+
+  renderHandicapTournament();
+
 }
 
 function requestDeletePlayer(event, i) {
@@ -484,7 +510,7 @@ function renderTournament() {
         </div>
         ${
           true /*currentTour == -1 || currentTour === null*/
-            ? `<button onclick="togglePanel()">⚙️ Paramètres</button>`
+            ? `<button onclick="togglePanel()">📊 Statistiques</button>`
             : ""
         }
       </div>
@@ -739,7 +765,8 @@ function renderTournament() {
                 </div>
                 
             </div>
-              <div class="flex justify-center flex-wrap w-full bg-gray-10 m-2">
+            ${tour.attentes.length > 0 ? 
+              `<div class="flex justify-center flex-wrap w-full bg-gray-10 m-2">
                 <h3>Joueurs en attente </h3>
                 <div class="flex justify-center flex-wrap gap-4 w-full">
                   ${tour.attentes
@@ -755,7 +782,8 @@ function renderTournament() {
                     })
                     .join("")}
                 </div>
-              </div>
+              </div>` : ""
+            }
             </div>
         `;
         })
@@ -916,7 +944,7 @@ function renderTeam(team, customClass, customStyle) {
 }
 
 function renderSliderScore(id) {
-  return `<div id="${id}" class="slider-score flex-auto m-4 h-24"> </div>`;
+  return `<div id="${id}" class="slider slider-score flex-auto m-4 h-24"> </div>`;
 }
 
 function getLevelTournament(p, customStyle) {
@@ -1138,20 +1166,36 @@ function clotureTour() {
 
 function renderContraintes() {
   const retour = `<button class="accordion p-2 flex justify-between items-center" onclick="this.classList.toggle('open')">
-        <span>Gestion des contraintes </span>
+        <span>⚙️ Options avancées</span>
         <span>▼</span>
         </button> 
   <div class="accordion-content flex-wrap gap-4 w-full"> 
-  ${Object.entries(settings.priorities)
-    .map(
-      ([priority, poids]) =>
-        `<label class="flex justify-between items-center">
-            <span class="w-12">${priority}</span>
-            <div id="slider-contrainte-${priority}" class="slider-contrainte w-64 flex-auto mx-6 my-2"> </div>
-            <span id="slider-contrainte-label-${priority}" class="w-12">${poids}</span>
-          </label>`
-    )
-    .join("")}
+  <div class="flex flex-col w-full ">
+    <h3 class="sous-header sous-sous-header flex justify-between mb-5">
+    Contraintes
+    </h3>
+    ${Object.entries(settings.priorities)
+      .map(
+        ([priority, poids]) =>
+          `<label class="flex justify-between items-center">
+              <span class="w-12">${priority}</span>
+              <div id="slider slider-contrainte-${priority}" class="slider-contrainte w-64 flex-auto mx-6 my-2"> </div>
+              <span id="slider-contrainte-label-${priority}" class="w-12">${poids}</span>
+            </label>`
+      )
+      .join("")}
+    </div>
+  
+  <div class="flex flex-col w-full">
+      <h3 class="sous-header sous-sous-header flex justify-between mb-5">Scores initiaux</h3>
+      <div id="score-panel" class="flex flex-col"></div>
+  </div>
+
+  <div class="flex flex-col w-full">
+      <h3 class="sous-header sous-sous-header flex justify-between mb-5"> Handicaps et avantages</h3>
+      <div id="handicap-tournament-panel" class="flex flex-col"></div>
+  </div>
+
   </div>`;
   return retour;
 }
@@ -1186,24 +1230,18 @@ function renderPanelTournament() {
   const panel = document.getElementById("panel");
   panel.innerHTML = `
   <h3 class="header flex justify-between items-center">
-  ⚙️ Paramètres
+  📊 Statistiques
   <button onclick="togglePanel(true);">✖</button>
   </h3>
   ${"" /*<div id="contrainte-panel">*/}
   ${"" /*renderContraintes("panel", true)*/}
   
-  <h3 class="sous-header flex justify-between">
-  📊 Contraintes <button onclick="evaluerPlanning();renderStats();">↺</button>
-  </h3>
+  <span>Score de distribution : ${scoreDistribution == 0 ? "0 (Parfait)" : scoreDistribution}</span> </br>
+  <span>Nombre de distribution testées : ${nbDistributionTeste}</span></br>
   <div id="stats-tournament-panel" class="flex flex-col"></div>
-  <h3 class="sous-header flex justify-between">
-  ⚙️ Handicaps et avantages
-  </h3>
-  <div id="handicap-tournament-panel" class="flex flex-col"></div>
   `;
   evaluerPlanning();
   renderStats();
-  renderHandicapTournament();
 }
 
 function renderPanelResults() {
@@ -1420,10 +1458,10 @@ function renderAccordions(map, label) {
 }
 
 function renderHandicapTournament() {
-  const handicapTournament = document.getElementById(
-    "handicap-tournament-panel"
+const scoreTournament = document.getElementById(
+    "score-panel"
   );
-  handicapTournament.innerHTML = `
+  scoreTournament.innerHTML = `
     <label class="flex w-full gap-4 p-4">
       <input type="checkbox" onchange="onChangeScoreNegatif(event);" ${
         settings.isScoreNegatif ? "checked" : ""
@@ -1437,8 +1475,12 @@ function renderHandicapTournament() {
         <div class="slider-ecart-max flex-auto mx-6 my-2"> </div>
         <span id="slider-ecart-max" class="">${settings.ecartMax}</span>
       </div>
-    </label>
+    </label>`;
 
+  const handicapTournament = document.getElementById(
+    "handicap-tournament-panel"
+  );
+  handicapTournament.innerHTML = `
     <h3 class="pl-4">Point bonus</h3>
     <div class="pl-4">
     ${Object.entries(levelValue)
@@ -1534,34 +1576,37 @@ function renderStats() {
   const stats = document.getElementById("stats-tournament-panel");
 
   stats.innerHTML = `
-  ${
-    currentNbCoequipierRepetee == 0
+  ${tournoi.typeTournoi == "double" ? 
+    (tournoi.currentNbCoequipierRepetee == 0
       ? `<span class="p-2">✅ Aucun coéquipier identique</span>`
-      : `<span class="p-2">❌ ${currentNbCoequipierRepetee} coéquipiers répétés</span>`
+      : `<span class="p-2">❌ ${tournoi.currentNbCoequipierRepetee} coéquipiers répétés</span>`)
+      : ""
   }
 
   ${
-    currentNbAdversaireDoubleRepetee + currentNbAdversaireSimpleRepetee == 0
+    tournoi.typeTournoi == "double" ? 
+    (tournoi.currentNbAdversaireDoubleRepetee + tournoi.currentNbAdversaireSimpleRepetee == 0
       ? `<span class="p-2">✅ Aucun adversaire identique</span>`
-      : `<span class="p-2">⚠ ${currentNbAdversaireDoubleRepetee + currentNbAdversaireSimpleRepetee} adversaires répétés</span>`
+      : `<span class="p-2">⚠ ${tournoi.currentNbAdversaireDoubleRepetee + tournoi.currentNbAdversaireSimpleRepetee} adversaires répétés</span>`)
+      : ""
   }
 
   ${
-    currentNbJoueursAttente == 0
+    tournoi.currentNbJoueursAttente == 0
       ? `<span class="p-2">✅ Aucun joueur en attente</span>`
-      : `<span class="p-2">⚠ ${currentNbJoueursAttente} joueurs en attente </span>`
+      : `<span class="p-2">⚠ ${tournoi.currentNbJoueursAttente} joueurs en attente </span>`
   }
 
   ${
-    currentNbEgaliteSexeNonRespecte == 0
+    tournoi.currentNbEgaliteSexeNonRespecte == 0
       ? `<span class="p-2">✅ Aucun problème de mixité</span>`
-      : `<span class="p-2">⚠ ${currentNbEgaliteSexeNonRespecte} problèmes de mixité</span>`
+      : `<span class="p-2">⚠ ${tournoi.currentNbEgaliteSexeNonRespecte} problèmes de mixité</span>`
   }
 
   ${
-    currentNbEcartMaxNonRespecte == 0
+    tournoi.currentNbEcartMaxNonRespecte == 0
       ? `<span class="p-2">✅ Aucun problème d'écart de point</span>`
-      : `<span class="p-2">⚠ ${currentNbEcartMaxNonRespecte} problèmes d'écart de point</span>`
+      : `<span class="p-2">⚠ ${tournoi.currentNbEcartMaxNonRespecte} problèmes d'écart de point</span>`
   }
   
 `;
@@ -1947,7 +1992,6 @@ async function optimisePlanningV3() {
   addProgressBar();
 
   showSection("tournament");
-  renderPanelTournament();
   togglePanel();
 
   const joueurs = players;
@@ -1968,16 +2012,15 @@ async function optimisePlanningV3() {
   // on attribue un id unique aux joueurs
   players = players.map((p, index) => ({ ...p , id: index }));
 
-  let playersIds;
   let equipesPossibleSimple; 
   let equipesPossibleDouble;
   let matchPossibleSimple; 
   let matchPossibleDouble;
   let matchsPossibleTour;
-  let nbRotation = null;
-  let init = true;
-  var score = Infinity;
+  //let nbRotation = null;
+  //let init = true;
   let meilleurScore = Infinity;
+  let meilleureDistribution = null;
 
   let nbAdversaireSimpleRepetee;
   let nbAdversaireDoubleRepetee;
@@ -1986,19 +2029,281 @@ async function optimisePlanningV3() {
   let nbEcartMaxNonRespecte;
 
   const distributions = []
-  while (score > 0 && !stopRequested) {
-    score = 0;
-    nbAdversaireSimpleRepetee = 0;
-    nbAdversaireDoubleRepetee = 0;
-    nbCoequipierRepetee = 0;
-    nbEgaliteSexeNonRespecte = 0;
-    nbEcartMaxNonRespecte = 0;
-    if (nbRotation === 0) init = true;
+  //players = shuffle(players);
+  let playersIds = players.map((p) => p.id);
+  //let comptMelange = 0;
+  const melangeJoueurs = genererPermutations(playersIds);
+  console.log("Nombre théorique de mélange de joueurs possibles : " + melangeJoueurs.length);
+  let curPlayersIds = null;
+
+  //while (score > 0 && !stopRequested) {
+  for(let iter = 0; iter < melangeJoueurs.length; iter++){
+
+    if (stopRequested) break;
+    if (meilleurScore  == 0) break;
+
+    curPlayersIds = melangeJoueurs[iter];
+
+    coequipierRepetee = {};
+    adversaireSimpleRepetee = {};
+    adversaireDoubleRepetee = {};
+    equipesPossibleSimple = getEquipesPossibleSimple(curPlayersIds, coequipierRepetee);
+    equipesPossibleDouble = typeTournoiDouble ? getEquipesPossibleDouble(curPlayersIds, coequipierRepetee, DHForbidden, DDForbidden, DMForbidden) : [];
+    matchPossibleSimple = getMatchsPossibleSimple(equipesPossibleSimple, adversaireSimpleRepetee);
+    matchPossibleDouble = typeTournoiDouble ? getMatchsPossibleDouble(equipesPossibleDouble, adversaireDoubleRepetee) : [];
+    matchsPossibleTour = typeTournoiDouble ? [...matchPossibleDouble] : [...matchPossibleSimple];
+    console.log("Matchs possibles : ", matchsPossibleTour);
+    let nbRotation = matchsPossibleTour.length - 1;
+    let curMatchsPossibleRotation = null;
+    
+    for (let iter2 = 0; iter2 < nbRotation; iter2++){
+
+      matchsPossibleTour = typeTournoiDouble ? [...matchPossibleDouble] : [...matchPossibleSimple];
+      curMatchsPossibleRotation = [...matchsPossibleTour];
+      for (let rot = 0; rot < iter2; rot++){
+        curMatchsPossibleRotation.push(curMatchsPossibleRotation.shift());
+      }
+      
+      if (stopRequested) break;
+      if (meilleurScore  == 0) break;
+
+      nbAdversaireSimpleRepetee = 0;
+      nbAdversaireDoubleRepetee = 0;
+      nbCoequipierRepetee = 0;
+      nbEgaliteSexeNonRespecte = 0;
+      nbEcartMaxNonRespecte = 0;
+
+      const attenteJoueurs = {};
+      const currentDistribution = [];
+      let currentScore = 0;
+      for (let indexTour = 0; indexTour < k; indexTour++) {
+
+        let curMatchsPossibleTour = [...curMatchsPossibleRotation];   
+
+        //on met de côté les joueurs qui vont attendre
+        const joueursByAttente = [...curPlayersIds].sort((a, b) => {
+          const attenteA = attenteJoueurs[a] || 0;
+          const attenteB = attenteJoueurs[b] || 0;
+          return attenteA - attenteB;
+        });
+        const currentJoueursAttente = [];
+        const nbJoueurAttente = n - (t * (typeTournoiDouble ? 4 : 2));
+
+        if (nbJoueurAttente > 0){
+          for(let i = 0; i < nbJoueurAttente; i++){
+            //on prend une fois au début, une fois à la fin pour les attentes
+            const joueurAttente = joueursByAttente[indexTour % 2 == 0 ? i : (typeTournoiDouble ? i + 3 : i + 1)];
+            currentJoueursAttente.push(joueurAttente);
+            attenteJoueurs[joueurAttente] = (attenteJoueurs[joueurAttente] || 0) + 1;
+          }
+        }
+
+        const matchsTour = [];
+        const joueursUtilises = new Set();
+        //let nbEssai = 0;
+        for (let indexTerrain = 0; indexTerrain < t; indexTerrain++) {
+
+          let indexMatch = 0;
+          for (indexMatch = 0 ; indexMatch < curMatchsPossibleTour.length; indexMatch++){
+            let curMatch = curMatchsPossibleTour[indexMatch];
+            //if (nbEssai > 0) break;
+            if (!joueursUtilises.has(curMatch[0]) &&
+            !joueursUtilises.has(curMatch[1]) &&
+            !currentJoueursAttente.includes(...curMatch[0]) &&
+            !currentJoueursAttente.includes(...curMatch[1])){
+              break;
+            }
+            curMatchsPossibleTour.splice(indexMatch, 1);
+            indexMatch--;
+          }
+
+          if (indexMatch >= curMatchsPossibleTour.length || curMatchsPossibleTour.length == 0) {
+            //plus assez de joueur
+            break;
+          }
+          
+          /*if (indexMatch >= matchsPossibleTour.length || matchsPossibleTour.length == 0) {
+            if( matchsPossibleTour.length == 0) {
+              nbEssai++;
+            }
+            if (typeTournoiDouble && allowSimpleIfTypeTournoiDouble)  {
+              //on essaye en simple
+              matchsPossibleTour = matchPossibleSimple;
+            } else {
+              matchsPossibleTour = typeTournoiDouble ?  [...matchPossibleDouble] : [...matchPossibleSimple];
+            }
+            matchsPossibleTour.push(matchsPossibleTour.shift());
+            indexTerrain--;
+            indexMatch = 0;
+            continue;
+          }*/
+
+          const match = curMatchsPossibleTour[indexMatch];
+          matchsTour.push(match);
+          joueursUtilises.add(match[0]);
+          joueursUtilises.add(match[1]);
+          curMatchsPossibleTour.splice(indexMatch, 1);
+
+          //adversaire répété
+          if (match[0].length == 1){
+            if (adversaireSimpleRepetee[match[0][0]] && adversaireSimpleRepetee[match[0][0]][match[1][0]]) {
+              adversaireSimpleRepetee[match[0][0]][match[1][0]]++;
+              nbAdversaireSimpleRepetee++;
+            } else {
+              if (adversaireSimpleRepetee[match[0][0]] == undefined){
+                adversaireSimpleRepetee[match[0][0]] = {};
+              }
+              adversaireSimpleRepetee[match[0][0]][match[1][0]] = 1;
+            }
+            if (adversaireSimpleRepetee[match[1][0]] && adversaireSimpleRepetee[match[1][0]][match[0][0]]) {
+              adversaireSimpleRepetee[match[1][0]][match[0][0]]++;
+              nbAdversaireSimpleRepetee++;
+            } else {
+              if (adversaireSimpleRepetee[match[1][0]] == undefined){
+                adversaireSimpleRepetee[match[1][0]] = {};
+              }
+              adversaireSimpleRepetee[match[1][0]][match[0][0]] = 1;
+            }
+            
+          } else if (match[0].length > 1){
+            if (adversaireDoubleRepetee[match[0][0]] && adversaireDoubleRepetee[match[0][0]][match[1][0]]) {
+              adversaireDoubleRepetee[match[0][0]][match[1][0]]++;
+              nbAdversaireDoubleRepetee++;
+            } else {
+              if (adversaireDoubleRepetee[match[1][0]] == undefined){
+                adversaireDoubleRepetee[match[1][0]] = {};
+              }
+              adversaireDoubleRepetee[match[0][0]][match[1][0]] = 1;
+            }
+            if (adversaireDoubleRepetee[match[1][0]] && adversaireDoubleRepetee[match[1][0]][match[0][0]]) {
+              adversaireDoubleRepetee[match[1][0]][match[0][0]]++;
+              nbAdversaireDoubleRepetee++;
+            } else{
+              if (adversaireDoubleRepetee[match[1][0]] == undefined){
+                adversaireDoubleRepetee[match[1][0]] = {};
+              }
+              adversaireDoubleRepetee[match[1][0]][match[0][0]] = 1;
+            }
+            if (adversaireDoubleRepetee[match[0][1]] && adversaireDoubleRepetee[match[0][1]][match[1][1]]) {
+              adversaireDoubleRepetee[match[0][1]][match[1][1]]++;
+              nbAdversaireDoubleRepetee++;
+            } else {
+              if (adversaireDoubleRepetee[match[0][1]] == undefined){
+                adversaireDoubleRepetee[match[0][1]] = {};
+              }
+              adversaireDoubleRepetee[match[0][1]][match[1][1]] = 1;
+            }
+            if (adversaireDoubleRepetee[match[1][1]] && adversaireDoubleRepetee[match[1][1]][match[0][1]]) {
+              adversaireDoubleRepetee[match[1][1]][match[0][1]]++;
+              nbAdversaireDoubleRepetee++;
+            } else {
+              if (adversaireDoubleRepetee[match[1][1]] == undefined){
+                adversaireDoubleRepetee[match[1][1]] = {};
+              }
+              adversaireDoubleRepetee[match[1][1]][match[0][1]] = 1;
+            }
+          }
+          //coequipier répété
+          if (match[0].length > 1){
+            if (coequipierRepetee[match[0][0]] && coequipierRepetee[match[0][0]][match[0][1]]) {
+              coequipierRepetee[match[0][0]][match[0][1]]++;
+              nbCoequipierRepetee++;
+            } else {
+              if (coequipierRepetee[match[0][0]] == undefined){
+                coequipierRepetee[match[0][0]] = {};
+              }
+              coequipierRepetee[match[0][0]][match[0][1]] = 1;
+            }
+            if (coequipierRepetee[match[0][1]] && coequipierRepetee[match[0][1]][match[0][0]]) {
+              coequipierRepetee[match[0][1]][match[0][0]]++;
+              nbCoequipierRepetee++;
+            } else {
+              if (coequipierRepetee[match[0][1]] == undefined){
+                coequipierRepetee[match[0][1]] = {};
+              }
+              coequipierRepetee[match[0][1]][match[0][0]] = 1;
+            }
+            if (coequipierRepetee[match[1][0]] && coequipierRepetee[match[1][0]][match[1][1]]) {
+              coequipierRepetee[match[1][0]][match[1][1]]++;
+              nbCoequipierRepetee++;
+            } else {
+              if (coequipierRepetee[match[1][0]] == undefined){
+                coequipierRepetee[match[1][0]] = {};
+              }
+              coequipierRepetee[match[1][0]][match[1][1]] = 1;
+            }
+            if (coequipierRepetee[match[1][1]] && coequipierRepetee[match[1][1]][match[1][0]]) {
+              coequipierRepetee[match[1][1]][match[1][0]]++;
+              nbCoequipierRepetee++;
+            } else {
+              if (coequipierRepetee[match[1][1]] == undefined){
+                coequipierRepetee[match[1][1]] = {};
+              }
+              coequipierRepetee[match[1][1]][match[1][0]] = 1;
+            }
+          }
+
+          //égalité des sexe
+          const nbHommeEquipe1 = match[0].reduce((acc, joueur) => acc + (isHomme(joueur) ? 1 : 0), 0);
+          const nbHommeEquipe2 = match[1].reduce((acc, joueur) => acc + (isHomme(joueur) ? 1 : 0), 0);
+          if (nbHommeEquipe1 !== nbHommeEquipe2){
+              currentScore += 1 * settings.priorities.sexe;
+              nbEgaliteSexeNonRespecte++;
+          }
+
+          //écart de niveau
+          const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(match[0],match[1]);
+          match["initialScoreTeam1"] = initialScoreTeam1;
+          match["initialScoreTeam2"] = initialScoreTeam2;
+          match["scoreTeam1"] = initialScoreTeam1;
+          match["scoreTeam2"] = initialScoreTeam2;
+          const ecart = Math.abs(initialScoreTeam1 - initialScoreTeam2);
+          if (ecart > ecartMax){
+            currentScore += 1 * settings.priorities.niveau;
+            nbEcartMaxNonRespecte++;
+          }
+
+        }
+
+        /*if (typeTournoiDouble && allowSimpleIfTypeTournoiDouble)  {
+          //on essaye en simple
+          matchsPossibleTour = matchPossibleSimple;
+        } else {
+          matchsPossibleTour = typeTournoiDouble ?  [...matchPossibleDouble] : [...matchPossibleSimple];
+        }
+        matchsPossibleTour.push(matchsPossibleTour.shift());*/
+
+        currentScore += (nbAdversaireSimpleRepetee + nbAdversaireDoubleRepetee) * settings.priorities.adversaire;
+        currentScore += nbCoequipierRepetee * settings.priorities.equipier;
+        
+        currentDistribution.push({ matchs: matchsTour, attente: currentJoueursAttente });
+      }
+
+      distributions.push({ distribution: currentDistribution, score: currentScore, attente: attenteJoueurs });
+      if (currentScore < meilleurScore){
+        meilleurScore = currentScore;
+        meilleureDistribution = distributions[distributions.length - 1];
+      }
+
+      const container = document.getElementById("label2-progress-bar");
+      container.innerHTML = `
+        <center>
+          <span>Meilleur score : ${meilleurScore} </span> </br> 
+          <span class="text-sm">Il faut avoir le score le plus petit possible</span>
+          <span>Nombre de distribution testée : ${distributions.length} </span>
+        </center>
+      `;
+      await new Promise((r) => requestAnimationFrame(r))
+    }
+
+    /*if (nbRotation === 0) init = true;
 
     if (init){
-      playersIds = players.map((p) => p.id);
-      //on mélange les joueurs 
-      //players = shuffle(players);
+      if (comptMelange > melangeJoueurs.length - 1){
+        break;
+      }
+      playersIds = melangeJoueurs[comptMelange];
+      comptMelange++;
       coequipierRepetee = {};
       adversaireSimpleRepetee = {};
       adversaireDoubleRepetee = {};
@@ -2015,228 +2320,31 @@ async function optimisePlanningV3() {
       coequipierRepetee = {};
 
       init = false;
-    }
+    }*/
 
-    const attenteJoueurs = {};
-    const currentDistribution = [];
-    const currentScore = 0;
-    for (let indexTour = 0; indexTour < k; indexTour++) {
-
-      //on met de côté les joueurs qui vont attendre
-      const joueursByAttente = [...playersIds].sort((a, b) => {
-        const attenteA = attenteJoueurs[a] || 0;
-        const attenteB = attenteJoueurs[b] || 0;
-        return attenteA - attenteB;
-      });
-      const currentJoueursAttente = [];
-      const nbJoueurAttente = n - (t * (typeTournoiDouble ? 4 : 2));
-      for(let i = 0; i < nbJoueurAttente; i++){
-        const joueurAttente = joueursByAttente[i];
-        currentJoueursAttente.push(joueurAttente);
-        attenteJoueurs[joueurAttente] = (attenteJoueurs[joueurAttente] || 0) + 1;
-      }
-
-      const matchsTour = [];
-      const joueursUtilises = new Set();
-
-      for (let indexTerrain = 0; indexTerrain < t; indexTerrain++) {
-
-        let indexMatch = 0;
-        for (indexMatch = 0 ; indexMatch < matchsPossibleTour.length; indexMatch++){
-          let curMatch = matchsPossibleTour[indexMatch];
-          let joueurValide = !joueursUtilises.has(curMatch[0]) && !joueursUtilises.has(curMatch[1]) && !currentJoueursAttente.includes(curMatch[0]) && !currentJoueursAttente.includes(curMatch[1]);
-          if (joueurValide){
-            break;
-          }
-        }
-
-        if (indexMatch >= matchsPossibleTour.length || matchsPossibleTour.length == 0) {
-          if (typeTournoiDouble && allowSimpleIfTypeTournoiDouble)  {
-            //on essaye en simple
-            matchsPossibleTour = matchPossibleSimple;
-          } else {
-            matchsPossibleTour = typeTournoiDouble ?  [...matchPossibleDouble] : [...matchPossibleSimple];
-          }
-          matchsPossibleTour.push(matchsPossibleTour.shift());
-          indexTerrain--;
-          indexMatch = 0;
-          continue;
-        }
-
-        const match = matchsPossibleTour[indexMatch];
-        matchsTour.push(match);
-        joueursUtilises.add(match[0]);
-        joueursUtilises.add(match[1]);
-        matchsPossibleTour.splice(indexMatch, 1);
-
-        //adversaire répété
-
-        if (match[0].length == 1){
-          if (adversaireSimpleRepetee[match[0][0]] && adversaireSimpleRepetee[match[0][0]][match[1][0]]) {
-            adversaireSimpleRepetee[match[0][0]][match[1][0]]++;
-            nbAdversaireSimpleRepetee++;
-          } else {
-            if (adversaireSimpleRepetee[match[0][0]] == undefined){
-              adversaireSimpleRepetee[match[0][0]] = {};
-            }
-            adversaireSimpleRepetee[match[0][0]][match[1][0]] = 1;
-          }
-          if (adversaireSimpleRepetee[match[1][0]] && adversaireSimpleRepetee[match[1][0]][match[0][0]]) {
-            adversaireSimpleRepetee[match[1][0]][match[0][0]]++;
-            nbAdversaireSimpleRepetee++;
-          } else {
-            if (adversaireSimpleRepetee[match[1][0]] == undefined){
-              adversaireSimpleRepetee[match[1][0]] = {};
-            }
-            adversaireSimpleRepetee[match[1][0]][match[0][0]] = 1;
-          }
-          
-        } else if (match[0].length > 1){
-          if (adversaireDoubleRepetee[match[0][0]] && adversaireDoubleRepetee[match[0][0]][match[1][0]]) {
-            adversaireDoubleRepetee[match[0][0]][match[1][0]]++;
-            nbAdversaireDoubleRepetee++;
-          } else {
-            if (adversaireDoubleRepetee[match[1][0]] == undefined){
-              adversaireDoubleRepetee[match[1][0]] = {};
-            }
-            adversaireDoubleRepetee[match[0][0]][match[1][0]] = 1;
-          }
-          if (adversaireDoubleRepetee[match[1][0]] && adversaireDoubleRepetee[match[1][0]][match[0][0]]) {
-            adversaireDoubleRepetee[match[1][0]][match[0][0]]++;
-            nbAdversaireDoubleRepetee++;
-          } else{
-            if (adversaireDoubleRepetee[match[1][0]] == undefined){
-              adversaireDoubleRepetee[match[1][0]] = {};
-            }
-            adversaireDoubleRepetee[match[1][0]][match[0][0]] = 1;
-          }
-          if (adversaireDoubleRepetee[match[0][1]] && adversaireDoubleRepetee[match[0][1]][match[1][1]]) {
-            adversaireDoubleRepetee[match[0][1]][match[1][1]]++;
-            nbAdversaireDoubleRepetee++;
-          } else {
-            if (adversaireDoubleRepetee[match[0][1]] == undefined){
-              adversaireDoubleRepetee[match[0][1]] = {};
-            }
-            adversaireDoubleRepetee[match[0][1]][match[1][1]] = 1;
-          }
-          if (adversaireDoubleRepetee[match[1][1]] && adversaireDoubleRepetee[match[1][1]][match[0][1]]) {
-            adversaireDoubleRepetee[match[1][1]][match[0][1]]++;
-            nbAdversaireDoubleRepetee++;
-          } else {
-            if (adversaireDoubleRepetee[match[1][1]] == undefined){
-              adversaireDoubleRepetee[match[1][1]] = {};
-            }
-            adversaireDoubleRepetee[match[1][1]][match[0][1]] = 1;
-          }
-        }
-
-        //coequipier répété
-        if (match[0].length > 1){
-          if (coequipierRepetee[match[0][0]] && coequipierRepetee[match[0][0]][match[0][1]]) {
-            coequipierRepetee[match[0][0]][match[0][1]]++;
-            nbCoequipierRepetee++;
-          } else {
-            if (coequipierRepetee[match[0][0]] == undefined){
-              coequipierRepetee[match[0][0]] = {};
-            }
-            coequipierRepetee[match[0][0]][match[0][1]] = 1;
-          }
-          if (coequipierRepetee[match[0][1]] && coequipierRepetee[match[0][1]][match[0][0]]) {
-            coequipierRepetee[match[0][1]][match[0][0]]++;
-            nbCoequipierRepetee++;
-          } else {
-            if (coequipierRepetee[match[0][1]] == undefined){
-              coequipierRepetee[match[0][1]] = {};
-            }
-            coequipierRepetee[match[0][1]][match[0][0]] = 1;
-          }
-          if (coequipierRepetee[match[1][0]] && coequipierRepetee[match[1][0]][match[1][1]]) {
-            coequipierRepetee[match[1][0]][match[1][1]]++;
-            nbCoequipierRepetee++;
-          } else {
-            if (coequipierRepetee[match[1][0]] == undefined){
-              coequipierRepetee[match[1][0]] = {};
-            }
-            coequipierRepetee[match[1][0]][match[1][1]] = 1;
-          }
-          if (coequipierRepetee[match[1][1]] && coequipierRepetee[match[1][1]][match[1][0]]) {
-            coequipierRepetee[match[1][1]][match[1][0]]++;
-            nbCoequipierRepetee++;
-          } else {
-            if (coequipierRepetee[match[1][1]] == undefined){
-              coequipierRepetee[match[1][1]] = {};
-            }
-            coequipierRepetee[match[1][1]][match[1][0]] = 1;
-          }
-        }
-
-        //égalité des sexe
-        const nbHommeEquipe1 = match[0].reduce((acc, joueur) => acc + (isHomme(joueur) ? 1 : 0), 0);
-        const nbHommeEquipe2 = match[1].reduce((acc, joueur) => acc + (isHomme(joueur) ? 1 : 0), 0);
-        if (nbHommeEquipe1 !== nbHommeEquipe2){
-            currentScore += 1 * settings.priorities.sexe;
-            nbEgaliteSexeNonRespecte++;
-        }
-
-        //écart de niveau
-        //const equipe1Level = getLevel(match[0][0]) + (typeTournoiDouble ? getLevel(match[0][1]) : 0);
-        //const equipe2Level = getLevel(match[1][0]) + (typeTournoiDouble ? getLevel(match[1][1]) : 0);
-        //const ecart = Math.abs(equipe1Level - equipe2Level);
-        const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
-                match[0],
-                match[1]
-              );
-        match["initialScoreTeam1"] = initialScoreTeam1;
-        match["initialScoreTeam2"] = initialScoreTeam2;
-        match["scoreTeam1"] = initialScoreTeam1;
-        match["scoreTeam2"] = initialScoreTeam2;
-        const ecart = Math.abs(initialScoreTeam1 - initialScoreTeam2);
-        if (ecart > ecartMax){
-          currentScore += 1 * settings.priorities.niveau;
-          nbEcartMaxNonRespecte++;
-        }
-      }
-
-      score += currentScore;
-      currentDistribution.push({ matchs: matchsTour, attente: currentJoueursAttente });
-
-    }
-    distributions.push({ distribution: currentDistribution, score: currentScore, attente: attenteJoueurs });
-    
+    /*if (typeTournoiDouble && allowSimpleIfTypeTournoiDouble)  {
+      //on essaye en simple
+      matchsPossibleTour = matchPossibleSimple;
+    } else {
+      matchsPossibleTour = typeTournoiDouble ?  [...matchPossibleDouble] : [...matchPossibleSimple];
+    }*/
     //on fait une rotation, le premier match à la fin
-    matchsPossibleTour.push(matchsPossibleTour.shift());
-    nbRotation--;
-
-    if (score < meilleurScore) {
-        meilleurScore = score;
-        meilleureDistribution = distributions[distributions.length -1];
-        currentNbJoueursAttente = Object.entries(attenteJoueurs).length;
-        currentNbAdversaireSimpleRepetee = nbAdversaireSimpleRepetee;
-        currentNbAdversaireDoubleRepetee = nbAdversaireDoubleRepetee;
-        currentNbCoequipierRepetee = nbCoequipierRepetee;
-        currentNbEgaliteSexeNonRespecte = nbEgaliteSexeNonRespecte;
-        currentNbEcartMaxNonRespecte = nbEcartMaxNonRespecte;
-    }
-
-    const container = document.getElementById("label2-progress-bar");
-    container.innerHTML = `
-            <center>
-              <span>Meilleur score : ${meilleurScore} </span> </br> <span class="text-sm">Il faut avoir le score le plus petit possible</span></center>
-          `;
-    await new Promise((r) => requestAnimationFrame(r))
+    //matchsPossibleTour.push(matchsPossibleTour.shift());
+    //nbRotation--;
 
   }
-
-
 
   if (meilleureDistribution == null){
     console.log("Aucune distribution trouvée");
   }else{
     console.log("Nombre distributions testés : " + distributions.length)
+    scoreDistribution = meilleurScore;
+    nbDistributionTeste = distributions.length;
     planning = transformerDistribution(meilleureDistribution);
     saveData();
     renderPreparationSection();
     renderTournament();
+    renderPanelTournament();
   }
 
   document.body.removeChild(loader);
@@ -2255,6 +2363,25 @@ function isHomme(playerId){
   return player && player.gender === "H";
 }
 
+function genererPermutations(nombres) {
+    // Fonction récursive pour générer les permutations
+    function permuter(arr, result = [], current = []) {
+        if (arr.length === 0) {
+            result.push([...current]);
+            return;
+        }
+        for (let i = 0; i < arr.length; i++) {
+            const reste = [...arr.slice(0, i), ...arr.slice(i + 1)];
+            current.push(arr[i]);
+            permuter(reste, result, current);
+            current.pop();
+        }
+        return result;
+    }
+
+    return permuter(nombres);
+}
+
 function getEquipesPossibleSimple(playersIds){
   const retour = [];
   const n = playersIds.length;
@@ -2268,25 +2395,25 @@ function getEquipesPossibleSimple(playersIds){
 function getMatchsPossibleSimple(equipePossibles, adversaireSimpleRepetee){
   const retour = [];
   let nbIterations = equipePossibles.length;
-    let compt = 1;
-    for (let i = 0; i < nbIterations; i++) {
-      for (let j = compt; j < nbIterations; j++) {
-        if (adversaireSimpleRepetee[equipePossibles[i]] && adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]]) {
-            adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] += 1 * settings.priorities.adversaire; //poids deux pour les coequipier
-        } else {
-            adversaireSimpleRepetee[equipePossibles[i]] = adversaireSimpleRepetee[equipePossibles[i]] || {};
-            adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] = 1;
-        }
-
-        retour.push([equipePossibles[i], equipePossibles[j]]);
+  let compt = 1;
+  for (let i = 0; i < nbIterations; i++) {
+    for (let j = compt; j < nbIterations; j++) {
+      if (adversaireSimpleRepetee[equipePossibles[i]] && adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]]) {
+          adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] += 1 * settings.priorities.adversaire; //poids deux pour les coequipier
+      } else {
+          adversaireSimpleRepetee[equipePossibles[i]] = adversaireSimpleRepetee[equipePossibles[i]] || {};
+          adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] = 1;
       }
-      compt++;
+
+      retour.push([equipePossibles[i], equipePossibles[j]]);
     }
-    retour.sort((a, b) => {
-      const scoreA = adversaireSimpleRepetee[a[0]][a[1]];
-      const scoreB = adversaireSimpleRepetee[b[0]][b[1]];
-      return scoreA - scoreB;
-    });
+    compt++;
+  }
+  retour.sort((a, b) => {
+    const scoreA = adversaireSimpleRepetee[a[0]][a[1]];
+    const scoreB = adversaireSimpleRepetee[b[0]][b[1]];
+    return scoreA - scoreB;
+  });
   console.log("Matchs simple :", retour);
   return retour;
 }
