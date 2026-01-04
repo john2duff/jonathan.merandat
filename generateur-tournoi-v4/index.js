@@ -221,11 +221,18 @@ function renderPreparationSection() {
     <div class="flex flex-wrap gap-4 m-5">
       <div class="flex flex-col flex-auto min-w-48">
         <label for="type-tournoi-value" class="mb-2">Type de tournoi</label> 
-          <select id="type-tournoi-select" onchange="settings.typeTournoi = this.value == 'double' ? 'double' : 'simple';saveData();" class="w-full">
+          <select id="type-tournoi-select" onchange="settings.typeTournoi = this.value == 'double' ? 'double' : 'simple';saveData(); renderPreparationSection();" class="w-full">
             <option value="double" ${settings.typeTournoi === "double" ? "selected" : ""}>Double</option>
             <option value="simple" ${settings.typeTournoi === "simple" ? "selected" : ""}>Simple</option>
           </select>
       </div>
+      ${settings.typeTournoi == "double" ? `
+        <label class="flex w-full gap-4 p-4">
+          <input type="checkbox" onchange="onChangeAllowSimpleIfTournoiDouble(event);" ${
+            settings.allowSimpleIfTypeTournoiDouble ? "checked" : ""
+          } />
+          <span class="">Autoriser les matchs simples</span>
+        </label>` : ""}
       <div class="flex flex-col flex-auto min-w-48">
         <label for="terrains-value" class="mb-2">Nombre de terrains</label> 
           <div class="flex items-center justify-between">
@@ -272,7 +279,7 @@ function renderPreparationSection() {
                 </select>
               </div>
             </div>
-            <button class="btn-primary rounded min-w-12" type="submit" id="addPlayer">Ajouter</button>
+            <button class="overflow-hidden text-ellipsis btn-primary rounded min-w-12" type="submit" id="addPlayer">Ajouter</button>
           </div>
       </form>
       <div id="playerList" class="m-5 flex flex-wrap gap-4"></div>
@@ -510,7 +517,7 @@ function renderTournament() {
         </div>
         ${
           true /*currentTour == -1 || currentTour === null*/
-            ? `<button onclick="togglePanel()">📊 Statistiques</button>`
+            ? `<button onclick="togglePanel()">📊</button>`
             : ""
         }
       </div>
@@ -1558,18 +1565,12 @@ const scoreTournament = document.getElementById(
 
 function onChangeScoreNegatif(event) {
   settings.isScoreNegatif = event.currentTarget.checked;
-  planning.forEach((tour) => {
-    tour.matchs.forEach((match) => {
-      const [initialScoreTeam1, initialScoreTeam2] = getInitialScore(
-        match.team1,
-        match.team2
-      );
-      match.initialScoreTeam1 = initialScoreTeam1;
-      match.initialScoreTeam2 = initialScoreTeam2;
-    });
-  });
   saveData();
-  renderTournament();
+}
+
+function onChangeAllowSimpleIfTournoiDouble(event) {
+  settings.allowSimpleIfTypeTournoiDouble = event.currentTarget.checked;
+  saveData();
 }
 
 function renderStats() {
@@ -1942,51 +1943,6 @@ function getPermutationsJoueur(disponibles) {
   return candidatePermutation;
 }
 
-async function optimisePlanning() {
-  showSection("tournament");
-  renderPanelTournament();
-  togglePanel();
-
-  let historyBestPlanning = [];
-  bestScore = Infinity;
-  permutationTotal = factorial(players.length);
-  combinaisonsTeste = 0;
-  planning = [];
-  bestPlanning = null;
-  stopRequested = false;
-  const tentative = 1000;
-  for (let i = 0; i < tentative && !stopRequested; i++) {
-    const obj = await generePlanning();
-    const score = evaluerPlanning();
-    if (score < bestScore) {
-      bestScore = score;
-      bestPlanning = obj.currentPlanning;
-      historyBestPlanning.push(`${bestScore / 10} % `);
-      renderTournament();
-      renderStats();
-      const container = document.getElementById("label2-progress-bar");
-      container.innerHTML = `
-              <center>
-                <span>Meilleur score : ${bestScore} </span> </br> <span class="text-sm">Il faut avoir le score le plus petit possible</span></center>
-            `;
-      await new Promise((r) => requestAnimationFrame(r));
-    }
-    if (score === 0) break;
-  }
-
-  if (bestPlanning) {
-    planning = bestPlanning;
-    saveData();
-    renderPreparationSection();
-    renderTournament();
-    evaluerPlanning();
-    renderStats();
-  }
-  document.body.removeChild(loader);
-  stopRequested = false;
-  bestPlanning = null;
-}
-
 async function optimisePlanningV3() {
 
   addProgressBar();
@@ -2035,6 +1991,8 @@ async function optimisePlanningV3() {
   //const melangeJoueurs = genererPermutations(playersIds);
   //console.log("Nombre théorique de mélange de joueurs possibles : " + melangeJoueurs.length);
   let curPlayersIds = null;
+  let curPlayersIdsAttente = null;
+  let curMatchPossibleTourSimple = null;
 
   while (meilleurScore != 0 &&!stopRequested) {
   //for(let iter = 0; iter < melangeJoueurs.length; iter++){
@@ -2048,11 +2006,11 @@ async function optimisePlanningV3() {
     curPlayersIds = shuffle(playersIds); //melangeJoueurs[iter];
     curPlayersIdsAttente = shuffle(playersIds);
     equipesPossibleSimple = getEquipesPossibleSimple(curPlayersIds, coequipierRepetee);
-    equipesPossibleDouble = typeTournoiDouble ? getEquipesPossibleDouble(curPlayersIds, coequipierRepetee, DHForbidden, DDForbidden, DMForbidden) : [];
+    equipesPossibleDouble = typeTournoiDouble ? getEquipesPossibleDouble(curPlayersIds, DHForbidden, DDForbidden, DMForbidden) : [];
     matchPossibleSimple = getMatchsPossibleSimple(equipesPossibleSimple, adversaireSimpleRepetee);
-    matchPossibleDouble = typeTournoiDouble ? getMatchsPossibleDouble(equipesPossibleDouble, adversaireDoubleRepetee) : [];
+    matchPossibleDouble = typeTournoiDouble ? getMatchsPossibleDouble(equipesPossibleDouble, adversaireDoubleRepetee, coequipierRepetee) : [];
     matchsPossibleTour = typeTournoiDouble ? [...matchPossibleDouble] : [...matchPossibleSimple];
-    console.log("Matchs possibles : ", matchsPossibleTour);
+    /*console.log("Matchs possibles : ", matchsPossibleTour);
     let nbRotation = matchsPossibleTour.length - 1;
     let curMatchsPossibleRotation = null;
     
@@ -2063,10 +2021,10 @@ async function optimisePlanningV3() {
       //const melangeMatchs = genererPermutations(curMatchsPossibleRotation);
       for (let rot = 0; rot < iter2; rot++){
         curMatchsPossibleRotation.push(curMatchsPossibleRotation.shift());
-      }
+      }*/
       
-      if (stopRequested) break;
-      if (meilleurScore  == 0) break;
+      //if (stopRequested) break;
+      //if (meilleurScore  == 0) break;
 
       nbAdversaireSimpleRepetee = 0;
       nbAdversaireDoubleRepetee = 0;
@@ -2081,12 +2039,13 @@ async function optimisePlanningV3() {
       const currentDistribution = [];
       let currentScore = 0;
       currentNbJoueursAttente = 0;
-      let curMatchsPossibleTour = [...curMatchsPossibleRotation];   
+      let curMatchsPossibleTour = [];   
 
       for (let indexTour = 0; indexTour < k; indexTour++) {
 
         if (curMatchsPossibleTour.length == 0){
-          curMatchsPossibleTour = [...curMatchsPossibleRotation];
+          curMatchsPossibleTour = [...matchsPossibleTour];
+          curMatchsPossibleTour = shuffle(curMatchsPossibleTour);
         }
 
         //on met de côté les joueurs qui vont attendre
@@ -2097,11 +2056,16 @@ async function optimisePlanningV3() {
           const attenteB = attenteJoueurs[b] || 0;
           return attenteA - attenteB;
         });
+
         const currentJoueursAttente = [];
         let nbJoueurAttente = n - (t * (typeTournoiDouble ? 4 : 2));
         if (nbJoueurAttente < 0) {
           nbJoueurAttente = typeTournoiDouble ? n%4 : n%2;
+          if (typeTournoiDouble && allowSimpleIfTypeTournoiDouble && nbJoueurAttente >= 2){
+            nbJoueurAttente -= 2;
+          }
         }
+
         for(let i = 0; i < nbJoueurAttente; i++){
           //on prend une fois au début, une fois à la fin pour les attentes
           const joueurAttente = joueursByAttente[i]; //joueursByAttente[indexTour % 2 == 0 ? i : (typeTournoiDouble ? i + 3 : i + 1)];
@@ -2113,10 +2077,25 @@ async function optimisePlanningV3() {
         const joueursUtilises = new Set();
         //let nbEssai = 0;
         for (let indexTerrain = 0; indexTerrain < t; indexTerrain++) {
+          
+          //si plus assez de joueurs
+          if (n - joueursUtilises.size < (typeTournoiDouble ? 4 : 2)){
+            if (typeTournoiDouble){
+              if (allowSimpleIfTypeTournoiDouble){
+                curMatchPossibleTourSimple = [...matchPossibleSimple];
+              }else{
+                break;
+              }
+            }else{
+                break;
+            }
+          }
 
+          let curMatchPossible = curMatchPossibleTourSimple != null ? curMatchPossibleTourSimple : curMatchsPossibleTour;
           let indexMatch = 0;
-          for (indexMatch = 0 ; indexMatch < curMatchsPossibleTour.length; indexMatch++){
-            let curMatch = curMatchsPossibleTour[indexMatch];
+          for (indexMatch = 0 ; indexMatch < curMatchPossible.length; indexMatch++){
+            //const nbJoueurRestant = n - joueursUtilises.size();
+            let curMatch = curMatchPossible[indexMatch];
             //if (nbEssai > 0) break;
             if (!curMatch[0].some(val => joueursUtilises.has(val)) &&
             !curMatch[1].some(val => joueursUtilises.has(val)) &&
@@ -2124,13 +2103,14 @@ async function optimisePlanningV3() {
             !curMatch[1].some(val => currentJoueursAttente.includes(val))){
               break;
             }
-            curMatchsPossibleTour.splice(indexMatch, 1);
+            curMatchPossible.splice(indexMatch, 1);
             indexMatch--;
           }
 
-          if (indexMatch >= curMatchsPossibleTour.length || curMatchsPossibleTour.length == 0) {
-            //plus assez de joueur
-            break;
+          if (curMatchPossible.length == 0) {
+            curMatchsPossibleTour = [...matchsPossibleTour];
+            curMatchsPossibleTour = shuffle(curMatchsPossibleTour);
+            continue;
           }
           
           /*if (indexMatch >= matchsPossibleTour.length || matchsPossibleTour.length == 0) {
@@ -2149,11 +2129,15 @@ async function optimisePlanningV3() {
             continue;
           }*/
 
-          const match = curMatchsPossibleTour[indexMatch];
+          const match = curMatchPossible[indexMatch];
           matchsTour.push(match);
-          joueursUtilises.add(...match[0]);
-          joueursUtilises.add(...match[1]);
-          curMatchsPossibleTour.splice(indexMatch, 1);
+          for (let j = 0; j < match[0].length; j++){
+            joueursUtilises.add(match[0][j]);
+          }
+          for (let j = 0; j < match[1].length; j++){
+            joueursUtilises.add(match[1][j]);
+          }
+          curMatchPossible.splice(indexMatch, 1);
 
           //adversaire répété
           if (match[0].length == 1){
@@ -2276,6 +2260,9 @@ async function optimisePlanningV3() {
 
         }
 
+        //init
+        curMatchPossibleTourSimple = null;
+
         /*if (typeTournoiDouble && allowSimpleIfTypeTournoiDouble)  {
           //on essaye en simple
           matchsPossibleTour = matchPossibleSimple;
@@ -2289,6 +2276,7 @@ async function optimisePlanningV3() {
         
         currentDistribution.push({ matchs: matchsTour, attente: currentJoueursAttente });
         currentNbJoueursAttente += currentJoueursAttente.length;
+
       }
 
       distributions.push({ distribution: currentDistribution, score: currentScore, attente: attenteJoueurs });
@@ -2311,8 +2299,11 @@ async function optimisePlanningV3() {
           <div class="w-full">Nombre de distribution testée : ${distributions.length} </div>
         </center>
       `;
+      renderTournament();
+      renderPanelTournament();
       await new Promise((r) => requestAnimationFrame(r))
-    }
+
+    //}
 
     /*if (nbRotation === 0) init = true;
 
@@ -2360,7 +2351,7 @@ async function optimisePlanningV3() {
     nbDistributionTeste = distributions.length;
     planning = transformerDistribution(meilleureDistribution);
     saveData();
-    renderPreparationSection();
+    //renderPreparationSection();
     renderTournament();
     renderPanelTournament();
   }
@@ -2417,7 +2408,7 @@ function getMatchsPossibleSimple(equipePossibles, adversaireSimpleRepetee){
   let playerRepete = {};
   for (let i = 0; i < nbIterations; i++) {
     for (let j = compt; j < nbIterations; j++) {
-      if (adversaireSimpleRepetee[equipePossibles[i]] && adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]]) {
+      /*if (adversaireSimpleRepetee[equipePossibles[i]] && adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]]) {
           adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] += 1 * settings.priorities.adversaire;
       } else {
           adversaireSimpleRepetee[equipePossibles[i]] = adversaireSimpleRepetee[equipePossibles[i]] || {};
@@ -2432,57 +2423,47 @@ function getMatchsPossibleSimple(equipePossibles, adversaireSimpleRepetee){
         playerRepete[equipePossibles[j]] += 1 * settings.priorities.equipier;
       } else {
         playerRepete[equipePossibles[j]] = 1;
-      }
+      }*/
       retour.push([equipePossibles[i], equipePossibles[j]]);
     }
     compt++;
   }
-  retour.sort((a, b) => {
+  /*retour.sort((a, b) => {
     const scoreA = adversaireSimpleRepetee[a[0]][a[1]] + playerRepete[a[0]] + playerRepete[a[1]];
     const scoreB = adversaireSimpleRepetee[b[0]][b[1]] + playerRepete[b[0]] + playerRepete[b[1]];
     return scoreA - scoreB;
-  });
+  });*/
   console.log("Matchs simple :", retour);
   return retour;
 }
 
-function getEquipesPossibleDouble(playersIds, coequipierRepetee, DHForbidden, DDForbidden, DMForbidden){
+function getEquipesPossibleDouble(playersIds, DHForbidden, DDForbidden, DMForbidden){
   const retour = [];
-  const n = playersIds.length;
-    let nbIterations = playersIds.length;
-    let compt = 1;
-    for (let i = 0; i < nbIterations; i++) {
-      for (let j = compt; j < nbIterations; j++) {
-        const isHommeP1 = isHomme(playersIds[i]);
-        const isHommeP2 = isHomme(playersIds[j]);
-        if ((isHommeP1 && isHommeP2 && DHForbidden) ||
-            (!isHommeP1 && !isHommeP2 && DDForbidden) ||
-            ((isHommeP1 != isHommeP2) && DMForbidden)){
-              continue;
-            }
-        if (coequipierRepetee[playersIds[i]] && coequipierRepetee[playersIds[i]][playersIds[j]]) {
-            coequipierRepetee[playersIds[i]][playersIds[j]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
-        } else {
-            coequipierRepetee[playersIds[i]] = coequipierRepetee[playersIds[i]] || {};
-            coequipierRepetee[playersIds[i]][playersIds[j]] = 1;
-        }
-        retour.push([playersIds[i], playersIds[j]]);
-      }
-      compt++;
+  let nbIterations = playersIds.length;
+  let compt = 1;
+  for (let i = 0; i < nbIterations; i++) {
+    for (let j = compt; j < nbIterations; j++) {
+      const isHommeP1 = isHomme(playersIds[i]);
+      const isHommeP2 = isHomme(playersIds[j]);
+      if ((isHommeP1 && isHommeP2 && DHForbidden) ||
+          (!isHommeP1 && !isHommeP2 && DDForbidden) ||
+          ((isHommeP1 != isHommeP2) && DMForbidden)){
+            continue;
+          }
+      
+      retour.push([playersIds[i], playersIds[j]]);
     }
-    retour.sort((a, b) => {
-      const scoreA = coequipierRepetee[a[0]][a[1]];
-      const scoreB = coequipierRepetee[b[0]][b[1]];
-      return scoreA - scoreB;
-    });
+    compt++;
+  }
   console.log("Equipes double :", retour);
   return retour;
 }
 
 
 
-function getMatchsPossibleDouble(equipePossibles, adversaireSimpleRepetee){
+function getMatchsPossibleDouble(equipePossibles, adversaireSimpleRepetee, coequipierRepetee){
   const retour = [];
+  const apparitionsJoueurs = {};
   let nbIterations = equipePossibles.length;
   let compt = 1;
   for (let i = 0; i < nbIterations; i++) {
@@ -2494,29 +2475,113 @@ function getMatchsPossibleDouble(equipePossibles, adversaireSimpleRepetee){
           equipePossibles[i][1] == equipePossibles[j][1]){
             continue;
           } 
-      
+
+      //apparition joueur
+      /*if (apparitionsJoueurs[equipePossibles[i][0]]) {
+          apparitionsJoueurs[equipePossibles[i][0]] += 1;
+      } else {
+          apparitionsJoueurs[equipePossibles[i][0]]  = 1;
+      }
+      if (apparitionsJoueurs[equipePossibles[j][0]]) {
+          apparitionsJoueurs[equipePossibles[j][0]] += 1; 
+      } else {
+          apparitionsJoueurs[equipePossibles[j][0]]  = 1;
+      }
+      if (apparitionsJoueurs[equipePossibles[i][1]]) {
+          apparitionsJoueurs[equipePossibles[i][1]] += 1;
+      } else {
+          apparitionsJoueurs[equipePossibles[i][1]]  = 1;
+      }
+      if (apparitionsJoueurs[equipePossibles[j][1]]) {
+          apparitionsJoueurs[equipePossibles[j][1]] += 1; 
+      } else {
+          apparitionsJoueurs[equipePossibles[j][1]]  = 1;
+      }*/
+
       //on fait ça pour i et j
-      if (adversaireSimpleRepetee[equipePossibles[i]] && adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]]) {
-          adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+      /*if (adversaireSimpleRepetee[equipePossibles[i][0]] && adversaireSimpleRepetee[equipePossibles[i][0]][equipePossibles[j][0]]) {
+        adversaireSimpleRepetee[equipePossibles[i][0]][equipePossibles[j][0]] += 1 * settings.priorities.adversaire; 
       } else {
-          adversaireSimpleRepetee[equipePossibles[i]] = adversaireSimpleRepetee[equipePossibles[i]] || {};
-          adversaireSimpleRepetee[equipePossibles[i]][equipePossibles[j]] = 1;
+        adversaireSimpleRepetee[equipePossibles[i][0]] = adversaireSimpleRepetee[equipePossibles[i][0]] || {};
+        adversaireSimpleRepetee[equipePossibles[i][0]][equipePossibles[j][0]] = 1;
       }
-      if (adversaireSimpleRepetee[equipePossibles[j]] && adversaireSimpleRepetee[equipePossibles[j]][equipePossibles[i]]) {
-          adversaireSimpleRepetee[equipePossibles[j]][equipePossibles[i]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+      if (adversaireSimpleRepetee[equipePossibles[i][0]] && adversaireSimpleRepetee[equipePossibles[i][0]][equipePossibles[j][1]]) {
+        adversaireSimpleRepetee[equipePossibles[i][0]][equipePossibles[j][1]] += 1 * settings.priorities.adversaire; 
       } else {
-          adversaireSimpleRepetee[equipePossibles[j]] = adversaireSimpleRepetee[equipePossibles[j]] || {};
-          adversaireSimpleRepetee[equipePossibles[j]][equipePossibles[i]] = 1;
+        adversaireSimpleRepetee[equipePossibles[i][0]] = adversaireSimpleRepetee[equipePossibles[i][0]] || {};
+        adversaireSimpleRepetee[equipePossibles[i][0]][equipePossibles[j][1]] = 1;
       }
+      if (adversaireSimpleRepetee[equipePossibles[i][1]] && adversaireSimpleRepetee[equipePossibles[i][1]][equipePossibles[j][0]]) {
+        adversaireSimpleRepetee[equipePossibles[i][1]][equipePossibles[j][0]] += 1 * settings.priorities.adversaire; 
+      } else {
+        adversaireSimpleRepetee[equipePossibles[i][1]] = adversaireSimpleRepetee[equipePossibles[i][1]] || {};
+        adversaireSimpleRepetee[equipePossibles[i][1]][equipePossibles[j][0]] = 1;
+      }
+      if (adversaireSimpleRepetee[equipePossibles[i][1]] && adversaireSimpleRepetee[equipePossibles[i][1]][equipePossibles[j][1]]) {
+        adversaireSimpleRepetee[equipePossibles[i][1]][equipePossibles[j][1]] += 1 * settings.priorities.adversaire; 
+      } else {
+        adversaireSimpleRepetee[equipePossibles[i][1]] = adversaireSimpleRepetee[equipePossibles[i][1]] || {};
+        adversaireSimpleRepetee[equipePossibles[i][1]][equipePossibles[j][1]] = 1;
+      }
+
+      if (adversaireSimpleRepetee[equipePossibles[j][0]] && adversaireSimpleRepetee[equipePossibles[j][0]][equipePossibles[i][0]]) {
+        adversaireSimpleRepetee[equipePossibles[j][0]][equipePossibles[i][0]] += 1 * settings.priorities.adversaire; 
+      } else {
+        adversaireSimpleRepetee[equipePossibles[j][0]] = adversaireSimpleRepetee[equipePossibles[j][0]] || {};
+        adversaireSimpleRepetee[equipePossibles[j][0]][equipePossibles[i][0]] = 1;
+      }
+      if (adversaireSimpleRepetee[equipePossibles[j][0]] && adversaireSimpleRepetee[equipePossibles[j][0]][equipePossibles[i][1]]) {
+        adversaireSimpleRepetee[equipePossibles[j][0]][equipePossibles[i][1]] += 1 * settings.priorities.adversaire; 
+      } else {
+        adversaireSimpleRepetee[equipePossibles[j][0]] = adversaireSimpleRepetee[equipePossibles[j][0]] || {};
+        adversaireSimpleRepetee[equipePossibles[j][0]][equipePossibles[i][1]] = 1;
+      }
+      if (adversaireSimpleRepetee[equipePossibles[j][1]] && adversaireSimpleRepetee[equipePossibles[j][1]][equipePossibles[i][0]]) {
+        adversaireSimpleRepetee[equipePossibles[j][1]][equipePossibles[i][0]] += 1 * settings.priorities.adversaire; 
+      } else {
+        adversaireSimpleRepetee[equipePossibles[j][1]] = adversaireSimpleRepetee[equipePossibles[j][1]] || {};
+        adversaireSimpleRepetee[equipePossibles[j][1]][equipePossibles[i][0]] = 1;
+      }
+      if (adversaireSimpleRepetee[equipePossibles[j][1]] && adversaireSimpleRepetee[equipePossibles[j][1]][equipePossibles[i][1]]) {
+        adversaireSimpleRepetee[equipePossibles[j][1]][equipePossibles[i][1]] += 1 * settings.priorities.adversaire; 
+      } else {
+        adversaireSimpleRepetee[equipePossibles[j][1]] = adversaireSimpleRepetee[equipePossibles[j][1]] || {};
+        adversaireSimpleRepetee[equipePossibles[j][1]][equipePossibles[i][1]] = 1;
+      }
+
+      if (coequipierRepetee[equipePossibles[i][0]] && coequipierRepetee[equipePossibles[i][0]][equipePossibles[i][1]]) {
+        coequipierRepetee[equipePossibles[i][0]][equipePossibles[i][1]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+      } else {
+        coequipierRepetee[equipePossibles[i][0]] = coequipierRepetee[equipePossibles[i][1]] || {};
+        coequipierRepetee[equipePossibles[i][0]][equipePossibles[i][1]] = 1;
+      }
+      if (coequipierRepetee[equipePossibles[i][1]] && coequipierRepetee[equipePossibles[i][1]][equipePossibles[i][0]]) {
+        coequipierRepetee[equipePossibles[i][1]][equipePossibles[i][0]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+      } else {
+        coequipierRepetee[equipePossibles[i][1]] = coequipierRepetee[equipePossibles[i][0]] || {};
+        coequipierRepetee[equipePossibles[i][1]][equipePossibles[i][0]] = 1;
+      }
+      if (coequipierRepetee[equipePossibles[j][0]] && coequipierRepetee[equipePossibles[j][0]][equipePossibles[j][1]]) {
+        coequipierRepetee[equipePossibles[j][0]][equipePossibles[j][1]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+      } else {
+        coequipierRepetee[equipePossibles[j][0]] = coequipierRepetee[equipePossibles[j][1]] || {};
+        coequipierRepetee[equipePossibles[j][0]][equipePossibles[j][1]] = 1;
+      }
+      if (coequipierRepetee[equipePossibles[j][1]] && coequipierRepetee[equipePossibles[j][1]][equipePossibles[j][0]]) {
+        coequipierRepetee[equipePossibles[j][1]][equipePossibles[j][0]] += 1 * settings.priorities.equipier; //poids deux pour les coequipier
+      } else {
+        coequipierRepetee[equipePossibles[j][1]] = coequipierRepetee[equipePossibles[j][0]] || {};
+        coequipierRepetee[equipePossibles[j][1]][equipePossibles[j][0]] = 1;
+      }*/
       retour.push([equipePossibles[i], equipePossibles[j]]);
     }
     compt++;
   }
-  retour.sort((a, b) => {
-    const scoreA = adversaireSimpleRepetee[a[0]][a[1]];
-    const scoreB = adversaireSimpleRepetee[b[0]][b[1]];
+  /*retour.sort((a, b) => {
+    const scoreA = adversaireSimpleRepetee[a[0][0]][b[1][0]] + adversaireSimpleRepetee[a[0][0]][b[1][1]] + adversaireSimpleRepetee[a[0][1]][b[1][0]] + adversaireSimpleRepetee[a[0][1]][b[1][1]] + coequipierRepetee[a[0][0]][a[0][1]] + coequipierRepetee[a[0][1]][a[0][0]];
+    const scoreB = adversaireSimpleRepetee[b[0][0]][a[1][0]] + adversaireSimpleRepetee[b[0][0]][a[1][1]] + adversaireSimpleRepetee[b[0][1]][a[1][0]] + adversaireSimpleRepetee[b[0][1]][a[1][1]] + coequipierRepetee[b[0][0]][b[0][1]] + coequipierRepetee[b[0][1]][b[0][0]];
     return scoreA - scoreB;
-  });
+  });*/
   console.log("Match double :", retour);
   return retour;
 }
