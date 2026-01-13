@@ -103,6 +103,23 @@ div#header {
     box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
 }
 
+.announcement-close{
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 8px;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+    font-weight: 300;
+}
+
+.announcement-close:hover{
+    opacity: 1;
+}
+
 @media (max-width: 640px) {
     .announcement-inner{
         align-items: flex-start;

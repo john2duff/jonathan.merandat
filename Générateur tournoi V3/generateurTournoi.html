@@ -45,6 +45,37 @@
             document.getElementById(tab).style.display = "block";
             evt.currentTarget.className += " active";
           }
+
+          // Gestion de la barre d'annonce avec localStorage
+          function checkAnnouncementBar() {
+            const hiddenDate = localStorage.getItem('announcementHidden');
+            const today = new Date().toDateString();
+            const announcementBar = document.getElementById('announcement-bar');
+            
+            if (hiddenDate === today && announcementBar) {
+              announcementBar.style.display = 'none';
+            }
+          }
+
+          function hideAnnouncementBar() {
+            const today = new Date().toDateString();
+            localStorage.setItem('announcementHidden', today);
+            const announcementBar = document.getElementById('announcement-bar');
+            if (announcementBar) {
+              announcementBar.style.display = 'none';
+            }
+          }
+
+          // Vérifier au chargement de la page
+          document.addEventListener('DOMContentLoaded', function() {
+            checkAnnouncementBar();
+            
+            // Attacher l'événement au bouton de fermeture
+            const closeBtn = document.getElementById('close-announcement');
+            if (closeBtn) {
+              closeBtn.addEventListener('click', hideAnnouncementBar);
+            }
+          });
           </script>
          
     </head>
@@ -54,11 +85,12 @@
         <div class="announcement-text">
           <span class="announcement-badge">Nouveau</span>
           <span class="announcement-title">Découvrez le nouveau générateur de tournoi de Badminton</span>
-          <span class="announcement-note">Cette version ne sera plus disponible à partir de l'été 2026</span>
+          <span class="announcement-note">La page actuelle ne sera plus disponible à partir de l'été 2026</span>
         </div>
         <a class="announcement-btn" href="https://jonathan-merandat.github.io/gen-tournoi/" target="_blank" rel="noopener">
           Accéder au nouveau générateur →
         </a>
+        <button id="close-announcement" class="announcement-close" title="Masquer pour aujourd'hui">&times; <span style="font-size: small;">Ne plus afficher</span></button>
       </div>
     </div>
     <!--
